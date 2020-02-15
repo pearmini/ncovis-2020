@@ -1,10 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from "react";
+import * as serviceWorker from "./serviceWorker";
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import createLoading from "dva-loading";
+import dva from "dva";
+
+import App from "./App";
+import globalModel from "./models/global";
+import HotModel from "./models/hot";
+import totalModel from "./models/total";
+import "./index.css";
+
+const app = new dva();
+
+app.use(createLoading());
+
+app.model(globalModel);
+app.model(HotModel);
+app.model(totalModel);
+
+app.router(() => <App />);
+
+app.start("#root");
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

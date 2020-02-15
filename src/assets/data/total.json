@@ -1,0 +1,581 @@
+{
+  "type": "total",
+  "data": [
+    {
+      "date": "2003-03-17",
+      "confirm": 95,
+      "dead": 1,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-18",
+      "confirm": 126,
+      "dead": 1,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-19",
+      "confirm": 151,
+      "dead": 5,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-20",
+      "confirm": 177,
+      "dead": 6,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-21",
+      "confirm": 209,
+      "dead": 6,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-22",
+      "confirm": 228,
+      "dead": 7,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-24",
+      "confirm": 266,
+      "dead": 10,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-25",
+      "confirm": 292,
+      "dead": 10,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-26",
+      "confirm": 1114,
+      "dead": 41,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-27",
+      "confirm": 1179,
+      "dead": 44,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-28",
+      "confirm": 1241,
+      "dead": 44,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-29",
+      "confirm": 1286,
+      "dead": 44,
+      "suspect": ""
+    },
+    {
+      "date": "2003-03-31",
+      "confirm": 1346,
+      "dead": 47,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-1",
+      "confirm": 1504,
+      "dead": 54,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-2",
+      "confirm": 1911,
+      "dead": 68,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-3",
+      "confirm": 1938,
+      "dead": 69,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-4",
+      "confirm": 1996,
+      "dead": 73,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-5",
+      "confirm": 2037,
+      "dead": 76,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-7",
+      "confirm": 2172,
+      "dead": 85,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-8",
+      "confirm": 2226,
+      "dead": 88,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-9",
+      "confirm": 2269,
+      "dead": 90,
+      "suspect": ""
+    },
+    {
+      "date": "2003-04-10",
+      "confirm": 2307,
+      "dead": 95,
+      "suspect": 1201
+    },
+    {
+      "date": "2003-04-11",
+      "confirm": 2389,
+      "dead": 90,
+      "suspect": 1212
+    },
+    {
+      "date": "2003-04-12",
+      "confirm": 2440,
+      "dead": 93,
+      "suspect": 1259
+    },
+    {
+      "date": "2003-04-14",
+      "confirm": 2631,
+      "dead": 111,
+      "suspect": 1324
+    },
+    {
+      "date": "2003-04-15",
+      "confirm": 2673,
+      "dead": 120,
+      "suspect": 1338
+    },
+    {
+      "date": "2003-04-16",
+      "confirm": 2727,
+      "dead": 125,
+      "suspect": 1364
+    },
+    {
+      "date": "2003-04-17",
+      "confirm": 2781,
+      "dead": 130,
+      "suspect": 1389
+    },
+    {
+      "date": "2003-04-18",
+      "confirm": 2899,
+      "dead": 146,
+      "suspect": 1520
+    },
+    {
+      "date": "2003-04-19",
+      "confirm": 2899,
+      "dead": 146,
+      "suspect": 1520
+    },
+    {
+      "date": "2003-04-21",
+      "confirm": 3390,
+      "dead": 180,
+      "suspect": 1640
+    },
+    {
+      "date": "2003-04-22",
+      "confirm": 3464,
+      "dead": 191,
+      "suspect": 1683
+    },
+    {
+      "date": "2003-04-23",
+      "confirm": 3800,
+      "dead": 211,
+      "suspect": 1774
+    },
+    {
+      "date": "2003-04-24",
+      "confirm": 3947,
+      "dead": 219,
+      "suspect": 1842
+    },
+    {
+      "date": "2003-04-25",
+      "confirm": 4152,
+      "dead": 230,
+      "suspect": 1912
+    },
+    {
+      "date": "2003-04-26",
+      "confirm": 4329,
+      "dead": 243,
+      "suspect": 1942
+    },
+    {
+      "date": "2003-04-28",
+      "confirm": 4537,
+      "dead": 269,
+      "suspect": 2034
+    },
+    {
+      "date": "2003-04-29",
+      "confirm": 4941,
+      "dead": 298,
+      "suspect": 2106
+    },
+    {
+      "date": "2003-04-30",
+      "confirm": 5128,
+      "dead": 319,
+      "suspect": 2148
+    },
+    {
+      "date": "2003-05-1",
+      "confirm": 5328,
+      "dead": 335,
+      "suspect": 2216
+    },
+    {
+      "date": "2003-05-2",
+      "confirm": 5511,
+      "dead": 351,
+      "suspect": 2275
+    },
+    {
+      "date": "2003-05-3",
+      "confirm": 5693,
+      "dead": 369,
+      "suspect": 2329
+    },
+    {
+      "date": "2003-05-5",
+      "confirm": 6034,
+      "dead": 401,
+      "suspect": 2388
+    },
+    {
+      "date": "2003-05-6",
+      "confirm": 6172,
+      "dead": 417,
+      "suspect": 2443
+    },
+    {
+      "date": "2003-05-7",
+      "confirm": 6340,
+      "dead": 434,
+      "suspect": 2507
+    },
+    {
+      "date": "2003-05-8",
+      "confirm": 6491,
+      "dead": 445,
+      "suspect": 2563
+    },
+    {
+      "date": "2003-05-9",
+      "confirm": 6622,
+      "dead": 453,
+      "suspect": 2623
+    },
+    {
+      "date": "2003-05-10",
+      "confirm": 6731,
+      "dead": 465,
+      "suspect": 2681
+    },
+    {
+      "date": "2003-05-12",
+      "confirm": 6881,
+      "dead": 490,
+      "suspect": 2785
+    },
+    {
+      "date": "2003-05-13",
+      "confirm": 6983,
+      "dead": 511,
+      "suspect": 2885
+    },
+    {
+      "date": "2003-05-14",
+      "confirm": 7061,
+      "dead": 524,
+      "suspect": 2977
+    },
+    {
+      "date": "2003-05-15",
+      "confirm": 7131,
+      "dead": 535,
+      "suspect": 3056
+    },
+    {
+      "date": "2003-05-16",
+      "confirm": 7172,
+      "dead": 548,
+      "suspect": 3164
+    },
+    {
+      "date": "2003-05-17",
+      "confirm": 7194,
+      "dead": 560,
+      "suspect": 3246
+    },
+    {
+      "date": "2003-05-19",
+      "confirm": 7295,
+      "dead": 580,
+      "suspect": 3411
+    },
+    {
+      "date": "2003-05-20",
+      "confirm": 7350,
+      "dead": 599,
+      "suspect": 3546
+    },
+    {
+      "date": "2003-05-21",
+      "confirm": 7387,
+      "dead": 603,
+      "suspect": 3643
+    },
+    {
+      "date": "2003-05-22",
+      "confirm": 7478,
+      "dead": 618,
+      "suspect": 3766
+    },
+    {
+      "date": "2003-05-23",
+      "confirm": 7549,
+      "dead": 623,
+      "suspect": 3881
+    },
+    {
+      "date": "2003-05-24",
+      "confirm": 7573,
+      "dead": 630,
+      "suspect": 4023
+    },
+    {
+      "date": "2003-05-26",
+      "confirm": 7629,
+      "dead": 656,
+      "suspect": 4116
+    },
+    {
+      "date": "2003-05-27",
+      "confirm": 7648,
+      "dead": 666,
+      "suspect": 4341
+    },
+    {
+      "date": "2003-05-28",
+      "confirm": 7665,
+      "dead": 676,
+      "suspect": 4443
+    },
+    {
+      "date": "2003-05-29",
+      "confirm": 7718,
+      "dead": 681,
+      "suspect": 4545
+    },
+    {
+      "date": "2003-05-30",
+      "confirm": 7732,
+      "dead": 683,
+      "suspect": 4679
+    },
+    {
+      "date": "2003-05-31",
+      "confirm": 7744,
+      "dead": 691,
+      "suspect": 4810
+    },
+    {
+      "date": "2003-06-2",
+      "confirm": 7759,
+      "dead": 697,
+      "suspect": 4949
+    },
+    {
+      "date": "2003-06-3",
+      "confirm": 7756,
+      "dead": 698,
+      "suspect": 5021
+    },
+    {
+      "date": "2003-06-4",
+      "confirm": 7756,
+      "dead": 698,
+      "suspect": 5286
+    },
+    {
+      "date": "2003-06-5",
+      "confirm": 7755,
+      "dead": 701,
+      "suspect": 5371
+    },
+    {
+      "date": "2003-06-6",
+      "confirm": 7756,
+      "dead": 705,
+      "suspect": 5444
+    },
+    {
+      "date": "2003-06-9",
+      "confirm": 7762,
+      "dead": 709,
+      "suspect": 5809
+    },
+    {
+      "date": "2003-06-10",
+      "confirm": 7769,
+      "dead": 714,
+      "suspect": 5982
+    },
+    {
+      "date": "2003-06-11",
+      "confirm": 7771,
+      "dead": 714,
+      "suspect": 6103
+    },
+    {
+      "date": "2003-06-12",
+      "confirm": 7772,
+      "dead": 715,
+      "suspect": 6182
+    },
+    {
+      "date": "2003-06-13",
+      "confirm": 7776,
+      "dead": 717,
+      "suspect": 6296
+    },
+    {
+      "date": "2003-06-16",
+      "confirm": 7780,
+      "dead": 724,
+      "suspect": 6486
+    },
+    {
+      "date": "2003-06-17",
+      "confirm": 7779,
+      "dead": 724,
+      "suspect": 6573
+    },
+    {
+      "date": "2003-06-18",
+      "confirm": 7761,
+      "dead": 725,
+      "suspect": 6625
+    },
+    {
+      "date": "2003-06-19",
+      "confirm": 7777,
+      "dead": 727,
+      "suspect": 6655
+    },
+    {
+      "date": "2003-06-20",
+      "confirm": 7777,
+      "dead": 727,
+      "suspect": 6690
+    },
+    {
+      "date": "2003-06-23",
+      "confirm": 7774,
+      "dead": 727,
+      "suspect": 6793
+    },
+    {
+      "date": "2003-06-24",
+      "confirm": 7769,
+      "dead": 727,
+      "suspect": 6811
+    },
+    {
+      "date": "2003-06-25",
+      "confirm": 7769,
+      "dead": 728,
+      "suspect": 6828
+    },
+    {
+      "date": "2003-06-26",
+      "confirm": 7765,
+      "dead": 728,
+      "suspect": 6832
+    },
+    {
+      "date": "2003-06-27",
+      "confirm": 7764,
+      "dead": 729,
+      "suspect": 6836
+    },
+    {
+      "date": "2003-06-30",
+      "confirm": 7761,
+      "dead": 730,
+      "suspect": 6852
+    },
+    {
+      "date": "2003-07-1",
+      "confirm": 7761,
+      "dead": 730,
+      "suspect": 6858
+    },
+    {
+      "date": "2003-07-2",
+      "confirm": 7759,
+      "dead": 730,
+      "suspect": 6861
+    },
+    {
+      "date": "2003-07-3",
+      "confirm": 7757,
+      "dead": 730,
+      "suspect": 6861
+    },
+    {
+      "date": "2003-07-4",
+      "confirm": 7757,
+      "dead": 730,
+      "suspect": 6865
+    },
+    {
+      "date": "2003-07-7",
+      "confirm": 7757,
+      "dead": 730,
+      "suspect": 6865
+    },
+    {
+      "date": "2003-07-8",
+      "confirm": 7754,
+      "dead": 730,
+      "suspect": 6867
+    },
+    {
+      "date": "2003-07-9",
+      "confirm": 7754,
+      "dead": 730,
+      "suspect": 6875
+    },
+    {
+      "date": "2003-07-10",
+      "confirm": 7754,
+      "dead": 730,
+      "suspect": 6879
+    },
+    {
+      "date": "2003-07-11",
+      "confirm": 7754,
+      "dead": 730,
+      "suspect": 6882
+    }
+  ]
+}

@@ -30,5 +30,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "antd": "^3.26.9",
+    "axios": "^0.19.2",
+    "d3": "^5.15.0",
+    "d3-cloud": "^1.2.5",
+    "dva": "^2.4.1",
+    "dva-loading": "^3.0.20",
+    "styled-components": "^5.0.1"
   }
 }
