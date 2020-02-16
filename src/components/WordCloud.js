@@ -1,8 +1,11 @@
 import React from "react";
-
-function WordCloud({ width, height, words, ...rest }) {
+import Svg from "./Svg";
+function WordCloud({ width, height, words }) {
   return (
-    <svg viewBox={[0, 0, width, height]} textAnchor="middle">
+    <Svg
+      viewBox={[0, 0, width, height]}
+      textAnchor="middle"
+    >
       <g transform={`translate(${width / 2}, ${height / 2})`}>
         {words.map(({ x, y, size, text, rotate }, index) => (
           <text
@@ -14,7 +17,7 @@ function WordCloud({ width, height, words, ...rest }) {
           </text>
         ))}
       </g>
-    </svg>
+    </Svg>
   );
 }
 

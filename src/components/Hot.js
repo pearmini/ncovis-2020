@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { connect } from "dva";
 import styled from "styled-components";
 import substr from "../utils/substr";
@@ -20,12 +20,7 @@ const Text = styled.span`
   width: 300px;
 `;
 
-function Hot({ selectedPlatform, hotlist, getHotlist, options }) {
-  const platform = options.platform.find(item => item.id === selectedPlatform);
-  const { data } = hotlist;
-  useEffect(() => {
-    getHotlist(platform);
-  }, [selectedPlatform]);
+function Hot({ data }) {
   return (
     <Container>
       <Title>Hot</Title>
@@ -36,7 +31,7 @@ function Hot({ selectedPlatform, hotlist, getHotlist, options }) {
               ({index + 1}) {substr(item.title, 15)}
             </Text>
             {isNaN(item.width) || item.width <= 0 ? (
-              "top"
+              "置顶"
             ) : (
               <Bar width={item.width} />
             )}
@@ -46,13 +41,6 @@ function Hot({ selectedPlatform, hotlist, getHotlist, options }) {
   );
 }
 
-export default connect(
-  ({ global, hot }) => ({
-    selectedPlatform: global.selectedPlatform,
-    hotlist: hot.list,
-    options: global.options
-  }),
-  {
-    getHotlist: key => ({ type: "hot/getlist", payload: { key } })
-  }
-)(Hot);
+export default connect(({ hot }) => ({
+  data: hot.list
+}))(Hot);

@@ -4,10 +4,10 @@ import styled from "styled-components";
 
 import LineChart from "./components/LineChart";
 import ShapeWordle from "./components/ShapeWordle";
-import TopicCloud from "./components/TopicCloud";
 import Timeline from "./components/Timeline";
-import Hot from "./components/Hot";
 import Heatmap from "./components/Heatmap";
+import HotPanel from "./components/HotPanel";
+import CommentPanel from "./components/CommentPanel"
 
 const Layout = styled.div``;
 const Logo = styled.div`
@@ -53,11 +53,10 @@ function App() {
         </Header>
       </HeaderWrapper>
       <Content>
-        <Introduction>这里主要关心在疫情期间新闻和人们的热烈讨论的话题</Introduction>
-        <Row>
-          <TopicCloud />
-          <Hot />
-        </Row>
+        <Introduction>
+          这里主要关心在疫情期间新闻和人们的热烈讨论的话题
+        </Introduction>
+        <HotPanel />
         <Timeline />
         <Row>
           <ShapeWordle />
@@ -66,6 +65,7 @@ function App() {
             <LineChart />
           </Col>
         </Row>
+        <CommentPanel/>
       </Content>
     </Layout>
   );

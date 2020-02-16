@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import Svg from "./Svg";
 import styled from "styled-components";
 import { connect } from "dva";
 import * as d3 from "d3";
@@ -14,7 +15,7 @@ const Box = styled.div`
 function Line({ data = [] }) {
   const width = 400,
     height = 150,
-    margin = { top: 20, right: 10, bottom: 20, left: 40 };
+    margin = { top: 20, right: 5, bottom: 20, left: 40 };
 
   useEffect(() => {
     const x = d3
@@ -72,12 +73,12 @@ function Line({ data = [] }) {
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("d", line);
-  }, [data]);
+  }, [data, margin.top, margin.right, margin.left, margin.bottom]);
   return (
     <Container>
       <Title>确诊总人数</Title>
       <Box>
-        <svg id="svg-line"></svg>
+        <Svg id="svg-line"></Svg>
       </Box>
     </Container>
   );

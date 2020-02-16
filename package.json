@@ -38,6 +38,7 @@
     "d3-cloud": "^1.2.5",
     "dva": "^2.4.1",
     "dva-loading": "^3.0.20",
+    "react-use": "^13.26.0",
     "styled-components": "^5.0.1"
   }
 }

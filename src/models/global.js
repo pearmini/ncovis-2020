@@ -1,8 +1,12 @@
+import regionOptions from "../assets/data/region_options.json";
 export default {
   namespace: "global",
   state: {
-    selectedPlatform: 1,
-    selectedRegion: 1,
+    selectedPlatform: "weibo",
+    selectedRegion: "全国",
+    selectedDate: null,
+    selectedTime: null,
+    regionOptions,
     options: {
       platform: [
         {
@@ -26,10 +30,13 @@ export default {
     }
   },
   reducers: {
-    setSelectedKey(state, action) {
-      const { type, id } = action.payload;
-      const key = type === "platform" ? "selectedPlatform" : "selectedRegion";
-      return { ...state, [key]: parseInt(id) };
+    setSelectedRegion(state, action) {
+      const { value } = action.payload;
+      return { ...state, selectedRegion: value };
+    },
+    setSelectedPlatform(state, action) {
+      const { value } = action.payload;
+      return { ...state, selectedPlatform: value };
     }
   }
 };

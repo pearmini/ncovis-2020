@@ -8,6 +8,7 @@ import App from "./App";
 import globalModel from "./models/global";
 import HotModel from "./models/hot";
 import totalModel from "./models/total";
+import newsModel from "./models/news";
 import "./index.css";
 
 const app = new dva();
@@ -17,6 +18,7 @@ app.use(createLoading());
 app.model(globalModel);
 app.model(HotModel);
 app.model(totalModel);
+app.model(newsModel);
 
 app.router(() => <App />);
 

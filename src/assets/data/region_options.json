@@ -1,0 +1,233 @@
+{
+  "title": "全国",
+  "value": "全国",
+  "key": 1,
+  "children": [
+    {
+      "title": "华北地区",
+      "value": "华北地区",
+      "key": 2,
+      "children": [
+        {
+          "title": "北京",
+          "value": "北京",
+          "key": 10
+        },
+        {
+          "title": "天津",
+          "value": "天津",
+          "key": 11
+        },
+        {
+          "title": "河北",
+          "value": "河北",
+          "key": 12
+        },
+        {
+          "title": "山西",
+          "value": "山西",
+          "key": 13
+        },
+        {
+          "title": "内蒙古",
+          "value": "内蒙古",
+          "key": 14
+        }
+      ]
+    },
+    {
+      "title": "西北地区",
+      "value": "西北地区",
+      "key": 3,
+      "children": [
+        {
+          "title": "宁夏",
+          "value": "宁夏",
+          "key": 15
+        },
+        {
+          "title": "青海",
+          "value": "青海",
+          "key": 16
+        },
+        {
+          "title": "陕西",
+          "value": "陕西",
+          "key": 17
+        },
+        {
+          "title": "甘肃",
+          "value": "甘肃",
+          "key": 18
+        },
+        {
+          "title": "新疆",
+          "value": "新疆",
+          "key": 19
+        }
+      ]
+    },
+    {
+      "title": "东北地区",
+      "value": "东北地区",
+      "key": 4,
+      "children": [
+        {
+          "title": "辽宁",
+          "value": "辽宁",
+          "key": 20
+        },
+        {
+          "title": "吉林",
+          "value": "吉林",
+          "key": 21
+        },
+        {
+          "title": "黑龙江",
+          "value": "黑龙江",
+          "key": 22
+        }
+      ]
+    },
+    {
+      "title": "华东地区",
+      "value": "华东地区",
+      "key": 5,
+      "children": [
+        {
+          "title": "山东",
+          "value": "山东",
+          "key": 23
+        },
+        {
+          "title": "江苏",
+          "value": "江苏",
+          "key": 24
+        },
+        {
+          "title": "上海",
+          "value": "上海",
+          "key": 25
+        },
+        {
+          "title": "浙江",
+          "value": "浙江",
+          "key": 26
+        },
+        {
+          "title": "安徽",
+          "value": "安徽",
+          "key": 27
+        },
+        {
+          "title": "福建",
+          "value": "福建",
+          "key": 28
+        },
+        {
+          "title": "江西",
+          "value": "江西",
+          "key": 29
+        }
+      ]
+    },
+    {
+      "title": "华中地区",
+      "value": "华中地区",
+      "key": 6,
+      "children": [
+        {
+          "title": "河南",
+          "value": "河南",
+          "key": 30
+        },
+        {
+          "title": "湖南",
+          "value": "湖南",
+          "key": 31
+        },
+        {
+          "title": "湖北",
+          "value": "湖北",
+          "key": 32
+        }
+      ]
+    },
+    {
+      "title": "西南地区",
+      "value": "西南地区",
+      "key": 7,
+      "children": [
+        {
+          "title": "四川",
+          "value": "四川",
+          "key": 33
+        },
+        {
+          "title": "贵州",
+          "value": "贵州",
+          "key": 34
+        },
+        {
+          "title": "云南",
+          "value": "云南",
+          "key": 35
+        },
+        {
+          "title": "重庆",
+          "value": "重庆",
+          "key": 36
+        },
+        {
+          "title": "西藏",
+          "value": "西藏",
+          "key": 37
+        }
+      ]
+    },
+    {
+      "title": "华南地区",
+      "value": "华南地区",
+      "key": 8,
+      "children": [
+        {
+          "title": "广东",
+          "value": "广东",
+          "key": 38
+        },
+        {
+          "title": "广西",
+          "value": "广西",
+          "key": 39
+        },
+        {
+          "title": "海南",
+          "value": "海南",
+          "key": 40
+        }
+      ]
+    },
+    {
+      "title": "港澳台地区",
+      "value": "港澳台地区",
+      "key": 9,
+      "children": [
+        {
+          "title": "香港",
+          "value": "香港",
+          "key": 41
+        },
+        {
+          "title": "澳门",
+          "value": "澳门",
+          "key": 42
+        },
+        {
+          "title": "台湾",
+          "value": "台湾",
+          "key": 43
+        }
+      ]
+    }
+  ]
+}
