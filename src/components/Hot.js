@@ -2,45 +2,87 @@ import React from "react";
 import { connect } from "dva";
 import styled from "styled-components";
 import substr from "../utils/substr";
+import indexOf from "../utils/indexOf";
 
 const Container = styled.section``;
-const Item = styled.div``;
+const Item = styled.div.attrs(props => ({
+  style: {
+    color: props.selected && "red"
+  }
+}))`
+  margin-bottom: 0.5em;
+`;
+
 const Title = styled.h3`
   padding-top: 0.5em;
 `;
-const Bar = styled.div`
-  background: steelblue;
+const Bar = styled.div.attrs(props => ({
+  style: {
+    background: props.disabled ? "#efefef" : props.color || "steelblue",
+    width: props.width
+  }
+}))`
   display: inline-block;
-  width: ${props => props.width}px;
   height: 1em;
+  cursor: pointer;
 `;
 
-const Text = styled.span`
+const Text = styled.a`
   display: inline-block;
-  width: 300px;
+  width: 260px;
 `;
 
-function Hot({ data }) {
+const Span = styled.span`
+  color: ${props => (props.disabled ? "#efefef" : props.color || "black")};
+  font-weight: bold;
+  cursor: pointer;
+`;
+
+function Hot({ list = [], selectedWords, toggleHots }) {
+  if (selectedWords.length === 0) {
+    list.forEach(item => (item.disabled = false));
+  } else {
+    list.forEach(item => {
+      const index = indexOf(selectedWords, item, (a, b) => a.index === b.index);
+      item.disabled = index === -1 ? true : false;
+    });
+  }
+
   return (
     <Container>
       <Title>Hot</Title>
-      {data &&
-        data.map((item, index) => (
-          <Item key={index}>
-            <Text>
-              ({index + 1}) {substr(item.title, 15)}
-            </Text>
-            {isNaN(item.width) || item.width <= 0 ? (
-              "置顶"
-            ) : (
-              <Bar width={item.width} />
-            )}
-          </Item>
-        ))}
+      {list.map((item, index) => (
+        <Item key={index} selected={item.highlight}>
+          <Text href={item.url} target="_blank" selected={item.highlight}>
+            ({index + 1}) {substr(item.title, 15)}
+          </Text>
+          {isNaN(item.width) || item.width <= 0 ? (
+            <Span color={item.color} disabled={item.disabled}>
+              置顶
+            </Span>
+          ) : (
+            <Bar
+              width={item.width}
+              selected={item.highlight}
+              color={item.color}
+              disabled={item.disabled}
+              onClick={() => toggleHots(item)}
+            />
+          )}
+        </Item>
+      ))}
     </Container>
   );
 }
 
-export default connect(({ hot }) => ({
-  data: hot.list
-}))(Hot);
+export default connect(
+  ({ global }) => ({
+    selectedWords: global.selectedWords
+  }),
+  {
+    toggleHots: item => ({
+      type: "global/toggleHots",
+      payload: { item }
+    })
+  }
+)(Hot);

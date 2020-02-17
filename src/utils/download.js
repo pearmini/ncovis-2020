@@ -33,12 +33,20 @@ export function rasterize(svg) {
   image.onload = () => {
     const rect = svg.getBoundingClientRect();
     const canvas = document.createElement("canvas");
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
     const context = canvas.getContext("2d");
     context.drawImage(image, 0, 0, rect.width, rect.height);
     context.canvas.toBlob(resolve);
   };
   image.src = URL.createObjectURL(serialize(svg));
   return promise;
+}
+
+export default function(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || "nCov-vis";
+  a.click();
 }

@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Button, Popover } from "antd";
 import styled from "styled-components";
-import { serialize, rasterize } from "../utils/download";
+import download, { serialize, rasterize } from "../utils/download";
 import { useMouse } from "react-use";
 const Container = styled.div`
   position: relative;
@@ -29,21 +29,11 @@ function Svg({ filename, ...rest }) {
 
   function onDownloadSvg() {
     const blob = serialize(ref.current);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename || "nCov-vis";
-    a.click();
+    download(blob);
   }
 
   function onDownloadPng() {
-    rasterize(ref.current).then(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename || "nCov-vis";
-      a.click();
-    });
+    rasterize(ref.current).then(download);
   }
 
   const content = (
