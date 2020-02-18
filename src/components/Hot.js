@@ -52,18 +52,21 @@ function Hot({ list = [], selectedWords, toggleHots }) {
     <Container>
       <Title>Hot</Title>
       {list.map((item, index) => (
-        <Item key={index} selected={item.highlight}>
-          <Text href={item.url} target="_blank" selected={item.highlight}>
+        <Item key={index}>
+          <Text href={item.url} target="_blank">
             ({index + 1}) {substr(item.title, 15)}
           </Text>
           {isNaN(item.width) || item.width <= 0 ? (
-            <Span color={item.color} disabled={item.disabled}>
+            <Span
+              color={item.color}
+              disabled={item.disabled}
+              onClick={() => toggleHots(item)}
+            >
               置顶
             </Span>
           ) : (
             <Bar
               width={item.width}
-              selected={item.highlight}
               color={item.color}
               disabled={item.disabled}
               onClick={() => toggleHots(item)}

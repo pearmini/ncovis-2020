@@ -1,30 +1,24 @@
 import React from "react";
 import Svg from "./Svg";
-import styled from "styled-components";
-const Text = styled.text.attrs(props => ({
-  style: {
-    fill: props.disabled ? "efefef" : props.fill || "black"
-  }
-}))`
-  cursor: pointer;
-`;
 function WordCloud({ width, height, words, onClick }) {
+  function drawWordCloud(svg) {
+    const g = svg
+      .append("g")
+      .attr("transform", `translate(${width / 2},${height / 2})`);
+
+    g.selectAll("text")
+      .data(words)
+      .join("text")
+      .attr("font-size", d => d.size)
+      .attr("transform", d => `translate(${d.x}, ${d.y}) rotate(${d.rotate})`)
+      .style("fill", d => (d.disabled ? "#efefef" : d.fill || "black"))
+      .attr("cursor", "pointer")
+      .text(d => d.text)
+      .on("click", d => onClick && onClick(d));
+  }
   return (
-    <Svg viewBox={[0, 0, width, height]} textAnchor="middle">
-      <g transform={`translate(${width / 2}, ${height / 2})`}>
-        {words.map((item, index) => (
-          <Text
-            key={index}
-            fontSize={item.size}
-            transform={`translate(${item.x}, ${item.y}) rotate(${item.rotate})`}
-            disabled={item.disabled}
-            fill={item.fill}
-            onClick={() => onClick && onClick(item)}
-          >
-            {item.text}
-          </Text>
-        ))}
-      </g>
+    <Svg textAnchor="middle" width={width} height={height}>
+      {svg => drawWordCloud(svg)}
     </Svg>
   );
 }

@@ -1,10 +1,14 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { Button, Popover } from "antd";
 import styled from "styled-components";
 import download, { serialize, rasterize } from "../utils/download";
 import { useMouse } from "react-use";
+import * as d3 from "d3";
 const Container = styled.div`
   position: relative;
+  width: ${props => props.width}px;
+  height: ${props => props.height}px;
+  outline: 1px solid black;
 `;
 
 const StyledButton = styled(Button)`
@@ -22,7 +26,7 @@ const Row = styled.div`
   justify-content: space-around;
 `;
 
-function Svg({ filename, ...rest }) {
+function Svg({ width, height, children, filename, ...rest }) {
   const ref = useRef(null);
   const { elX, elY, elW, elH } = useMouse(ref);
   const mouseHovered = elX > 0 && elX < elW && elY > 0 && elY < elH;
@@ -43,8 +47,12 @@ function Svg({ filename, ...rest }) {
     </Row>
   );
 
+  useEffect(() => {
+    children && children(d3.select(ref.current));
+  }, [children]);
+
   return (
-    <Container>
+    <Container width={width} height={height}>
       {mouseHovered && (
         <Popover
           placement="bottomRight"
@@ -55,7 +63,11 @@ function Svg({ filename, ...rest }) {
           <StyledButton icon="download" type="primary" />
         </Popover>
       )}
-      <StyledSvg ref={ref} {...rest}></StyledSvg>
+      <StyledSvg
+        ref={ref}
+        viewBox={[0, 0, width, height]}
+        {...rest}
+      ></StyledSvg>
     </Container>
   );
 }

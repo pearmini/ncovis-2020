@@ -2,12 +2,21 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import * as d3 from "d3";
-
+import { Radio } from "antd";
+import Timeline from "./Timeline";
 import TopicCloud from "./TopicCloud";
 import Hot from "./Hot";
+const { Group } = Radio;
 
 const Row = styled.section`
   display: flex;
+`;
+
+const Container = styled.section``;
+
+const RadioGroup = styled(Group)`
+  margin-left: 2em;
+  margin-bottom: 0.5em;
 `;
 
 function computeBar({ data }, colorScale, minRange = 0, maxRange = 100) {
@@ -62,17 +71,36 @@ function computeData(hot, platform, time) {
   }
 }
 
-function HotPanel({ selectedPlatform, selectedTime, getHotData, hot }) {
+function HotPanel({
+  selectedPlatform,
+  setSelectedPlatform,
+  selectedTime,
+  getHotData,
+  hot
+}) {
   // 对数据进行计算：布局，颜色等
   const { words, list } = computeData(hot, selectedPlatform, selectedTime);
   useEffect(() => {
     getHotData();
   }, [getHotData]);
   return (
-    <Row>
-      <TopicCloud words={words} />
-      <Hot list={list} />
-    </Row>
+    <Container>
+      <Row>
+        <h3>hellow world</h3>
+        <RadioGroup
+          value={selectedPlatform}
+          onChange={e => setSelectedPlatform(e.target.value)}
+        >
+          <Radio value={"weibo"}>微博</Radio>
+          <Radio value={"zhihu"}>知乎</Radio>
+        </RadioGroup>
+      </Row>
+      <Row>
+        <TopicCloud words={words} />
+        <Hot list={list} />
+      </Row>
+      <Timeline />
+    </Container>
   );
 }
 
@@ -83,6 +111,10 @@ export default connect(
     hot: hot
   }),
   {
-    getHotData: () => ({ type: "hot/getData" })
+    getHotData: () => ({ type: "hot/getData" }),
+    setSelectedPlatform: value => ({
+      type: "global/setSelectedPlatform",
+      payload: { value }
+    })
   }
 )(HotPanel);

@@ -17,7 +17,7 @@ function Line({ data = [] }) {
     height = 150,
     margin = { top: 20, right: 5, bottom: 20, left: 40 };
 
-  useEffect(() => {
+  function drawLineChart(svg) {
     const x = d3
       .scaleUtc()
       .domain(d3.extent(data, d => d.date))
@@ -58,8 +58,6 @@ function Line({ data = [] }) {
       .x(d => x(d.date))
       .y(d => y(d.confirm));
 
-    const svg = d3.select("#svg-line").attr("viewBox", [0, 0, width, height]);
-
     svg.append("g").call(xAxis);
 
     svg.append("g").call(yAxis);
@@ -73,12 +71,15 @@ function Line({ data = [] }) {
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("d", line);
-  }, [data, margin.top, margin.right, margin.left, margin.bottom]);
+  }
+
   return (
     <Container>
       <Title>确诊总人数</Title>
       <Box>
-        <Svg id="svg-line"></Svg>
+        <Svg width={width} height={height}>
+          {svg => drawLineChart(svg)}
+        </Svg>
       </Box>
     </Container>
   );
