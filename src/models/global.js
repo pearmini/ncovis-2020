@@ -6,7 +6,7 @@ export default {
     selectedPlatform: "weibo",
     selectedRegion: "全国",
     selectedDate: null,
-    selectedTime: 1581739201,
+    selectedTime: -631180800000,
     selectedWords: [],
     selectedHots: [],
     regionOptions,
@@ -22,17 +22,14 @@ export default {
           value: "zhihu",
           id: 2
         }
-      ],
-      region: [
-        {
-          name: "全国",
-          value: "all",
-          id: 1
-        }
       ]
     }
   },
   reducers: {
+    setSelectedTime(state, action) {
+      const { value } = action.payload;
+      return { ...state, selectedTime: value };
+    },
     setSelectedRegion(state, action) {
       const { value } = action.payload;
       return { ...state, selectedRegion: value };

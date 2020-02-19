@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Svg from "./Svg";
 import styled from "styled-components";
 import { connect } from "dva";

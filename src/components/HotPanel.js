@@ -2,10 +2,13 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import * as d3 from "d3";
+
 import { Radio } from "antd";
+
 import Timeline from "./Timeline";
 import TopicCloud from "./TopicCloud";
 import Hot from "./Hot";
+
 const { Group } = Radio;
 
 const Row = styled.section`
@@ -15,7 +18,6 @@ const Row = styled.section`
 const Container = styled.section``;
 
 const RadioGroup = styled(Group)`
-  margin-left: 2em;
   margin-bottom: 0.5em;
 `;
 
@@ -49,6 +51,10 @@ function computeWords({ data }, colorScale) {
   }, []);
 }
 
+function computeRange({ data }) {
+  return d3.extent(data, item => item.time);
+}
+
 function computeData(hot, platform, time) {
   const defaultValue = {
     words: [],
@@ -56,14 +62,31 @@ function computeData(hot, platform, time) {
   };
   try {
     if (!hot) return defaultValue;
-    const platformData = hot.data.find(item => item.platform === platform);
-    const timeData = platformData.data.find(item => item.time === time);
+    const platformData = hot.find(item => item.platform === platform);
+    const timeData = platformData.data.find((item, index) => {
+      const startTime =
+        index === 0 ? item.time - 1 : platformData.data[index - 1].time;
+      const endTime = item.time;
+
+      // 对数据进行差值
+
+      // 对条形图进行差值
+
+      // 对词云进行差值
+      // item.data.forEach(ele => {
+
+      // })
+      return startTime < time && time <= endTime;
+    });
+
     const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
-    const words = computeWords(timeData, colorScale);
-    const list = computeBar(timeData, colorScale, 10, 150);
+    const words = timeData ? computeWords(timeData, colorScale) : [];
+    const list = timeData ? computeBar(timeData, colorScale, 10, 150) : [];
+    const range = computeRange(platformData);
     return {
       words,
-      list
+      list,
+      range
     };
   } catch (e) {
     console.error(e);
@@ -79,14 +102,19 @@ function HotPanel({
   hot
 }) {
   // 对数据进行计算：布局，颜色等
-  const { words, list } = computeData(hot, selectedPlatform, selectedTime);
+
+  const { words, list, range } = computeData(
+    hot,
+    selectedPlatform,
+    selectedTime
+  );
+
   useEffect(() => {
     getHotData();
   }, [getHotData]);
   return (
     <Container>
       <Row>
-        <h3>hellow world</h3>
         <RadioGroup
           value={selectedPlatform}
           onChange={e => setSelectedPlatform(e.target.value)}
@@ -99,7 +127,7 @@ function HotPanel({
         <TopicCloud words={words} />
         <Hot list={list} />
       </Row>
-      <Timeline />
+      <Timeline range={range} />
     </Container>
   );
 }

@@ -48,7 +48,8 @@ function Svg({ width, height, children, filename, ...rest }) {
   );
 
   useEffect(() => {
-    children && children(d3.select(ref.current));
+    const svg = d3.select(ref.current);
+    children && children(svg);
   }, [children]);
 
   return (
