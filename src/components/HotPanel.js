@@ -2,20 +2,17 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import * as d3 from "d3";
-
-import { Radio } from "antd";
+import { Radio, Row, Col } from "antd";
 
 import Timeline from "./Timeline";
 import TopicCloud from "./TopicCloud";
 import Hot from "./Hot";
+import Svg from "./Svg";
+import wordscloud from "../utils/vis/wordscloud";
 
 const { Group } = Radio;
 
-const Row = styled.section`
-  display: flex;
-`;
-
-const Container = styled.section``;
+const Container = styled.div``;
 
 const RadioGroup = styled(Group)`
   margin-bottom: 0.5em;
@@ -67,15 +64,6 @@ function computeData(hot, platform, time) {
       const startTime =
         index === 0 ? item.time - 1 : platformData.data[index - 1].time;
       const endTime = item.time;
-
-      // 对数据进行差值
-
-      // 对条形图进行差值
-
-      // 对词云进行差值
-      // item.data.forEach(ele => {
-
-      // })
       return startTime < time && time <= endTime;
     });
 
@@ -114,7 +102,11 @@ function HotPanel({
   }, [getHotData]);
   return (
     <Container>
-      <Row>
+      <h1>全国人民都在讨论些啥？</h1>
+      <div style={{ marginBottom: "1em" }}>
+        <span>
+          这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。
+        </span>
         <RadioGroup
           value={selectedPlatform}
           onChange={e => setSelectedPlatform(e.target.value)}
@@ -122,12 +114,25 @@ function HotPanel({
           <Radio value={"weibo"}>微博</Radio>
           <Radio value={"zhihu"}>知乎</Radio>
         </RadioGroup>
-      </Row>
-      <Row>
-        <TopicCloud words={words} />
-        <Hot list={list} />
+      </div>
+      <Row gutter={[16, 16]}>
+        <Col md={12} span={24}>
+          <Svg viewBox={[0, 0, 600, 400]}>
+            {svg => {
+              wordscloud(svg, words);
+            }}
+          </Svg>
+        </Col>
+        <Col md={12} span={24}>
+          <Svg viewBox={[0, 0, 600, 400]}>
+            {svg => {
+              wordscloud(svg, words);
+            }}
+          </Svg>
+        </Col>
       </Row>
       <Timeline range={range} />
+      <br />
     </Container>
   );
 }

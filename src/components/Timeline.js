@@ -10,7 +10,7 @@ const Container = styled.div`
   align-items: center;
 `;
 const StyledSlider = styled(Slider)`
-  width: 750px;
+  width: 100%;
   margin: 1em 1em;
 `;
 const ControlButton = styled(Button)``;
@@ -22,11 +22,8 @@ function Timeline({ range = [0, 0], selectedTime, setSelectedTime }) {
     .domain([0, totalTime])
     .range(range);
 
-  const { requestFrame, cancelFrame, isRunning } = useFrame(step);
+  const { requestFrame, cancelFrame, isRunning } = useFrame(step, totalTime);
   function step(duration) {
-    if (duration > totalTime) {
-      cancelFrame();
-    }
     setSelectedTime(scale(duration));
   }
 

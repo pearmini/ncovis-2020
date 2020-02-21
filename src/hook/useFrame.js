@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-export default function(cb) {
+export default function(cb, maxProgress) {
   const [isRunning, setIsRunning] = useState(false);
   const timer = useRef();
   const startTime = useRef();
@@ -19,8 +19,12 @@ export default function(cb) {
 
   function step(time) {
     if (startTime.current === undefined) startTime.current = time;
-    const duration = time - startTime.current;
-    cb(duration);
+    const progress = time - startTime.current;
+    if (progress > maxProgress) {
+      cancelFrame();
+      return;
+    }
+    cb(progress);
     timer.current = requestAnimationFrame(step);
   }
 
