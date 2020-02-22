@@ -1,0 +1,27 @@
+[
+  {
+    "date": "2019-2-20",
+    "data": [
+      {
+        "region": "chengdu",
+        "dead": 1,
+        "confirm": 10,
+        "suspect": 5,
+        "imageURL": ""
+      },
+      {
+        "region": "beijing",
+        "dead": 1,
+        "confirm": 10,
+        "suspect": 5,
+        "imageURL": ""
+      }
+    ]
+  },
+  {
+      "date":"2019-2-12",
+      "data": [
+
+      ]
+  }
+]

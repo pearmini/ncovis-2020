@@ -5,8 +5,6 @@ import * as d3 from "d3";
 import { Radio, Row, Col } from "antd";
 
 import Timeline from "./Timeline";
-import TopicCloud from "./TopicCloud";
-import Hot from "./Hot";
 import Svg from "./Svg";
 import wordscloud from "../utils/vis/wordscloud";
 
@@ -82,57 +80,46 @@ function computeData(hot, platform, time) {
   }
 }
 
-function HotPanel({
+function VisPanel({
   selectedPlatform,
   setSelectedPlatform,
   selectedTime,
   getHotData,
+
   hot
 }) {
   // 对数据进行计算：布局，颜色等
 
-  const { words, list, range } = computeData(
-    hot,
-    selectedPlatform,
-    selectedTime
-  );
+  const { words, range } = computeData(hot, selectedPlatform, selectedTime);
 
   useEffect(() => {
     getHotData();
   }, [getHotData]);
   return (
     <Container>
-      <h1>全国人民都在讨论些啥？</h1>
-      <div style={{ marginBottom: "1em" }}>
-        <span>
-          这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。
-        </span>
-        <RadioGroup
-          value={selectedPlatform}
-          onChange={e => setSelectedPlatform(e.target.value)}
-        >
-          <Radio value={"weibo"}>微博</Radio>
-          <Radio value={"zhihu"}>知乎</Radio>
-        </RadioGroup>
-      </div>
+      <h1>人们在网络上都在讨论些啥？</h1>
+      <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p>
+      <span>选择一个社交平台</span>&ensp;
+      <RadioGroup
+        value={selectedPlatform}
+        onChange={e => setSelectedPlatform(e.target.value)}
+      >
+        <Radio value={"weibo"}>微博</Radio>
+        <Radio value={"zhihu"}>知乎</Radio>
+      </RadioGroup>
       <Row gutter={[16, 16]}>
-        <Col md={12} span={24}>
+        <Col span={24} md={12}>
           <Svg viewBox={[0, 0, 600, 400]}>
-            {svg => {
-              wordscloud(svg, words);
-            }}
+            {svg => svg.call(wordscloud, words)}
           </Svg>
         </Col>
-        <Col md={12} span={24}>
+        <Col span={24} md={12}>
           <Svg viewBox={[0, 0, 600, 400]}>
-            {svg => {
-              wordscloud(svg, words);
-            }}
+            {svg => svg.call(wordscloud, words)}
           </Svg>
         </Col>
       </Row>
       <Timeline range={range} />
-      <br />
     </Container>
   );
 }
@@ -140,14 +127,20 @@ function HotPanel({
 export default connect(
   ({ global, hot }) => ({
     selectedPlatform: global.selectedPlatform,
+    regionOptions: global.regionOptions,
     selectedTime: global.selectedTime,
-    hot: hot
+    hot: hot,
+    selectedRegion: global.selectedRegion
   }),
   {
     getHotData: () => ({ type: "hot/getData" }),
+    setSelectedRegion: value => ({
+      type: "global/setSelectedRegion",
+      payload: { value }
+    }),
     setSelectedPlatform: value => ({
       type: "global/setSelectedPlatform",
       payload: { value }
     })
   }
-)(HotPanel);
+)(VisPanel);

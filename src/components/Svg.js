@@ -10,14 +10,16 @@ const Container = styled.div`
   outline: 1px solid black;
 `;
 
-const StyledButton = styled(Button)`
+const DownloadButton = styled(Button)`
   right: 5px;
   top: 5px;
   position: absolute;
 `;
+
 const StyledSvg = styled.svg`
-  background: "white";
+  background: white;
 `;
+
 const Row = styled.div`
   display: flex;
   justify-content: space-around;
@@ -58,7 +60,7 @@ function Svg({ viewBox, children, filename, ...rest }) {
           content={content}
           trigger="click"
         >
-          <StyledButton icon="download" type="primary" />
+          <DownloadButton icon="download" type="primary" />
         </Popover>
       )}
       <StyledSvg ref={ref} viewBox={viewBox}></StyledSvg>

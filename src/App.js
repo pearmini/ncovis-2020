@@ -3,33 +3,33 @@ import "antd/dist/antd.css";
 import styled from "styled-components";
 
 import IntroductionPanel from "./components/IntroductionPanel";
-import HotPanel from "./components/HotPanel";
-import CommentPanel from "./components/CommentPanel";
+import HotsPanel from "./components/HotsPanel";
+import StoryPanel from "./components/StoryPanel";
 import NewsPanel from "./components/NewsPanel";
 
 const Layout = styled.div`
-  /* background: #f0f8ea; */
+  /* background: #f9f9f9; */
 `;
 const Logo = styled.div`
   color: white;
   font-size: 25px;
   font-weight: bold;
-  color: #ebebd3;
+  color: white;
 `;
 
 const HeaderWrapper = styled.div`
   height: 56px;
-  background: #e54b4b;
+  background: black;
   line-height: 56px;
 `;
 const Header = styled.header`
   margin: 0 auto;
   max-width: 1200px;
-  background: #e54b4b;
+  background: black;
   width: 90%;
 `;
 
-const Content = styled.section`
+const Content = styled.div`
   margin: 0 auto;
   width: 90%;
   max-width: 1200px;
@@ -45,9 +45,9 @@ function App() {
       </HeaderWrapper>
       <Content>
         <IntroductionPanel />
-        <HotPanel />
+        <HotsPanel />
         <NewsPanel />
-        <CommentPanel />
+        <StoryPanel />
       </Content>
     </Layout>
   );

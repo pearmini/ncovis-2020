@@ -1,4 +1,10 @@
 export default function(svg, data, options) {
+  const g = svg.select(".container");
+  if (!g) {
+    svg.append("g").attr("class", "container");
+  }
+
+  
   const texts = svg.selectAll("text").data(data, d => d.index);
 
   texts
@@ -9,7 +15,7 @@ export default function(svg, data, options) {
     .attr("fill", d => (d.disabled ? "#efefef" : d.fill || "black"))
     .attr("stroke", d => (d.disabled ? "#efefef" : d.fill || "black"))
     .attr("cursor", "pointer")
-    .text(d => d.text)
+    .text(d => d.text);
 
   texts
     .attr("transform", d => `translate(${d.x}, ${d.y}) rotate(${d.rotate})`)
