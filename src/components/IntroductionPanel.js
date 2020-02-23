@@ -7,8 +7,8 @@ const Container = styled.div`
 const Title = styled.h1``;
 function Introduction() {
   return (
-    <Container>
-      <Title>概述</Title>
+    <Container id="introduction">
+      <Title>介绍</Title>
       <ul>
         <li>疫情期间，人们喜欢讨论的问题以及随着疫情变化的变化趋势。</li>
         <li>疫情期间，新闻的主题以及随着疫情变化的变化情况。</li>

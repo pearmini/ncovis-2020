@@ -10,7 +10,8 @@ import wordscloud from "../utils/vis/wordscloud";
 
 const { Group } = Radio;
 
-const Container = styled.div``;
+const Container = styled.div`
+`;
 
 const RadioGroup = styled(Group)`
   margin-bottom: 0.5em;
@@ -96,7 +97,7 @@ function VisPanel({
     getHotData();
   }, [getHotData]);
   return (
-    <Container>
+    <Container id="hots">
       <h1>人们在网络上都在讨论些啥？</h1>
       <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p>
       <span>选择一个社交平台</span>&ensp;

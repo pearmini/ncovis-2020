@@ -18,7 +18,7 @@ const Control = styled.div`
 
 function NewsPanel({ selectedRegion, regionOptions, setSelectedRegion }) {
   return (
-    <Container>
+    <Container id="news">
       <h1>全国各地都在报道些啥?</h1>
       <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p>
 
