@@ -1,6 +1,7 @@
 {
   "name": "ncov-topic-cloud",
   "version": "0.1.0",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
@@ -35,9 +36,11 @@
     "antd": "^3.26.9",
     "axios": "^0.19.2",
     "d3": "^5.15.0",
+    "d3-array": "^2.4.0",
     "d3-cloud": "^1.2.5",
     "dva": "^2.4.1",
     "dva-loading": "^3.0.20",
+    "moment": "^2.24.0",
     "react-use": "^13.26.0",
     "styled-components": "^5.0.1"
   }

@@ -1,24 +1,31 @@
-function getData({ region }) {
-  return {
-    words: []
-  };
+import data from "../assets/data/news.json";
+import * as d3 from "d3-array";
+
+function getNews() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(data), 1000);
+  });
 }
 
 export default {
   namespace: "news",
-  state: {
-    words: []
-  },
+  state: new Map(),
   effects: {
-    *getWords(action, { call, put }) {
-      const { words } = yield call(getData, action.payload);
-      yield put({ type: "setWords", payload: { words } });
+    *getData(action, { call, put }) {
+      const data = yield call(getNews);
+      const datevalues = d3.rollup(
+        data,
+        ([d]) => d.data,
+        d => d.region,
+        d => d.date
+      );
+      yield put({ type: "setData", payload: { data: datevalues } });
     }
   },
   reducers: {
-    setWords(state, action) {
-      const { words } = action.payload;
-      return { ...state, words };
+    setData(state, action) {
+      const { data } = action.payload;
+      return data;
     }
   }
 };

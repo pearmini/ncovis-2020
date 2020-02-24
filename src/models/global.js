@@ -4,9 +4,10 @@ export default {
   namespace: "global",
   state: {
     selectedPlatform: "weibo",
-    selectedRegion: "全国",
-    selectedDate: null,
+    selectedRegion: "all",
+    selectedDate: "2003-03-17",
     selectedTime: -631180800000,
+    selectedType: "confirm",
     selectedWords: [],
     selectedHots: [],
     regionOptions,
@@ -37,6 +38,17 @@ export default {
     setSelectedPlatform(state, action) {
       const { value } = action.payload;
       return { ...state, selectedPlatform: value };
+    },
+    setSelectedType(state, action) {
+      const { type } = action.payload;
+      return { ...state, selectedType: type };
+    },
+    setSelectedDate(state, action) {
+      const { date } = action.payload;
+      const selectedDate = `${date.getFullYear()}-${
+        date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+      }-${date.getDate()}`;
+      return { ...state, selectedDate };
     },
     toggleHots(state, action) {
       const { item } = action.payload;

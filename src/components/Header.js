@@ -110,7 +110,7 @@ function Header() {
           <ul>
             {navs.map(nav => (
               <li key={nav.name}>
-                <a onClick={() => jumpTo(nav.id)}>{nav.name}</a>
+                <a onClick={() => jumpTo(nav.id)} href="#">{nav.name}</a>
               </li>
             ))}
           </ul>

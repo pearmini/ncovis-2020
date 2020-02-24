@@ -1,4 +1,4 @@
-import hot from "../assets/data/hot.json";
+import hot from "../assets/data/hots_data.json";
 
 function getHots() {
   return hot;
