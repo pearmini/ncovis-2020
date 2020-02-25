@@ -11,7 +11,7 @@ const StyledSvg = styled.svg.attrs(props => ({
   }
 }))``;
 
-function Svg({ viewBox, children, filename, ...rest }) {
+function Svg({ width, height, children, filename, id, style, ...rest }) {
   const ref = useRef(null);
   function onDownloadSvg() {
     const blob = serialize(ref.current);
@@ -24,8 +24,17 @@ function Svg({ viewBox, children, filename, ...rest }) {
 
   useEffect(() => {
     const svg = d3.select(ref.current);
-    children && children(svg);
-  }, [children]);
+    
+    // 初始化
+    svg.select(".chart").remove();
+    const props = {
+      svg,
+      width,
+      height,
+      ...rest
+    };
+    children && children(props);
+  }, [children, width, height, rest]);
 
   const props = {
     onDownloadPng,
@@ -33,8 +42,8 @@ function Svg({ viewBox, children, filename, ...rest }) {
   };
 
   return (
-    <Card {...rest} {...props}>
-      <StyledSvg ref={ref} viewBox={viewBox}></StyledSvg>
+    <Card {...props} id={id} style={style}>
+      <StyledSvg ref={ref} viewBox={[0, 0, width, height]}></StyledSvg>
     </Card>
   );
 }

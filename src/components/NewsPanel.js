@@ -36,6 +36,44 @@ function NewsPanel({
 }) {
   const regionvalues = data.get(selectedRegion);
   const datevalues = regionvalues && regionvalues.get(selectedDate);
+
+  const shapeProps = {
+    src: datevalues && datevalues.image,
+    width: 600,
+    height: 400
+  };
+
+  const linesProps = {
+    width: 600,
+    height: 200,
+    data: regionvalues,
+    margin: {
+      top: 30,
+      right: 30,
+      bottom: 30,
+      left: 50
+    },
+    setSelectedDate,
+    selectedDate,
+    type: selectedType,
+    style: { marginBottom: 16 }
+  };
+
+  const heatProps = {
+    type: selectedType,
+    width: 600,
+    height: 200,
+    margin: {
+      top: 30,
+      right: 30,
+      bottom: 30,
+      left: 50
+    },
+    setSelectedDate,
+    selectedDate,
+    data: regionvalues
+  };
+
   useEffect(() => {
     getData();
   }, [getData]);
@@ -68,9 +106,7 @@ function NewsPanel({
               />
             </div>
           </Control>
-          <Canvas src={datevalues && datevalues.image} width={600} height={400}>
-            {shape}
-          </Canvas>
+          <Canvas {...shapeProps}>{shape}</Canvas>
         </Col>
         <Col span={24} md={12}>
           <Control>
@@ -88,40 +124,8 @@ function NewsPanel({
             </div>
           </Control>
           <Row>
-            <Svg viewBox={[0, 0, 600, 200]} style={{ marginBottom: 16 }}>
-              {svg =>
-                lines(svg, regionvalues, {
-                  type: selectedType,
-                  width: 600,
-                  height: 200,
-                  margin: {
-                    top: 30,
-                    right: 30,
-                    bottom: 30,
-                    left: 50
-                  },
-                  setSelectedDate,
-                  selectedDate
-                })
-              }
-            </Svg>
-            <Svg viewBox={[0, 0, 600, 200]}>
-              {svg =>
-                heat(svg, regionvalues, {
-                  type: selectedType,
-                  width: 600,
-                  height: 200,
-                  margin: {
-                    top: 30,
-                    right: 30,
-                    bottom: 30,
-                    left: 50
-                  },
-                  setSelectedDate,
-                  selectedDate
-                })
-              }
-            </Svg>
+            <Svg {...linesProps}>{lines}</Svg>
+            <Svg {...heatProps}>{heat}</Svg>
           </Row>
         </Col>
       </Row>

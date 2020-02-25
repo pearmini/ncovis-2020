@@ -1,16 +1,25 @@
 import * as d3 from "d3";
-export default function(
+export default function({
   svg,
-  dataMap,
-  { type, width, height, margin, setSelectedDate, selectedDate }
-) {
-  svg.select(".chart").remove();
+  data: dataMap,
+  type,
+  width,
+  height,
+  margin,
+  setSelectedDate,
+  selectedDate
+}) {
   if (dataMap === undefined) return;
 
-  const data = d3.pairs(Array.from(dataMap)).map(([a, b]) => ({
-    date: new Date(b[0]),
-    value: (b[1][type] - a[1][type]) | 0
-  }));
+  const data = d3
+    .pairs(Array.from(dataMap))
+    .map(([a, b]) => ({
+      date: new Date(b[0]),
+      value: b[1][type] - a[1][type]
+    }))
+    .filter(d => !isNaN(d.value));
+
+  if (!data.length) return;
 
   const select = data.find(
     ({ date }) => date.getTime() === new Date(selectedDate).getTime()

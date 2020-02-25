@@ -6,12 +6,13 @@ import { Radio, Row, Col } from "antd";
 
 import Timeline from "./Timeline";
 import Svg from "./Svg";
-import wordscloud from "../utils/vis/wordscloud";
+
+import clouds from "../utils/vis/clouds";
+import bars from "../utils/vis/bars";
 
 const { Group } = Radio;
 
-const Container = styled.div`
-`;
+const Container = styled.div``;
 
 const RadioGroup = styled(Group)`
   margin-bottom: 0.5em;
@@ -92,7 +93,15 @@ function VisPanel({
   // 对数据进行计算：布局，颜色等
 
   const { words, range } = computeData(hot, selectedPlatform, selectedTime);
+  const barsProps = {
+    width: 600,
+    height: 400
+  };
 
+  const cloudsProps = {
+    width: 600,
+    height: 400
+  };
   useEffect(() => {
     getHotData();
   }, [getHotData]);
@@ -110,14 +119,10 @@ function VisPanel({
       </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          <Svg viewBox={[0, 0, 600, 400]}>
-            {svg => svg.call(wordscloud, words)}
-          </Svg>
+          <Svg {...cloudsProps}>{clouds}</Svg>
         </Col>
         <Col span={24} md={12}>
-          <Svg viewBox={[0, 0, 600, 400]}>
-            {svg => svg.call(wordscloud, words)}
-          </Svg>
+          <Svg {...barsProps}>{bars}</Svg>
         </Col>
       </Row>
       <Timeline range={range} />

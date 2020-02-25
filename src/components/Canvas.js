@@ -20,8 +20,15 @@ function Canvas({ src, width, height, filename, children, ...rest }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!src) return;
-    children && children(ref.current, src, width * 2, height * 2);
-  });
+    const canvas = ref.current;
+    const context = canvas.getContext("2d");
+    context.restore();
+    context.save();
+    context.scale(2, 2);
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, width, height);
+    children && children(context, src, width, height);
+  }, [src, width, height, children]);
 
   return (
     <Card onDownload={() => downloadImage()} {...rest}>

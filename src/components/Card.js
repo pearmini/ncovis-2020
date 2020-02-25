@@ -11,23 +11,20 @@ const Container = styled.div.attrs(
         zIndex: 10,
         left: "50%",
         top: "50%",
-        transform: "translate(-50%, -50%)"
+        transform: "translate(-50%, -50%)",
+        width: "90%"
       }
     }
 )`
   position: relative;
+  max-width: 900px;
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.5s;
   background: white;
-  width: ${props => props.zoom && "70%"};
   cursor: pointer;
   &:hover {
     box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (max-width: 700px) {
-    width: ${props => props.zoom && "95%"};
   }
 `;
 

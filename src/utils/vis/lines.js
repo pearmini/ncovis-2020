@@ -1,15 +1,19 @@
 import * as d3 from "d3";
-export default function(
+export default function({
   svg,
-  dataMap,
-  { type, width, height, margin, setSelectedDate, selectedDate }
-) {
-  svg.select(".chart").remove();
+  data: dataMap,
+  type,
+  width,
+  height,
+  margin,
+  setSelectedDate,
+  selectedDate
+}) {
   if (dataMap === undefined) return;
 
   const select = {
     date: new Date(selectedDate),
-    value: dataMap.get(selectedDate)[type]
+    value: dataMap.get(selectedDate) ? dataMap.get(selectedDate)[type] : null
   };
 
   const color = {
@@ -20,12 +24,16 @@ export default function(
   }[type];
 
   const data = Object.assign(
-    Array.from(dataMap).map(([date, data]) => ({
-      date: new Date(date),
-      value: data[type]
-    })),
+    Array.from(dataMap)
+      .map(([date, data]) => ({
+        date: new Date(date),
+        value: data[type]
+      }))
+      .filter(d => !isNaN(d.value) && d.value !== ""),
     { y: "人数" }
   );
+
+  if (!data.length) return;
 
   const y = d3
     .scaleLinear()
@@ -73,7 +81,7 @@ export default function(
       );
 
   const labels = g => {
-    if (!select) return;
+    if (!select.value) return;
     const text = g
       .append("g")
       .datum(select)
@@ -98,7 +106,7 @@ export default function(
   };
 
   const dot = g => {
-    if (!select) return;
+    if (!select.value) return;
     g.append("circle")
       .attr("class", "dot")
       .datum(select)
@@ -182,7 +190,7 @@ export default function(
     .attr("stroke-linejoin", "round")
     .attr("stroke-linecap", "round")
     .attr("d", line);
-    
+
   g.call(dot);
   g.call(tip);
 }
