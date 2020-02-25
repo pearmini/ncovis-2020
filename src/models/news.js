@@ -15,7 +15,7 @@ export default {
       const data = yield call(getNews);
       const datevalues = d3.rollup(
         data,
-        ([d]) => d.data,
+        ([d]) => ({ ...d.data, image: d.imageURL }),
         d => d.region,
         d => d.date
       );

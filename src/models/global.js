@@ -5,7 +5,7 @@ export default {
   state: {
     selectedPlatform: "weibo",
     selectedRegion: "all",
-    selectedDate: "2003-03-17",
+    selectedDate: "2003-03-18",
     selectedTime: -631180800000,
     selectedType: "confirm",
     selectedWords: [],

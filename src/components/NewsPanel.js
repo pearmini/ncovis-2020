@@ -4,8 +4,11 @@ import { connect } from "dva";
 import { TreeSelect, DatePicker, Row, Col, Select } from "antd";
 import styled from "styled-components";
 import Svg from "./Svg";
+import Canvas from "./Canvas";
 
 import lines from "../utils/vis/lines";
+import heat from "../utils/vis/heat";
+import shape from "../utils/vis/shape";
 
 const { Option } = Select;
 const Container = styled.div``;
@@ -32,6 +35,7 @@ function NewsPanel({
   loading
 }) {
   const regionvalues = data.get(selectedRegion);
+  const datevalues = regionvalues && regionvalues.get(selectedDate);
   useEffect(() => {
     getData();
   }, [getData]);
@@ -64,7 +68,9 @@ function NewsPanel({
               />
             </div>
           </Control>
-          <Svg viewBox={[0, 0, 600, 420]}></Svg>
+          <Canvas src={datevalues && datevalues.image} width={600} height={400}>
+            {shape}
+          </Canvas>
         </Col>
         <Col span={24} md={12}>
           <Control>
@@ -91,15 +97,31 @@ function NewsPanel({
                   margin: {
                     top: 30,
                     right: 30,
-                    bottom: 20,
-                    left: 40
+                    bottom: 30,
+                    left: 50
                   },
                   setSelectedDate,
                   selectedDate
                 })
               }
             </Svg>
-            <Svg viewBox={[0, 0, 600, 200]}></Svg>
+            <Svg viewBox={[0, 0, 600, 200]}>
+              {svg =>
+                heat(svg, regionvalues, {
+                  type: selectedType,
+                  width: 600,
+                  height: 200,
+                  margin: {
+                    top: 30,
+                    right: 30,
+                    bottom: 30,
+                    left: 50
+                  },
+                  setSelectedDate,
+                  selectedDate
+                })
+              }
+            </Svg>
           </Row>
         </Col>
       </Row>

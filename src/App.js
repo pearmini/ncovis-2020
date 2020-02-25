@@ -10,7 +10,7 @@ import Header from "./components/Header";
 import DiscoveryPanel from "./components/DiscoveryPanel";
 
 const Layout = styled.div`
-  /* background: #f9f9f9; */
+  background: #f9f9f9;
 `;
 
 const Content = styled.div`

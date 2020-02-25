@@ -7,10 +7,17 @@ export default function(
   svg.select(".chart").remove();
   if (dataMap === undefined) return;
 
-  let select = {
+  const select = {
     date: new Date(selectedDate),
     value: dataMap.get(selectedDate)[type]
   };
+
+  const color = {
+    dead: "black",
+    confirm: "red",
+    cue: "green",
+    suspect: "orange"
+  }[type];
 
   const data = Object.assign(
     Array.from(dataMap).map(([date, data]) => ({
@@ -66,12 +73,13 @@ export default function(
       );
 
   const labels = g => {
+    if (!select) return;
     const text = g
       .append("g")
       .datum(select)
       .attr(
         "transform",
-        `translate(${width - margin.right - 110}, ${height - margin.top - 10})`
+        `translate(${width - margin.right - 110}, ${height - margin.top - 20})`
       );
 
     text
@@ -90,12 +98,13 @@ export default function(
   };
 
   const dot = g => {
+    if (!select) return;
     g.append("circle")
       .attr("class", "dot")
       .datum(select)
       .attr("cx", d => x(d.date))
       .attr("cy", d => y(d.value))
-      .attr("fill", "steelblue")
+      .attr("fill", color)
       .attr("r", 4);
   };
 
@@ -103,6 +112,8 @@ export default function(
     const box = g.append("g").on("mouseleave", () => {
       d3.select(".tip").style("display", "none");
     });
+
+    let next;
 
     box
       .append("rect")
@@ -122,8 +133,9 @@ export default function(
       .attr("class", "tip")
       .attr("x", d => x(d.date))
       .attr("y", margin.top)
-      .attr("width", 2)
+      .attr("width", 1)
       .attr("height", height - margin.bottom - margin.top)
+      .attr("fill", "currentColor")
       .attr("cursor", "pointer")
       .style("display", "none")
       .on("click", date);
@@ -133,22 +145,23 @@ export default function(
 
       d3.pairs(data).forEach(([pre, cur]) => {
         const date = x.invert(x0);
-        pre.date <= date && date < cur.date && (select = pre);
+        pre.date <= date && date < cur.date && (next = pre);
       });
 
-      svg
-        .select(".tip")
-        .datum(select)
-        .attr("x", d => x(d.date))
-        .attr("y", margin.top)
-        .attr("width", 2)
-        .attr("height", height - margin.bottom - margin.top)
-        .style("display", "block");
+      next &&
+        svg
+          .select(".tip")
+          .datum(next)
+          .attr("x", d => x(d.date))
+          .attr("y", margin.top)
+          .attr("width", 2)
+          .attr("height", height - margin.bottom - margin.top)
+          .style("display", "block");
     }
 
     function date() {
-      if (!select) return;
-      const { date } = select;
+      if (!next) return;
+      const { date } = next;
       setSelectedDate(date);
     }
   };
@@ -161,14 +174,15 @@ export default function(
 
   g.call(labels);
 
-  g.call(dot);
-
-  g.call(tip);
-
   g.append("path")
     .datum(data)
     .attr("fill", "none")
-    .attr("stroke", "steelblue")
+    .attr("stroke", color)
     .attr("stroke-width", 2)
+    .attr("stroke-linejoin", "round")
+    .attr("stroke-linecap", "round")
     .attr("d", line);
+    
+  g.call(dot);
+  g.call(tip);
 }
