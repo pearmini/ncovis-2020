@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Slider, Button } from "antd";
 import styled from "styled-components";
 import { connect } from "dva";
@@ -15,52 +15,68 @@ const StyledSlider = styled(Slider)`
 `;
 const ControlButton = styled(Button)``;
 
-function Timeline({ range = [0, 0], selectedTime, setSelectedTime }) {
-  const totalTime = 2 * 1000;
+function Timeline({
+  range = [0, 0],
+  total = 0,
+  selectedTime,
+  setSelectedTime
+}) {
+  const [running, setRunning] = useState(false);
+  const { requestFrame, pauseFrame, setFrame } = useFrame(step);
+
   const scale = d3
     .scaleLinear()
-    .domain([0, totalTime])
+    .domain([0, total])
     .range(range);
 
-  const { requestFrame, cancelFrame, isRunning } = useFrame(step, totalTime);
+  const formatDate = d => new Date(d).getFullYear();
+
   function step(duration) {
-    setSelectedTime(scale(duration));
+    const time = scale(duration);
+    setSelectedTime(time);
+    if (duration > total) {
+      setRunning(false);
+      return false;
+    }
   }
 
   function toggleAnimation() {
-    if (isRunning) {
-      cancelFrame();
+    if (running) {
+      setRunning(false);
+      pauseFrame();
     } else {
+      setRunning(true);
       requestFrame();
     }
   }
+
+  function onChange(value) {
+    setFrame(scale.invert(value));
+    setSelectedTime(value);
+  }
+
   return (
     <Container>
       <ControlButton
         shape="circle"
-        icon={isRunning ? "pause-circle" : "play-circle"}
+        icon={running ? "pause-circle" : "play-circle"}
         type="primary"
         onClick={toggleAnimation}
       />
       <StyledSlider
-        min={range && range[0]}
-        max={range && range[1]}
+        min={range[0]}
+        max={range[1]}
         value={selectedTime}
-        onChange={value => setSelectedTime && setSelectedTime(value)}
-        tipFormatter={value => new Date(value).getFullYear()}
+        onChange={onChange}
+        tipFormatter={formatDate}
       />
     </Container>
   );
 }
 
-export default connect(
-  ({ global }) => ({
-    selectedTime: global.selectedTime
-  }),
-  {
-    setSelectedTime: value => ({
-      type: "global/setSelectedTime",
-      payload: { value }
-    })
-  }
-)(Timeline);
+export default connect(null, {
+  setSelectedTime: value => ({
+    type: "global/setSelectedTime",
+    payload: { value }
+  })
+})(Timeline);

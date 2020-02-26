@@ -1,36 +1,43 @@
-import { useRef, useState } from "react";
-export default function(cb, maxProgress) {
-  const [isRunning, setIsRunning] = useState(false);
+import { useRef } from "react";
+export default function(cb, start = 0) {
   const timer = useRef();
-  const startTime = useRef();
+  const duration = useRef(start);
+  const pre = useRef();
 
   const requestFrame = () => {
-    if (isRunning) return;
-    setIsRunning(() => true);
     timer.current = requestAnimationFrame(step);
   };
 
   const cancelFrame = () => {
-    if (!isRunning) return;
-    setIsRunning(() => false);
-    startTime.current = undefined;
+    pre.current = undefined;
+    duration.current = 0;
+    cancelAnimationFrame(timer.current);
+  };
+
+  const setFrame = time => {
+    duration.current = time;
+  };
+
+  const pauseFrame = () => {
+    pre.current = undefined;
     cancelAnimationFrame(timer.current);
   };
 
   function step(time) {
-    if (startTime.current === undefined) startTime.current = time;
-    const progress = time - startTime.current;
-    if (progress > maxProgress) {
+    if (pre.current === undefined) pre.current = time;
+    duration.current += time - pre.current;
+    pre.current = time;
+    const end = cb(duration.current);
+    if (end === false) {
       cancelFrame();
       return;
     }
-    cb(progress);
     timer.current = requestAnimationFrame(step);
   }
 
   return {
     requestFrame,
-    cancelFrame,
-    isRunning
+    pauseFrame,
+    setFrame
   };
 }

@@ -11,7 +11,9 @@ import heat from "../utils/vis/heat";
 import shape from "../utils/vis/shape";
 
 const { Option } = Select;
-const Container = styled.div``;
+const Container = styled.div`
+  position: relative;
+`;
 
 const Control = styled.div`
   display: flex;
@@ -20,6 +22,10 @@ const Control = styled.div`
   @media (max-width: 700px) {
     flex-direction: column;
   }
+`;
+const An = styled.div`
+  position: absolute;
+  top: -56px;
 `;
 
 function NewsPanel({
@@ -78,11 +84,11 @@ function NewsPanel({
     getData();
   }, [getData]);
   return (
-    <Container id="news">
+    <Container>
+      <An id="news" />
       <h1>全国各地都在报道些啥?</h1>
       <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p>
       {loading && "loading"}
-
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <Control>

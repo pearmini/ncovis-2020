@@ -2,12 +2,19 @@ import React from "react";
 import styled from "styled-components";
 const Container = styled.div`
   margin: 1em 0;
+  position: relative;
+`;
+
+const An = styled.div`
+  position: absolute;
+  top: -56px;
 `;
 
 const Title = styled.h1``;
 function Introduction() {
   return (
-    <Container id="introduction">
+    <Container>
+      <An id="introduction" />
       <Title>介绍</Title>
       <ul>
         <li>疫情期间，人们喜欢讨论的问题以及随着疫情变化的变化趋势。</li>

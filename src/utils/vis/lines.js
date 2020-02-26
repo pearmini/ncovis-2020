@@ -16,6 +16,8 @@ export default function({
     value: dataMap.get(selectedDate) ? dataMap.get(selectedDate)[type] : null
   };
 
+  const formatDate = d3.timeFormat("%x");
+
   const color = {
     dead: "black",
     confirm: "red",
@@ -29,7 +31,7 @@ export default function({
         date: new Date(date),
         value: data[type]
       }))
-      .filter(d => !isNaN(d.value) && d.value !== ""),
+      .filter(d => !isNaN(d.value)),
     { y: "人数" }
   );
 
@@ -117,13 +119,14 @@ export default function({
   };
 
   const tip = g => {
-    const box = g.append("g").on("mouseleave", () => {
+    const container = g.append("g").on("mouseleave", () => {
       d3.select(".tip").style("display", "none");
     });
 
     let next;
 
-    box
+    // overlayer
+    container
       .append("rect")
       .attr("width", width - margin.right)
       .attr("height", height - margin.bottom)
@@ -131,22 +134,22 @@ export default function({
       .attr("y", margin.top)
       .attr("fill", "transparent")
       .attr("cursor", "pointer")
-      .on("mousemove", update)
-      .on("click", date);
+      .on("click", date)
+      .on("mousemove", update);
 
-    box
-      .append("g")
-      .datum(select)
+    const line = container
       .append("rect")
+      .datum(select)
       .attr("class", "tip")
-      .attr("x", d => x(d.date))
       .attr("y", margin.top)
+      .attr("x", d => x(d.date))
       .attr("width", 1)
       .attr("height", height - margin.bottom - margin.top)
       .attr("fill", "currentColor")
-      .attr("cursor", "pointer")
-      .style("display", "none")
-      .on("click", date);
+      .on("click", date)
+      .style("display", "none");
+
+    const title = container.append("title");
 
     function update() {
       const [x0] = d3.mouse(this);
@@ -156,15 +159,14 @@ export default function({
         pre.date <= date && date < cur.date && (next = pre);
       });
 
-      next &&
-        svg
-          .select(".tip")
-          .datum(next)
-          .attr("x", d => x(d.date))
-          .attr("y", margin.top)
-          .attr("width", 2)
-          .attr("height", height - margin.bottom - margin.top)
-          .style("display", "block");
+      if (!next) return;
+
+      title.datum(next).text(d => `${formatDate(d.date)}:${d.value}`);
+
+      line
+        .datum(next)
+        .attr("x", d => x(d.date))
+        .style("display", "block");
     }
 
     function date() {

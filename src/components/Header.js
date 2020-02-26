@@ -43,7 +43,7 @@ const Nav = styled.nav`
   }
 
   @media (max-width: 700px) {
-    display: ${props => (props.show ? "none" : "block")};
+    display: ${props => (props.show ? "block" : "none")};
     position: absolute;
     top: 100%;
     right: 0;
@@ -51,7 +51,7 @@ const Nav = styled.nav`
 
     & ul {
       background: black;
-      padding: 0 2em;
+      padding: 0 2.5em 0 2em;
     }
     & li {
       display: block;
@@ -66,8 +66,18 @@ const ToggleButton = styled(Button)`
   }
 `;
 
+const Overlayer = styled.div`
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2;
+`;
+
 function Header() {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
 
   function jumpTo(id) {
     const element = document.getElementById(id);
@@ -77,7 +87,7 @@ function Header() {
       actualTop += current.offsetTop;
       current = current.offsetParent;
     }
-    window.scrollTo(0, actualTop - 56);
+    setShow(false);
   }
 
   const navs = [
@@ -103,21 +113,26 @@ function Header() {
     }
   ];
   return (
-    <Container>
-      <HeaderWrapper>
-        <Logo>nCov 社交媒体可视化</Logo>
-        <Nav show={show}>
-          <ul>
-            {navs.map(nav => (
-              <li key={nav.name}>
-                <a onClick={() => jumpTo(nav.id)} href="#">{nav.name}</a>
-              </li>
-            ))}
-          </ul>
-        </Nav>
-        <ToggleButton icon="menu" ghost onClick={() => setShow(!show)} />
-      </HeaderWrapper>
-    </Container>
+    <>
+      <Container>
+        <HeaderWrapper>
+          <Logo>nCov 社交媒体可视化</Logo>
+          <Nav show={show}>
+            <ul>
+              {navs.map(nav => (
+                <li key={nav.name}>
+                  <a onClick={() => jumpTo(nav.id)} href={"#" + nav.id}>
+                    {nav.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Nav>
+          <ToggleButton icon="menu" ghost onClick={() => setShow(!show)} />
+        </HeaderWrapper>
+      </Container>
+      {show && <Overlayer onClick={() => setShow(false)} />}
+    </>
   );
 }
 export default Header;

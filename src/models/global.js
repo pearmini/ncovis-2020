@@ -6,7 +6,7 @@ export default {
     selectedPlatform: "weibo",
     selectedRegion: "all",
     selectedDate: "2003-03-18",
-    selectedTime: -631180800000,
+    selectedTime: new Date("2000-01-01").getTime(),
     selectedType: "confirm",
     selectedWords: [],
     selectedHots: [],
