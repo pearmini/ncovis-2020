@@ -78,18 +78,6 @@ const Overlayer = styled.div`
 
 function Header() {
   const [show, setShow] = useState(false);
-
-  function jumpTo(id) {
-    const element = document.getElementById(id);
-    let { offsetTop: actualTop } = element;
-    let current = element.offsetParent;
-    while (current) {
-      actualTop += current.offsetTop;
-      current = current.offsetParent;
-    }
-    setShow(false);
-  }
-
   const navs = [
     {
       name: "介绍",
@@ -121,7 +109,7 @@ function Header() {
             <ul>
               {navs.map(nav => (
                 <li key={nav.name}>
-                  <a onClick={() => jumpTo(nav.id)} href={"#" + nav.id}>
+                  <a onClick={() => setShow(false)} href={"#" + nav.id}>
                     {nav.name}
                   </a>
                 </li>

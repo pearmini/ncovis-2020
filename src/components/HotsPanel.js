@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import { Radio, Row, Col } from "antd";
@@ -28,21 +28,30 @@ function HotsPanel({
   selectedPlatform,
   setSelectedPlatform,
   selectedTime,
+  setSelectedTime,
   getHotData,
   hots
 }) {
+  const [running, setRunning] = useState(false);
+  const transition = useRef(new Map());
   const colors = useRef(d3.schemeTableau10.map(d => [d, undefined]));
   const platformvalues = hots && hots.get(selectedPlatform);
   const { getWordsByTime, getListByTime, range } = platformvalues || {};
+  const time = d3
+    .scaleLinear()
+    .domain([0, 10000])
+    .range(range || [0, 0]);
 
   const barsProps = {
     width: 600,
     height: 400,
     list: getListByTime && getListByTime(selectedTime),
-    selectedTime,
+    currentTime: time.invert(selectedTime),
     colors: colors.current,
+    transition: transition.current,
+    running,
     margin: {
-      left: 200,
+      left: 20,
       right: 30,
       top: 30,
       bottom: 30
@@ -54,13 +63,16 @@ function HotsPanel({
     height: 400,
     colors: colors.current,
     words: getWordsByTime && getWordsByTime(selectedTime),
-    selectedTime
+    colors: colors.current
   };
 
   const timeProps = {
-    range,
-    total: 10000,
-    selectedTime
+    time,
+    selectedTime,
+    running,
+    setRunning,
+    setSelectedTime,
+    transition: transition.current
   };
 
   useEffect(() => {
@@ -104,6 +116,10 @@ export default connect(
     getHotData: () => ({ type: "hots/getData" }),
     setSelectedPlatform: value => ({
       type: "globals/setSelectedPlatform",
+      payload: { value }
+    }),
+    setSelectedTime: value => ({
+      type: "global/setSelectedTime",
       payload: { value }
     })
   }

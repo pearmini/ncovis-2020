@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Slider, Button } from "antd";
 import styled from "styled-components";
-import { connect } from "dva";
 import useFrame from "../hook/useFrame";
-import * as d3 from "d3";
 const Container = styled.div`
   display: flex;
   margin: 1em 0;
@@ -15,34 +13,35 @@ const StyledSlider = styled(Slider)`
 `;
 const ControlButton = styled(Button)``;
 
-function Timeline({
-  range = [0, 0],
-  total = 0,
+export default function({
+  time,
   selectedTime,
-  setSelectedTime
+  setSelectedTime,
+  running,
+  setRunning,
+  transition,
 }) {
-  const [running, setRunning] = useState(false);
   const { requestFrame, pauseFrame, setFrame } = useFrame(step);
-
-  const scale = d3
-    .scaleLinear()
-    .domain([0, total])
-    .range(range);
-
+  const [, total] = time.domain(),
+    range = time.range();
   const formatDate = d => new Date(d).getFullYear();
 
   function step(duration) {
-    const time = scale(duration);
-    setSelectedTime(time);
+    setSelectedTime(time(duration));
     if (duration > total) {
-      setRunning(false);
+      stopAnimation();
       return false;
     }
   }
 
+  function stopAnimation() {
+    setRunning(false);
+    transition.clear();
+  }
+
   function toggleAnimation() {
     if (running) {
-      setRunning(false);
+      stopAnimation();
       pauseFrame();
     } else {
       setRunning(true);
@@ -51,7 +50,7 @@ function Timeline({
   }
 
   function onChange(value) {
-    setFrame(scale.invert(value));
+    setFrame(time.invert(value));
     setSelectedTime(value);
   }
 
@@ -69,14 +68,8 @@ function Timeline({
         value={selectedTime}
         onChange={onChange}
         tipFormatter={formatDate}
+        disabled={running && true}
       />
     </Container>
   );
 }
-
-export default connect(null, {
-  setSelectedTime: value => ({
-    type: "global/setSelectedTime",
-    payload: { value }
-  })
-})(Timeline);

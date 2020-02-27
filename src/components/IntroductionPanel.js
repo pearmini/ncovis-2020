@@ -34,15 +34,20 @@ function Introduction() {
     const handler = e => {
       const { scrollY } = window,
         h = height - 56;
+      const step = scrollY - pre.current;
       if (scrollY === 0 || scrollY >= h) scrolling.current = false;
-      if (scrolling.current) return;
-      if (pre.current > scrollY && scrollY < h) {
+      if (scrolling.current) {
+        pre.current = scrollY;
+        return;
+      }
+      if (step < 0 && scrollY < h) {
         window.scrollTo(0, 0);
         scrolling.current = true;
       } else if (0 < scrollY && scrollY < h) {
         window.scrollTo(0, h);
         scrolling.current = true;
       }
+
       pre.current = scrollY;
     };
 

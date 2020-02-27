@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import { useMouse } from "react-use";
-import { Button, Popover } from "antd";
+import { Button, Popover, Empty } from "antd";
 
 const Container = styled.div.attrs(
   props =>
@@ -55,7 +55,13 @@ const Layer = styled.div`
   background: rgba(0, 0, 0, 0.7);
 `;
 
-function Card({ children, onDownload, onDownloadPng, onDownloadSvg, ...rest }) {
+function Card({
+  children,
+  onDownload,
+  onDownloadPng,
+  onDownloadSvg,
+  ...rest
+}) {
   const ref = useRef(null);
   const [zoom, setZoom] = useState(false);
   const { elX, elY, elW, elH } = useMouse(ref);
