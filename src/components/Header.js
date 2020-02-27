@@ -116,7 +116,7 @@ function Header() {
     <>
       <Container>
         <HeaderWrapper>
-          <Logo>nCov 社交媒体可视化</Logo>
+          <Logo>nCov Visulization</Logo>
           <Nav show={show}>
             <ul>
               {navs.map(nav => (

@@ -9,6 +9,8 @@ export default function({
   setSelectedDate,
   selectedDate
 }) {
+  // 初始化
+  svg.select(".chart").remove();
   if (dataMap === undefined) return;
 
   const data = d3

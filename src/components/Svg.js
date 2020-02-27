@@ -24,9 +24,6 @@ function Svg({ width, height, children, filename, id, style, ...rest }) {
 
   useEffect(() => {
     const svg = d3.select(ref.current);
-    
-    // 初始化
-    svg.select(".chart").remove();
     const props = {
       svg,
       width,

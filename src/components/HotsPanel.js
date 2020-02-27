@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
 import { Radio, Row, Col } from "antd";
@@ -8,6 +8,7 @@ import Svg from "./Svg";
 
 import clouds from "../utils/vis/clouds";
 import bars from "../utils/vis/bars";
+import * as d3 from "d3";
 
 const { Group } = Radio;
 
@@ -30,20 +31,29 @@ function HotsPanel({
   getHotData,
   hots
 }) {
+  const colors = useRef(d3.schemeTableau10.map(d => [d, undefined]));
   const platformvalues = hots && hots.get(selectedPlatform);
-  const { words, list, range } = platformvalues || {};
+  const { getWordsByTime, getListByTime, range } = platformvalues || {};
 
   const barsProps = {
     width: 600,
     height: 400,
-    list,
-    selectedTime
+    list: getListByTime && getListByTime(selectedTime),
+    selectedTime,
+    colors: colors.current,
+    margin: {
+      left: 200,
+      right: 30,
+      top: 30,
+      bottom: 30
+    }
   };
 
   const cloudsProps = {
     width: 600,
     height: 400,
-    words,
+    colors: colors.current,
+    words: getWordsByTime && getWordsByTime(selectedTime),
     selectedTime
   };
 

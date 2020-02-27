@@ -14,7 +14,7 @@ const Layout = styled.div`
 `;
 
 const Content = styled.div`
-  margin: 56px auto;
+  margin: 0 auto;
   width: 90%;
   max-width: 1200px;
 `;

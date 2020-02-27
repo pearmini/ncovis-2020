@@ -30,29 +30,51 @@ export default {
           .extent(list, d => d.time)
           .map(d => new Date(d).getTime());
 
-        const valueByTime = Array.from(
-          d3.rollup(list, rank, d => d.time)
-        ).map(([date, data]) => [new Date(date), data]);
         
+        const titlevalues = Array.from(
+          d3.rollup(
+            list,
+            d => ({
+              url: d[0].url,
+              values: d.map(i => [new Date(i.time).getTime(), +i.reading])
+            }),
+            d => d.title
+          )
+        );
+
         return {
           name,
           range,
-          list: [],
-          words: []
+          getListByTime: time =>
+            titlevalues
+              .map(([title, d]) => ({
+                title,
+                url: d.url,
+                reading: interpolateValues(d.values, time)
+              }))
+              .filter(d => !isNaN(d.reading))
+              .sort((a, b) => d3.descending(a.reading, b.reading)),
+          getWordsByTime: time => ({})
         };
       });
 
-      const dataByName = d3.map(data, d => d.name);
+      function interpolateValues(values, time) {
+        const bisect = d3.bisector(d => d[0]);
+        const i = bisect.left(values, time, 0, values.length - 1),
+          a = values[i];
 
-      function rank(d) {
-        d.map(({ time, reading, ...rest }) => ({
-          reading: +reading,
-          ...rest
-        }))
-          .sort((a, b) => b.reading - a.reading)
-          .map((item, i) => ({ ...item, rank: i }));
+        if (i > 0) {
+          const b = values[i - 1],
+            t = (time - a[0]) / (b[0] - a[0]);
+          return a[1] * (1 - t) + b[1] * t;
+        }
+        return a[1];
       }
-      yield put({ type: "setHots", payload: { data: dataByName } });
+
+      yield put({
+        type: "setHots",
+        payload: { data: d3.map(data, d => d.name) }
+      });
     }
   }
 };
