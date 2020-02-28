@@ -42,6 +42,7 @@
     "dva-loading": "^3.0.20",
     "moment": "^2.24.0",
     "react-use": "^13.26.0",
+    "resize-observer-polyfill": "^1.5.1",
     "styled-components": "^5.0.1"
   }
 }

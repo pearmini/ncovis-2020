@@ -103,10 +103,10 @@ function HotsPanel({
       </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          <Svg {...cloudsProps}>{clouds}</Svg>
+          {/* <Svg {...cloudsProps}>{clouds}</Svg> */}
         </Col>
         <Col span={24} md={12}>
-          <Svg {...barsProps}>{bars}</Svg>
+          {/* <Svg {...barsProps}>{bars}</Svg> */}
         </Col>
       </Row>
       <Timeline {...timeProps} />

@@ -1,7 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { useMouse } from "react-use";
-import { Button, Popover, Empty } from "antd";
+import useSize from "../hook/useSize";
+import { Button, Popover, Empty, Spin, Icon } from "antd";
 
 const Container = styled.div.attrs(
   props =>
@@ -55,16 +56,61 @@ const Layer = styled.div`
   background: rgba(0, 0, 0, 0.7);
 `;
 
+const Box = styled.div`
+  width: ${props => props.width}px;
+  height: ${props => props.height}px;
+  line-height: ${props => props.height}px;
+  z-index: 10;
+  background: white;
+  position: absolute;
+  left: 0;
+  top: 0;
+`;
+
+const MiddleSpin = styled(Spin)`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+`;
+
+const MiddleEmpty = styled(Empty)`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+`;
+
+function State({ type, width, height }) {
+  return (
+    <Box width={width} height={height}>
+      {type === "loading" ? (
+        <MiddleSpin />
+      ) : (
+        <MiddleEmpty
+          description="暂无数据"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      )}
+    </Box>
+  );
+}
+
 function Card({
   children,
   onDownload,
   onDownloadPng,
   onDownloadSvg,
+  loading,
+  nodata,
   ...rest
 }) {
   const ref = useRef(null);
-  const [zoom, setZoom] = useState(false);
+  const { width, height } = useSize(ref);
   const { elX, elY, elW, elH } = useMouse(ref);
+  const [zoom, setZoom] = useState(false);
+
   const mouseHovered = elX > 0 && elX < elW && elY > 0 && elY < elH;
   const content = (
     <Row>
@@ -100,10 +146,17 @@ function Card({
       )}
     </>
   );
+
   return (
     <>
       <Container ref={ref} {...rest} zoom={zoom}>
-        {mouseHovered && buttonGroup}
+        {loading ? (
+          <State width={width} height={height} type="loading" />
+        ) : nodata ? (
+          <State width={width} height={height} />
+        ) : (
+          mouseHovered && buttonGroup
+        )}
         {children}
       </Container>
       {zoom && <Layer onClick={() => setZoom(false)} />}

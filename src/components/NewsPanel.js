@@ -7,6 +7,7 @@ import Svg from "./Svg";
 import Canvas from "./Canvas";
 import regions from "../assets/data/region_options.json";
 
+import Linechart from "./Linechart";
 import lines from "../utils/vis/lines";
 import heat from "../utils/vis/heat";
 import shape from "../utils/vis/shape";
@@ -56,13 +57,30 @@ function NewsPanel({
   const linesProps = {
     width: 600,
     height: 200,
-    data: regionvalues,
+    data: regionvalues
+      ? Object.assign(
+          Array.from(regionvalues)
+            .map(([date, data]) => ({
+              date: new Date(date),
+              value: data[selectedType]
+            }))
+            .filter(d => !isNaN(d.value)),
+          { y: "人数" }
+        )
+      : [],
+    loading,
     margin: {
       top: 30,
       right: 30,
       bottom: 30,
       left: 50
     },
+    color: {
+      dead: "black",
+      confirm: "red",
+      cue: "green",
+      suspect: "orange"
+    }[selectedType],
     setSelectedDate: setSelectedTime,
     selectedDate: selectedTime,
     type: selectedType,
@@ -92,7 +110,6 @@ function NewsPanel({
       <An id="news" />
       <h1>全国各地都在报道些啥?</h1>
       <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p>
-      {loading && "loading"}
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <Control>
@@ -118,7 +135,7 @@ function NewsPanel({
               />
             </div>
           </Control>
-          <Canvas {...shapeProps}>{shape}</Canvas>
+          {/* <Canvas {...shapeProps}>{shape}</Canvas> */}
         </Col>
         <Col span={24} md={12}>
           <Control>
@@ -135,8 +152,9 @@ function NewsPanel({
             </div>
           </Control>
           <Row>
-            <Svg {...linesProps}>{lines}</Svg>
-            <Svg {...heatProps}>{heat}</Svg>
+            <Linechart {...linesProps} />
+            {/* <Svg {...linesProps}>{lines}</Svg> */}
+            {/* <Svg {...heatProps}>{heat}</Svg> */}
           </Row>
         </Col>
       </Row>
