@@ -1,5 +1,11 @@
 import data from "../assets/data/news.json";
-import * as d3 from "d3-array";
+import * as d3All from "d3";
+import * as d3Array from "d3-array";
+
+const d3 = {
+  ...d3All,
+  ...d3Array
+};
 
 function getNews() {
   return new Promise((resolve, reject) => {
@@ -9,23 +15,35 @@ function getNews() {
 
 export default {
   namespace: "news",
-  state: new Map(),
-  effects: {
-    *getData(action, { call, put }) {
-      const data = yield call(getNews);
-      const datevalues = d3.rollup(
-        data,
-        ([d]) => ({ ...d.data, image: d.imageURL }),
-        d => d.region,
-        d => d.date
-      );
-      yield put({ type: "setData", payload: { data: datevalues } });
-    }
+  state: {
+    dataByRegion: d3.map(),
+    selectedTime: 0
   },
   reducers: {
-    setData(state, action) {
-      const { data } = action.payload;
-      return data;
+    init: (state, action) => ({ ...state, ...action.payload }),
+    setSelectedTime: (state, action) => ({
+      ...state,
+      selectedTime: action.payload
+    })
+  },
+  effects: {
+    *getData(action, { call, put }) {
+      const news = yield call(getNews);
+      const dataByRegion = d3.rollup(
+          news.map(({ date, ...rest }) => ({
+            date: new Date(date).getTime(),
+            ...rest
+          })),
+          ([d]) => ({ ...d.data, image: d.imageURL }),
+          d => d.region,
+          d => d.date
+        ),
+        [selectedTime] = d3.extent(news, d => new Date(d.date).getTime());
+
+      yield put({
+        type: "init",
+        payload: { dataByRegion, selectedTime }
+      });
     }
   }
 };

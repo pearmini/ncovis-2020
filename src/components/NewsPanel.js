@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { connect } from "dva";
 import { TreeSelect, DatePicker, Row, Col, Select } from "antd";
 import styled from "styled-components";
 import Svg from "./Svg";
 import Canvas from "./Canvas";
+import regions from "../assets/data/region_options.json";
 
 import lines from "../utils/vis/lines";
 import heat from "../utils/vis/heat";
@@ -29,19 +30,22 @@ const An = styled.div`
 `;
 
 function NewsPanel({
-  selectedRegion,
-  regionOptions,
-  setSelectedRegion,
-  setSelectedType,
-  selectedDate,
-  selectedType,
-  setSelectedDate,
-  data,
+  selectedTime,
+  setSelectedTime,
+  dataByRegion,
   getData,
   loading
 }) {
-  const regionvalues = data.get(selectedRegion);
-  const datevalues = regionvalues && regionvalues.get(selectedDate);
+  const [selectedRegion, setSelectedRegion] = useState("all");
+  const [selectedType, setSelectedType] = useState("confirm");
+  const types = [
+    { name: "确诊", key: "confirm" },
+    { name: "治愈", key: "cue" },
+    { name: "疑似", key: "suspect" },
+    { name: "死亡", key: "dead" }
+  ];
+  const regionvalues = dataByRegion.get(selectedRegion);
+  const datevalues = regionvalues && regionvalues.get(selectedTime);
 
   const shapeProps = {
     src: datevalues && datevalues.image,
@@ -59,8 +63,8 @@ function NewsPanel({
       bottom: 30,
       left: 50
     },
-    setSelectedDate,
-    selectedDate,
+    setSelectedDate: setSelectedTime,
+    selectedDate: selectedTime,
     type: selectedType,
     style: { marginBottom: 16 }
   };
@@ -75,8 +79,8 @@ function NewsPanel({
       bottom: 30,
       left: 50
     },
-    setSelectedDate,
-    selectedDate,
+    setSelectedDate: setSelectedTime,
+    selectedDate: selectedTime,
     data: regionvalues
   };
 
@@ -97,7 +101,7 @@ function NewsPanel({
               <TreeSelect
                 showSearch
                 value={selectedRegion}
-                treeData={regionOptions}
+                treeData={regions}
                 dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
                 treeDefaultExpandAll
                 onChange={setSelectedRegion}
@@ -107,8 +111,10 @@ function NewsPanel({
             <div>
               <span>日期</span>&ensp;
               <DatePicker
-                value={moment(selectedDate)}
-                onChange={(date, string) => setSelectedDate(new Date(string))}
+                value={moment(selectedTime)}
+                onChange={(date, string) =>
+                  setSelectedTime(new Date(string).getTime())
+                }
               />
             </div>
           </Control>
@@ -122,10 +128,9 @@ function NewsPanel({
                 value={selectedType}
                 onChange={value => setSelectedType(value)}
               >
-                <Option key="confirm">确诊</Option>
-                <Option key="cue">治愈</Option>
-                <Option key="suspect">疑似</Option>
-                <Option key="dead">死亡</Option>
+                {types.map(d => (
+                  <Option key={d.key}>{d.name}</Option>
+                ))}
               </Select>
             </div>
           </Control>
@@ -139,26 +144,14 @@ function NewsPanel({
   );
 }
 export default connect(
-  ({ global, news, loading }) => ({
-    regionOptions: global.regionOptions,
-    selectedRegion: global.selectedRegion,
-    selectedDate: global.selectedDate,
-    selectedType: global.selectedType,
-    data: news,
+  ({ news, loading }) => ({
+    ...news,
     loading: loading.models.news
   }),
   {
-    setSelectedRegion: value => ({
-      type: "global/setSelectedRegion",
-      payload: { value }
-    }),
-    setSelectedType: type => ({
-      type: "global/setSelectedType",
-      payload: { type }
-    }),
-    setSelectedDate: date => ({
-      type: "global/setSelectedDate",
-      payload: { date }
+    setSelectedTime: time => ({
+      type: "news/setSelectedTime",
+      payload: time
     }),
     getData: () => ({ type: "news/getData" })
   }

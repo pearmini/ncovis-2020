@@ -15,36 +15,51 @@ function getHots() {
 
 export default {
   namespace: "hots",
-  state: new Map(),
+  state: {
+    dataByName: d3.map(),
+    range: [],
+    selectedTime: 0
+  },
   reducers: {
-    setHots(state, action) {
-      const { data } = action.payload;
-      return data;
-    }
+    init: (state, action) => ({ ...action.payload }),
+    setSelectedName: (state, action) => ({
+      ...state,
+      selectedName: action.payload
+    }),
+    setSelectedTime: (state, action) => ({
+      ...state,
+      selectedTime: action.payload
+    })
   },
   effects: {
     *getData(action, { call, put }) {
-      const platforms = yield call(getHots);
-      const data = platforms.map(({ words, list, name }) => {
-        const range = d3
-          .extent(list, d => d.time)
-          .map(d => new Date(d).getTime());
+      const hots = yield call(getHots),
+        range = Array.from(d3.rollup(hots, extent, d => d.value)).reduce(
+          (total, [, [min, max]]) => [
+            Math.max(total[0], min),
+            Math.min(total[1], max)
+          ],
+          [-1, Infinity]
+        ),
+        dataByName = d3.rollup(hots, preprocess, d => d.value),
+        selectedTime = range[0];
 
-        
-        const titlevalues = Array.from(
-          d3.rollup(
-            list,
-            d => ({
-              url: d[0].url,
-              values: d.map(i => [new Date(i.time).getTime(), +i.reading])
-            }),
-            d => d.title
-          )
-        );
-
-        return {
-          name,
+      yield put({
+        type: "init",
+        payload: {
+          dataByName,
           range,
+          selectedTime
+        }
+      });
+
+      function extent([{ list }]) {
+        return d3.extent(list, d => d.time).map(d => new Date(d).getTime());
+      }
+
+      function preprocess([{ words, list }]) {
+        const titlevalues = Array.from(d3.rollup(list, format, d => d.title));
+        return {
           getListByTime: time =>
             titlevalues
               .map(([title, d]) => ({
@@ -56,7 +71,14 @@ export default {
               .sort((a, b) => d3.descending(a.reading, b.reading)),
           getWordsByTime: time => ({})
         };
-      });
+      }
+
+      function format(d) {
+        return {
+          url: d[0].url,
+          values: d.map(i => [new Date(i.time).getTime(), +i.reading])
+        };
+      }
 
       function interpolateValues(values, time) {
         const bisect = d3.bisector(d => d[0]);
@@ -70,11 +92,6 @@ export default {
         }
         return a[1];
       }
-
-      yield put({
-        type: "setHots",
-        payload: { data: d3.map(data, d => d.name) }
-      });
     }
   }
 };

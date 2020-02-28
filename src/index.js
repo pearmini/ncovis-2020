@@ -5,7 +5,6 @@ import createLoading from "dva-loading";
 import dva from "dva";
 
 import App from "./App";
-import globalModel from "./models/global";
 import hotsModel from "./models/hots";
 import newsModel from "./models/news";
 import "./index.css";
@@ -13,8 +12,6 @@ import "./index.css";
 const app = new dva();
 
 app.use(createLoading());
-
-app.model(globalModel);
 app.model(hotsModel);
 app.model(newsModel);
 

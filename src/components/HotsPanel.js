@@ -25,28 +25,35 @@ const An = styled.div`
 `;
 
 function HotsPanel({
-  selectedPlatform,
-  setSelectedPlatform,
+  dataByName,
+  range,
   selectedTime,
   setSelectedTime,
-  getHotData,
-  hots
+  getData
 }) {
-  const [running, setRunning] = useState(false);
-  const transition = useRef(new Map());
-  const colors = useRef(d3.schemeTableau10.map(d => [d, undefined]));
-  const platformvalues = hots && hots.get(selectedPlatform);
-  const { getWordsByTime, getListByTime, range } = platformvalues || {};
-  const time = d3
+  const timeAt = d3
     .scaleLinear()
     .domain([0, 10000])
     .range(range || [0, 0]);
+  const names = [
+    { name: "微博", value: "weibo" },
+    { name: "知乎", value: "zhihu" }
+  ];
+
+  const [running, setRunning] = useState(false);
+  const [selectedName, setSelectedName] = useState(names[0].value);
+
+  const transition = useRef(new Map());
+  const colors = useRef(d3.schemeTableau10.map(d => [d, undefined]));
+
+  const data = dataByName.get(selectedName);
+  const { getWordsByTime, getListByTime } = data || {};
 
   const barsProps = {
     width: 600,
     height: 400,
     list: getListByTime && getListByTime(selectedTime),
-    currentTime: time.invert(selectedTime),
+    currentTime: timeAt.invert(selectedTime),
     colors: colors.current,
     transition: transition.current,
     running,
@@ -62,12 +69,11 @@ function HotsPanel({
     width: 600,
     height: 400,
     colors: colors.current,
-    words: getWordsByTime && getWordsByTime(selectedTime),
-    colors: colors.current
+    words: getWordsByTime && getWordsByTime(selectedTime)
   };
 
   const timeProps = {
-    time,
+    time: timeAt,
     selectedTime,
     running,
     setRunning,
@@ -76,8 +82,8 @@ function HotsPanel({
   };
 
   useEffect(() => {
-    getHotData();
-  }, [getHotData]);
+    getData();
+  }, [getData]);
 
   return (
     <Container>
@@ -86,11 +92,14 @@ function HotsPanel({
       <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p>
       <span>选择一个社交平台</span>&ensp;
       <RadioGroup
-        value={selectedPlatform}
-        onChange={e => setSelectedPlatform(e.target.value)}
+        value={selectedName}
+        onChange={e => setSelectedName(e.target.value)}
       >
-        <Radio value={"weibo"}>微博</Radio>
-        <Radio value={"zhihu"}>知乎</Radio>
+        {names.map(d => (
+          <Radio key={d.value} value={d.value}>
+            {d.name}
+          </Radio>
+        ))}
       </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
@@ -105,22 +114,14 @@ function HotsPanel({
   );
 }
 
-export default connect(
-  ({ global, hots }) => ({
-    selectedPlatform: global.selectedPlatform,
-    selectedTime: global.selectedTime,
-    regionOptions: global.regionOptions,
-    hots
+export default connect(({ hots }) => ({ ...hots }), {
+  getData: () => ({ type: "hots/getData" }),
+  setSelectedName: name => ({
+    type: "hots/setSelectedName",
+    payload: name
   }),
-  {
-    getHotData: () => ({ type: "hots/getData" }),
-    setSelectedPlatform: value => ({
-      type: "globals/setSelectedPlatform",
-      payload: { value }
-    }),
-    setSelectedTime: value => ({
-      type: "global/setSelectedTime",
-      payload: { value }
-    })
-  }
-)(HotsPanel);
+  setSelectedTime: time => ({
+    type: "hots/setSelectedTime",
+    payload: time
+  })
+})(HotsPanel);
