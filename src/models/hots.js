@@ -33,64 +33,98 @@ export default {
   },
   effects: {
     *getData(action, { call, put }) {
-      const hots = yield call(getHots),
-        range = Array.from(d3.rollup(hots, extent, d => d.value)).reduce(
-          (total, [, [min, max]]) => [
-            Math.max(total[0], min),
-            Math.min(total[1], max)
-          ],
-          [-1, Infinity]
-        ),
-        dataByName = d3.rollup(hots, preprocess, d => d.value),
-        selectedTime = range[0];
+      try {
+        const hots = yield call(getHots),
+          range = Array.from(
+            d3.rollup(
+              hots,
+              ([{ list }]) =>
+                d3.extent(list, d => d.time).map(d => new Date(d).getTime()),
+              d => d.value
+            )
+          ).reduce(
+            (total, [, [min, max]]) => [
+              Math.max(total[0], min),
+              Math.min(total[1], max)
+            ],
+            [-1, Infinity]
+          ),
+          dataByName = d3.rollup(hots, preprocess, d => d.value),
+          selectedTime = range[0];
 
-      yield put({
-        type: "init",
-        payload: {
-          dataByName,
-          range,
-          selectedTime
+        yield put({
+          type: "init",
+          payload: { dataByName, selectedTime, range }
+        });
+
+        function preprocess([{ list, words }]) {
+          const datevalues = Array.from(
+            d3.rollup(
+              list,
+              ([d]) => d.reading,
+              d => d.time,
+              d => d.title
+            )
+          )
+            .map(([date, data]) => [new Date(date), data])
+            .sort(([a], [b]) => a - b);
+
+          const titles = new Set(list.map(d => d.title));
+          const keyframes = interpolate(10);
+          const nameframes = d3.groups(
+            keyframes.flatMap(([date, data]) => data),
+            d => d.title
+          );
+          const pre = new Map(
+            nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a]))
+          );
+          const next = new Map(
+            nameframes.flatMap(([, data]) => d3.pairs(data))
+          );
+
+          return {
+            keyframes,
+            pre,
+            next
+          };
+
+          function interpolate(k) {
+            const keyframes = [];
+            let ka, a, kb, b;
+            for ([[ka, a], [kb, b]] of d3.pairs(datevalues)) {
+              for (let i = 0; i < k; i++) {
+                const t = i / k;
+                keyframes.push([
+                  new Date(ka * (1 - t) + kb * t).getTime(),
+                  rank(title => a.get(title) * (1 - t) + b.get(title) * t)
+                ]);
+              }
+            }
+
+            keyframes.push([
+              new Date(kb).getTime(),
+              rank(title => b.get(title))
+            ]);
+            
+            keyframes.forEach(([date, data]) =>
+              data.forEach(d => (d.time = date))
+            );
+            return keyframes;
+          }
+
+          function rank(reading) {
+            const n = 10;
+            const data = Array.from(titles, title => ({
+              title,
+              reading: reading(title) || 0
+            }));
+            data.sort((a, b) => d3.descending(a.reading, b.reading));
+            for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(n, i);
+            return data;
+          }
         }
-      });
-
-      function extent([{ list }]) {
-        return d3.extent(list, d => d.time).map(d => new Date(d).getTime());
-      }
-
-      function preprocess([{ words, list }]) {
-        const titlevalues = Array.from(d3.rollup(list, format, d => d.title));
-        return {
-          getListByTime: time =>
-            titlevalues
-              .map(([title, d]) => ({
-                title,
-                url: d.url,
-                reading: interpolateValues(d.values, time)
-              }))
-              .filter(d => !isNaN(d.reading))
-              .sort((a, b) => d3.descending(a.reading, b.reading)),
-          getWordsByTime: time => ({})
-        };
-      }
-
-      function format(d) {
-        return {
-          url: d[0].url,
-          values: d.map(i => [new Date(i.time).getTime(), +i.reading])
-        };
-      }
-
-      function interpolateValues(values, time) {
-        const bisect = d3.bisector(d => d[0]);
-        const i = bisect.left(values, time, 0, values.length - 1),
-          a = values[i];
-
-        if (i > 0) {
-          const b = values[i - 1],
-            t = (time - a[0]) / (b[0] - a[0]);
-          return a[1] * (1 - t) + b[1] * t;
-        }
-        return a[1];
+      } catch (e) {
+        console.error(e);
       }
     }
   }

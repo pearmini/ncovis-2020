@@ -19,7 +19,7 @@ export default function({
   setSelectedTime,
   running,
   setRunning,
-  transition,
+  transition
 }) {
   const { requestFrame, pauseFrame, setFrame } = useFrame(step);
   const [, total] = time.domain(),

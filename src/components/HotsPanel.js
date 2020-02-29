@@ -4,6 +4,8 @@ import { connect } from "dva";
 import { Radio, Row, Col } from "antd";
 
 import Timeline from "./Timeline";
+import BarRace from "../components/BarRace";
+import StoryTelling from "../components/StoryTelling";
 import * as d3 from "d3";
 
 const { Group } = Radio;
@@ -25,13 +27,14 @@ function HotsPanel({
   range,
   selectedTime,
   setSelectedTime,
-  getData
+  getData,
+  loading
 }) {
   const timeAt = d3
     .scaleLinear()
-    .domain([0, 10000])
+    .domain([0, 30000])
     .range(range || [0, 0]);
-    
+
   const names = [
     { name: "微博", value: "weibo" },
     { name: "知乎", value: "zhihu" }
@@ -44,29 +47,22 @@ function HotsPanel({
   const colors = useRef(d3.schemeTableau10.map(d => [d, undefined]));
 
   const data = dataByName.get(selectedName);
-  const { getWordsByTime, getListByTime } = data || {};
 
   const barsProps = {
     width: 600,
     height: 400,
-    list: getListByTime && getListByTime(selectedTime),
-    currentTime: timeAt.invert(selectedTime),
+    data,
+    selectedTime,
     colors: colors.current,
-    transition: transition.current,
     running,
-    margin: {
-      left: 20,
-      right: 30,
-      top: 30,
-      bottom: 30
-    }
+    loading
   };
 
-  const cloudsProps = {
+  const storyProps = {
     width: 600,
     height: 400,
     colors: colors.current,
-    words: getWordsByTime && getWordsByTime(selectedTime)
+    loading
   };
 
   const timeProps = {
@@ -100,10 +96,10 @@ function HotsPanel({
       </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          {/* <Svg {...cloudsProps}>{clouds}</Svg> */}
+          <StoryTelling {...storyProps} />
         </Col>
         <Col span={24} md={12}>
-          {/* <Svg {...barsProps}>{bars}</Svg> */}
+          <BarRace {...barsProps} />
         </Col>
       </Row>
       <Timeline {...timeProps} />
@@ -111,14 +107,17 @@ function HotsPanel({
   );
 }
 
-export default connect(({ hots }) => ({ ...hots }), {
-  getData: () => ({ type: "hots/getData" }),
-  setSelectedName: name => ({
-    type: "hots/setSelectedName",
-    payload: name
-  }),
-  setSelectedTime: time => ({
-    type: "hots/setSelectedTime",
-    payload: time
-  })
-})(HotsPanel);
+export default connect(
+  ({ hots, loading }) => ({ ...hots, loading: loading.models.hots }),
+  {
+    getData: () => ({ type: "hots/getData" }),
+    setSelectedName: name => ({
+      type: "hots/setSelectedName",
+      payload: name
+    }),
+    setSelectedTime: time => ({
+      type: "hots/setSelectedTime",
+      payload: time
+    })
+  }
+)(HotsPanel);

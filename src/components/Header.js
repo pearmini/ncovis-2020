@@ -16,7 +16,7 @@ const Container = styled.div`
   position: fixed;
   width: 100%;
   top: 0px;
-  z-index: 3;
+  z-index: 15;
 `;
 
 const HeaderWrapper = styled.header`
