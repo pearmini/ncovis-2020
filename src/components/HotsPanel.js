@@ -4,10 +4,6 @@ import { connect } from "dva";
 import { Radio, Row, Col } from "antd";
 
 import Timeline from "./Timeline";
-import Svg from "./Svg";
-
-import clouds from "../utils/vis/clouds";
-import bars from "../utils/vis/bars";
 import * as d3 from "d3";
 
 const { Group } = Radio;
@@ -35,6 +31,7 @@ function HotsPanel({
     .scaleLinear()
     .domain([0, 10000])
     .range(range || [0, 0]);
+    
   const names = [
     { name: "微博", value: "weibo" },
     { name: "知乎", value: "zhihu" }

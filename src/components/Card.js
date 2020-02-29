@@ -1,8 +1,7 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import { useMouse } from "react-use";
 import useSize from "../hook/useSize";
-import { Button, Popover, Empty, Spin, Icon } from "antd";
+import { Button, Popover, Empty, Spin} from "antd";
 
 const Container = styled.div.attrs(
   props =>
@@ -108,10 +107,9 @@ function Card({
 }) {
   const ref = useRef(null);
   const { width, height } = useSize(ref);
-  const { elX, elY, elW, elH } = useMouse(ref);
   const [zoom, setZoom] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
-  const mouseHovered = elX > 0 && elX < elW && elY > 0 && elY < elH;
   const content = (
     <Row>
       <Button onClick={() => onDownloadPng && onDownloadPng()}>png</Button>
@@ -149,13 +147,19 @@ function Card({
 
   return (
     <>
-      <Container ref={ref} {...rest} zoom={zoom}>
+      <Container
+        ref={ref}
+        {...rest}
+        zoom={zoom}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
         {loading ? (
           <State width={width} height={height} type="loading" />
         ) : nodata ? (
           <State width={width} height={height} />
         ) : (
-          mouseHovered && buttonGroup
+          hovered && buttonGroup
         )}
         {children}
       </Container>

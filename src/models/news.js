@@ -17,13 +17,13 @@ export default {
   namespace: "news",
   state: {
     dataByRegion: d3.map(),
-    selectedTime: 0
+    selectedDate: 0
   },
   reducers: {
     init: (state, action) => ({ ...state, ...action.payload }),
-    setSelectedTime: (state, action) => ({
+    setSelectedDate: (state, action) => ({
       ...state,
-      selectedTime: action.payload
+      selectedDate: action.payload
     })
   },
   effects: {
@@ -38,11 +38,11 @@ export default {
           d => d.region,
           d => d.date
         ),
-        [selectedTime] = d3.extent(news, d => new Date(d.date).getTime());
+        [selectedDate] = d3.extent(news, d => new Date(d.date).getTime());
 
       yield put({
         type: "init",
-        payload: { dataByRegion, selectedTime }
+        payload: { dataByRegion, selectedDate }
       });
     }
   }
