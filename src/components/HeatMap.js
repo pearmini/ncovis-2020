@@ -101,6 +101,8 @@ export default function({
             width={cellSize - 1}
             height={cellSize - 1}
             fill={color(value)}
+            rx={2}
+            ry={2}
             onClick={() => setSelectedDate(date.getTime())}
           >
             <title>{`${formatDate(date)}:${value}`}</title>
@@ -140,6 +142,8 @@ export default function({
             stroke="red"
             x={x(select.date)}
             y={y(select.date)}
+            rx={2}
+            ry={2}
           ></rect>
         )}
         <g
@@ -153,6 +157,13 @@ export default function({
           }`}</text>
           <text y="1.25em">{`人数:${select ? select.value : "暂无数据"}`}</text>
         </g>
+        {/* <image
+          xlinkHref="https://i.loli.net/2020/02/25/aBy49ReQIcOmZdK.png"
+          x="0"
+          y="0"
+          height="100"
+          width="100"
+        /> */}
       </g>
     </Svg>
   );

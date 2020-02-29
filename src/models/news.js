@@ -17,7 +17,8 @@ export default {
   namespace: "news",
   state: {
     dataByRegion: d3.map(),
-    selectedDate: 0
+    selectedDate: new Date().getTime(),
+    range: []
   },
   reducers: {
     init: (state, action) => ({ ...state, ...action.payload }),
@@ -28,22 +29,27 @@ export default {
   },
   effects: {
     *getData(action, { call, put }) {
-      const news = yield call(getNews);
-      const dataByRegion = d3.rollup(
-          news.map(({ date, ...rest }) => ({
-            date: new Date(date).getTime(),
-            ...rest
-          })),
-          ([d]) => ({ ...d.data, image: d.imageURL }),
-          d => d.region,
-          d => d.date
-        ),
-        [selectedDate] = d3.extent(news, d => new Date(d.date).getTime());
+      try {
+        const news = yield call(getNews);
+        const dataByRegion = d3.rollup(
+            news.map(({ date, ...rest }) => ({
+              date: new Date(date).getTime(),
+              ...rest
+            })),
+            ([d]) => ({ ...d.data, image: d.imageURL }),
+            d => d.region,
+            d => d.date
+          ),
+          range = d3.extent(news, d => new Date(d.date).getTime()),
+          [,selectedDate] = range;
 
-      yield put({
-        type: "init",
-        payload: { dataByRegion, selectedDate }
-      });
+        yield put({
+          type: "init",
+          payload: { dataByRegion, selectedDate, range }
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };

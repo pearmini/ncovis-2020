@@ -32,7 +32,8 @@ function NewsPanel({
   setSelectedDate,
   dataByRegion,
   getData,
-  loading
+  loading,
+  range
 }) {
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [selectedType, setSelectedType] = useState("confirm");
@@ -72,6 +73,11 @@ function NewsPanel({
     loading
   };
 
+  function disabledDate(current) {
+    if (range.length === 0) return true;
+    return current < moment(range[0]) || current > moment(range[1]);
+  }
+
   useEffect(() => {
     getData();
   }, [getData]);
@@ -102,6 +108,8 @@ function NewsPanel({
                 onChange={(date, string) =>
                   setSelectedDate(new Date(string).getTime())
                 }
+                disabledDate={disabledDate}
+                showTody={false}
               />
             </div>
           </Control>
@@ -124,8 +132,6 @@ function NewsPanel({
           <Row>
             <Linechart {...linesProps} />
             <HeatMap {...heatProps} />
-            {/* <Svg {...linesProps}>{lines}</Svg> */}
-            {/* <Svg {...heatProps}>{heat}</Svg> */}
           </Row>
         </Col>
       </Row>
