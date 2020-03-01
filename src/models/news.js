@@ -36,12 +36,12 @@ export default {
               date: new Date(date).getTime(),
               ...rest
             })),
-            ([d]) => ({ ...d.data, image: d.imageURL }),
+            ([d]) => ({ ...d.data, key: d.key, fill: d.fill }),
             d => d.region,
             d => d.date
           ),
           range = d3.extent(news, d => new Date(d.date).getTime()),
-          [,selectedDate] = range;
+          [, selectedDate] = range;
 
         yield put({
           type: "init",

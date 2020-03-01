@@ -104,7 +104,7 @@ function Header() {
     <>
       <Container>
         <HeaderWrapper>
-          <Logo>nCov Visulization</Logo>
+          <Logo>nCoVIS</Logo>
           <Nav show={show}>
             <ul>
               {navs.map(nav => (

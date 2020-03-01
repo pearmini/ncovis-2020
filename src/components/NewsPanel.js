@@ -7,7 +7,8 @@ import regions from "../assets/data/region_options.json";
 
 import Linechart from "./Linechart";
 import Shape from "./Shape";
-import HeatMap from "./HeatMap.js";
+import TreeMatrix from "./TreeMatrix";
+import HeatMap from "./HeatMap";
 
 const { Option } = Select;
 const Container = styled.div`
@@ -35,7 +36,7 @@ function NewsPanel({
   loading,
   range
 }) {
-  const [selectedRegion, setSelectedRegion] = useState("all");
+  const [selectedRegion, setSelectedRegion] = useState("全国");
   const [selectedType, setSelectedType] = useState("confirm");
   const [loadingImage, setLoadingImage] = useState(false);
   const types = [
@@ -129,10 +130,12 @@ function NewsPanel({
               </Select>
             </div>
           </Control>
-          <Row>
-            <Linechart {...linesProps} />
-            <HeatMap {...heatProps} />
-          </Row>
+          <TreeMatrix />
+        </Col>
+      </Row>
+      <Row>
+        <Col span={24}>
+          <Linechart {...linesProps} />
         </Col>
       </Row>
     </Container>

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import useSize from "../hook/useSize";
-import { Button, Popover, Empty, Spin} from "antd";
+import { Button, Popover, Empty, Spin } from "antd";
 
 const Container = styled.div.attrs(
   props =>
@@ -12,17 +12,16 @@ const Container = styled.div.attrs(
         left: "50%",
         top: "50%",
         transform: "translate(-50%, -50%)",
-        width: "90%"
+        width: "90%",
+        maxWidth: 900
       }
     }
 )`
   position: relative;
-  max-width: 900px;
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.5s;
   background: white;
-  cursor: pointer;
   &:hover {
     box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.1);
   }

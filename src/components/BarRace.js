@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Svg from "./Svg";
 import * as d3 from "d3";
-export default function({ loading, data, selectedTime, running }) {
+export default function({ loading, keyframes, selectedTime, running, color }) {
   const width = 600,
     height = 400,
     margin = { top: 30, right: 30, bottom: 30, left: 50 };
-  if (data === undefined) {
+  if (keyframes === undefined) {
     return (
       <Svg
         viewBox={[0, 0, width, height]}
@@ -23,7 +23,6 @@ export default function({ loading, data, selectedTime, running }) {
     .padding(0.1)
     .range([margin.top, ((height - margin.bottom) / n) * (n + 1)]);
 
-  const { keyframes, pre } = data || {};
   const bars = interPolateData(selectedTime);
 
   const x = d3
@@ -31,32 +30,39 @@ export default function({ loading, data, selectedTime, running }) {
     .domain([0, d3.max(bars, d => d.reading)])
     .range([margin.left, width - margin.right]);
 
-  function interPolateData(time) {
-    const i = bisect.left(keyframes, time, 0, keyframes.length - 1),
-      a = keyframes[i];
-    if (i > 0) {
-      const b = keyframes[i - 1],
-        t = (time - a[0]) / (b[0] - a[0]);
-      return a[1].slice(0, n).map(d => {
-        const { reading, rank } = pre.get(d);
-        return {
-          ...d,
-          y: y(d.rank) * (1 - t) + y(rank) * t,
-          reading: d.reading * (1 - t) + reading * t
-        };
-      });
-    }
-    return a[1].slice(0, n).map(d => ({ ...d, y: y(d.rank) }));
-  }
+  const titles = bars.map(d => d.title);
 
-  const color = d3
-    .scaleOrdinal(d3.schemeCategory10)
-    .domain(bars.map(d => d.title));
+  color.cur(titles);
+
+  useEffect(() => {
+    color.pre(titles);
+  });
+
+  function interPolateData(time) {
+    const len = keyframes.length,
+      i = bisect.left(keyframes, time, 0, len - 1),
+      a = keyframes[i];
+    if (!i) return a[1].map(d => ({ ...d, y: y(d.rank) }));
+    const b = keyframes[i - 1],
+      t = (time - a[0]) / (b[0] - a[0]);
+    return a[1].map(d => {
+      const { reading, rank } = b[1].find(({ title }) => d.title === title) || {
+        reading: d.reading,
+        rank: n
+      };
+      return {
+        ...d,
+        y: y(d.rank) * (1 - t) + y(rank) * t,
+        reading: d.reading * (1 - t) + reading * t
+      };
+    });
+  }
 
   return (
     <Svg viewBox={[0, 0, width, height]} loading={loading}>
       {bars.map(d => (
         <rect
+          key={d.title}
           x={margin.left}
           y={running ? d.y : y(d.rank)}
           width={running ? x(d.reading) - x(0) : x(d.reading) - x(0)}

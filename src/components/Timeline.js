@@ -18,8 +18,7 @@ export default function({
   selectedTime,
   setSelectedTime,
   running,
-  setRunning,
-  transition
+  setRunning
 }) {
   const { requestFrame, pauseFrame, setFrame } = useFrame(step);
   const [, total] = time.domain(),
@@ -29,19 +28,14 @@ export default function({
   function step(duration) {
     setSelectedTime(time(duration));
     if (duration > total) {
-      stopAnimation();
+      setRunning(false);
       return false;
     }
   }
 
-  function stopAnimation() {
-    setRunning(false);
-    transition.clear();
-  }
-
   function toggleAnimation() {
     if (running) {
-      stopAnimation();
+      setRunning(false);
       pauseFrame();
     } else {
       setRunning(true);
@@ -68,7 +62,6 @@ export default function({
         value={selectedTime}
         onChange={onChange}
         tipFormatter={formatDate}
-        disabled={running && true}
       />
     </Container>
   );

@@ -6,6 +6,8 @@ import { Radio, Row, Col } from "antd";
 import Timeline from "./Timeline";
 import BarRace from "../components/BarRace";
 import StoryTelling from "../components/StoryTelling";
+import Areachart from "../components/Areachart";
+import mc from "../utils/memorizedColor";
 import * as d3 from "d3";
 
 const { Group } = Radio;
@@ -42,18 +44,15 @@ function HotsPanel({
 
   const [running, setRunning] = useState(false);
   const [selectedName, setSelectedName] = useState(names[0].value);
-
-  const transition = useRef(new Map());
-  const colors = useRef(d3.schemeTableau10.map(d => [d, undefined]));
-
-  const data = dataByName.get(selectedName);
+  const color = useRef(mc(d3.schemeSet3, 10));
+  const keyframes = dataByName.get(selectedName);
 
   const barsProps = {
     width: 600,
     height: 400,
-    data,
+    keyframes,
     selectedTime,
-    colors: colors.current,
+    color: color.current,
     running,
     loading
   };
@@ -61,7 +60,7 @@ function HotsPanel({
   const storyProps = {
     width: 600,
     height: 400,
-    colors: colors.current,
+    color: color.current,
     loading
   };
 
@@ -70,8 +69,7 @@ function HotsPanel({
     selectedTime,
     running,
     setRunning,
-    setSelectedTime,
-    transition: transition.current
+    setSelectedTime
   };
 
   useEffect(() => {
@@ -100,6 +98,11 @@ function HotsPanel({
         </Col>
         <Col span={24} md={12}>
           <BarRace {...barsProps} />
+        </Col>
+      </Row>
+      <Row>
+        <Col span={24}>
+          <Areachart />
         </Col>
       </Row>
       <Timeline {...timeProps} />

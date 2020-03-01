@@ -61,7 +61,7 @@ export default {
           const datevalues = Array.from(
             d3.rollup(
               list,
-              ([d]) => d.reading,
+              ([d]) => +d.reading,
               d => d.time,
               d => d.title
             )
@@ -71,22 +71,7 @@ export default {
 
           const titles = new Set(list.map(d => d.title));
           const keyframes = interpolate(10);
-          const nameframes = d3.groups(
-            keyframes.flatMap(([date, data]) => data),
-            d => d.title
-          );
-          const pre = new Map(
-            nameframes.flatMap(([, data]) => d3.pairs(data, (a, b) => [b, a]))
-          );
-          const next = new Map(
-            nameframes.flatMap(([, data]) => d3.pairs(data))
-          );
-
-          return {
-            keyframes,
-            pre,
-            next
-          };
+          return keyframes;
 
           function interpolate(k) {
             const keyframes = [];
@@ -100,15 +85,10 @@ export default {
                 ]);
               }
             }
-
             keyframes.push([
               new Date(kb).getTime(),
               rank(title => b.get(title))
             ]);
-            
-            keyframes.forEach(([date, data]) =>
-              data.forEach(d => (d.time = date))
-            );
             return keyframes;
           }
 
@@ -118,9 +98,10 @@ export default {
               title,
               reading: reading(title) || 0
             }));
-            data.sort((a, b) => d3.descending(a.reading, b.reading));
-            for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(n, i);
-            return data;
+            data
+              .sort((a, b) => d3.descending(a.reading, b.reading));
+            for (let i = 0; i < data.length; ++i) data[i].rank = i;
+            return data.slice(0, n);
           }
         }
       } catch (e) {

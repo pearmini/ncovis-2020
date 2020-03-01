@@ -12,8 +12,8 @@ export default function({
 }) {
   const ref = useRef(null);
   const { elX } = useMouse(ref);
-  const width = 600,
-    height = 200,
+  const width = 1200,
+    height = 250,
     margin = { top: 30, right: 30, bottom: 30, left: 50 },
     colors = { dead: "black", confirm: "red", cue: "green", suspect: "orange" };
 
