@@ -33,12 +33,10 @@ export function rasterize(svg) {
   image.onload = () => {
     const rect = svg.getBoundingClientRect();
     const canvas = document.createElement("canvas");
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    // canvas.style.width = rect.width + "px";
-    // canvas.style.height = rect.height + "px";
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
     const context = canvas.getContext("2d");
-    // context.scale(2, 2);
+    context.scale(2, 2);
     context.drawImage(image, 0, 0, rect.width, rect.height);
     context.canvas.toBlob(resolve);
   };

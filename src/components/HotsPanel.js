@@ -72,6 +72,10 @@ function HotsPanel({
     setSelectedTime
   };
 
+  const areaPros = {
+    loading
+  };
+
   useEffect(() => {
     getData();
   }, [getData]);
@@ -100,12 +104,16 @@ function HotsPanel({
           <BarRace {...barsProps} />
         </Col>
       </Row>
-      <Row>
+      <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Areachart />
+          <Areachart {...areaPros} />
         </Col>
       </Row>
-      <Timeline {...timeProps} />
+      <Row>
+        <Col span={24}>
+          <Timeline {...timeProps} />
+        </Col>
+      </Row>
     </Container>
   );
 }

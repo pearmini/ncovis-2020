@@ -103,6 +103,7 @@ export default function({
             fill={color(value)}
             rx={2}
             ry={2}
+            
             onClick={() => setSelectedDate(date.getTime())}
           >
             <title>{`${formatDate(date)}:${value}`}</title>

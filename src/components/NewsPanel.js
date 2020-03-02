@@ -5,10 +5,9 @@ import { TreeSelect, DatePicker, Row, Col, Select } from "antd";
 import styled from "styled-components";
 import regions from "../assets/data/region_options.json";
 
-import Linechart from "./Linechart";
 import Shape from "./Shape";
 import TreeMatrix from "./TreeMatrix";
-import HeatMap from "./HeatMap";
+import Piechart from "./Piechart";
 
 const { Option } = Select;
 const Container = styled.div`
@@ -34,7 +33,8 @@ function NewsPanel({
   dataByRegion,
   getData,
   loading,
-  range
+  range,
+  data: all
 }) {
   const [selectedRegion, setSelectedRegion] = useState("全国");
   const [selectedType, setSelectedType] = useState("confirm");
@@ -52,26 +52,25 @@ function NewsPanel({
     data,
     loading,
     loadingImage,
-    setLoadingImage
+    setLoadingImage,
+    selectedDate,
+    selectedRegion
   };
 
-  const linesProps = {
-    dataByDate,
-    loading,
-    setSelectedDate,
-    selectedDate,
-    selectedType,
-    style: {
-      marginBottom: 16
-    }
-  };
-
-  const heatProps = {
-    selectedType,
-    setSelectedDate,
-    selectedDate,
-    dataByDate,
+  const pieProps = {
     loading
+  };
+
+  const treeProps = {
+    regions,
+    range,
+    selectedRegion,
+    selectedDate,
+    setSelectedDate,
+    setSelectedRegion,
+    selectedType,
+    loading,
+    all
   };
 
   function disabledDate(current) {
@@ -87,55 +86,54 @@ function NewsPanel({
       <An id="news" />
       <h1>全国各地都在报道些啥?</h1>
       <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p>
+      <Control>
+        <div>
+          <span>区域</span>&ensp;
+          <TreeSelect
+            showSearch
+            value={selectedRegion}
+            treeData={regions}
+            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+            treeDefaultExpandAll
+            onChange={setSelectedRegion}
+          />
+        </div>
+        &emsp;
+        <div>
+          <span>日期</span>&ensp;
+          <DatePicker
+            value={moment(selectedDate)}
+            onChange={(date, string) =>
+              setSelectedDate(new Date(string).getTime())
+            }
+            disabledDate={disabledDate}
+            showTody={false}
+          />
+        </div>
+        &emsp;
+        <div>
+          <span>种类</span>&ensp;
+          <Select
+            value={selectedType}
+            onChange={value => setSelectedType(value)}
+          >
+            {types.map(d => (
+              <Option key={d.key}>{d.name}</Option>
+            ))}
+          </Select>
+        </div>
+      </Control>
+      <Row>
+        <Col span={24}>
+          <TreeMatrix {...treeProps} />
+        </Col>
+      </Row>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          <Control>
-            <div>
-              <span>区域</span>&ensp;
-              <TreeSelect
-                showSearch
-                value={selectedRegion}
-                treeData={regions}
-                dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-                treeDefaultExpandAll
-                onChange={setSelectedRegion}
-              />
-            </div>
-            &emsp;
-            <div>
-              <span>日期</span>&ensp;
-              <DatePicker
-                value={moment(selectedDate)}
-                onChange={(date, string) =>
-                  setSelectedDate(new Date(string).getTime())
-                }
-                disabledDate={disabledDate}
-                showTody={false}
-              />
-            </div>
-          </Control>
           <Shape {...shapeProps} />
         </Col>
         <Col span={24} md={12}>
-          <Control>
-            <div>
-              <span>种类</span>&ensp;
-              <Select
-                value={selectedType}
-                onChange={value => setSelectedType(value)}
-              >
-                {types.map(d => (
-                  <Option key={d.key}>{d.name}</Option>
-                ))}
-              </Select>
-            </div>
-          </Control>
-          <TreeMatrix />
-        </Col>
-      </Row>
-      <Row>
-        <Col span={24}>
-          <Linechart {...linesProps} />
+          <Piechart {...pieProps} />
         </Col>
       </Row>
     </Container>

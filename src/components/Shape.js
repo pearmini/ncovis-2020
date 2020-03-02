@@ -21,10 +21,11 @@ function Shape({ data, loading, loadingImage, setLoadingImage }) {
     });
   }
 
-  function setupCanvas(canvas) {
+  function setupCanvas(_) {
+    const canvas = arguments.length ? _ : document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-    return canvas.getContext("2d");
+    return [canvas, canvas.getContext("2d")];
   }
 
   function drawImage(context, src, color) {
@@ -56,15 +57,14 @@ function Shape({ data, loading, loadingImage, setLoadingImage }) {
   useEffect(() => {
     (async () => {
       if (!key) return;
-      const canvas = ref.current,
-        canvasFill = document.createElement("canvas"),
-        canvasKey = document.createElement("canvas");
-      const context = setupCanvas(canvas),
-        contextFill = setupCanvas(canvasFill),
-        contextKey = setupCanvas(canvasKey);
+      const [, context] = setupCanvas(ref.current),
+        [canvasFill, contextFill] = setupCanvas(),
+        [canvasKey, contextKey] = setupCanvas();
       setLoadingImage(true);
-      await drawImage(contextFill, fill, "orange");
-      await drawImage(contextKey, key, "blue");
+      await Promise.all([
+        drawImage(contextFill, fill, "orange"),
+        drawImage(contextKey, key, "purple")
+      ]);
       drawBackground(context, "white");
       context.drawImage(canvasFill, 0, 0);
       context.drawImage(canvasKey, 0, 0);
@@ -78,7 +78,7 @@ function Shape({ data, loading, loadingImage, setLoadingImage }) {
       loading={loading || loadingImage}
       nodata={data === undefined}
     >
-      <StyledCanvas ref={ref}></StyledCanvas>
+      <StyledCanvas ref={ref} width={width} height={height}></StyledCanvas>
     </Card>
   );
 }
