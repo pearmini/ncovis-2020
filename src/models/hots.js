@@ -18,7 +18,7 @@ export default {
   state: {
     dataByName: d3.map(),
     range: [],
-    selectedTime: 0
+    selectedTime: 0,
   },
   reducers: {
     init: (state, action) => ({ ...action.payload }),

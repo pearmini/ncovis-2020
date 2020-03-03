@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
-import { Radio, Row, Col } from "antd";
+import { Radio, Row, Col, Select } from "antd";
 
 import Timeline from "./Timeline";
 import BarRace from "../components/BarRace";
@@ -10,6 +10,7 @@ import Areachart from "../components/Areachart";
 import mc from "../utils/memorizedColor";
 import * as d3 from "d3";
 
+const { Option } = Select;
 const { Group } = Radio;
 
 const Container = styled.div`
@@ -19,13 +20,24 @@ const Container = styled.div`
 const RadioGroup = styled(Group)`
   margin-bottom: 0.5em;
 `;
+
 const An = styled.div`
   position: absolute;
   top: -56px;
 `;
 
+const Control = styled.div`
+  display: flex;
+  margin-bottom: 0.5em;
+
+  @media (max-width: 700px) {
+    flex-direction: column;
+  }
+`;
+
 function HotsPanel({
   dataByName,
+  dataByDate,
   range,
   selectedTime,
   setSelectedTime,
@@ -42,8 +54,22 @@ function HotsPanel({
     { name: "知乎", value: "zhihu" }
   ];
 
+  const levels = [
+    { name: "全国", key: "top" },
+    { name: "分区", key: "second" },
+    { name: "省份", key: "third" }
+  ];
+
   const [running, setRunning] = useState(false);
   const [selectedName, setSelectedName] = useState(names[0].value);
+  const [selectedLevel, setSelectedLevel] = useState("third");
+  const [selectedType, setSelectedType] = useState("confirm");
+  const types = [
+    { name: "确诊", key: "confirm" },
+    { name: "治愈", key: "cue" },
+    { name: "疑似", key: "suspect" },
+    { name: "死亡", key: "dead" }
+  ];
   const color = useRef(mc(d3.schemeSet3, 10));
   const keyframes = dataByName.get(selectedName);
 
@@ -73,7 +99,12 @@ function HotsPanel({
   };
 
   const areaPros = {
-    loading
+    loading,
+    dataByDate,
+    selectedTime,
+    setSelectedTime,
+    selectedType,
+    selectedLevel
   };
 
   useEffect(() => {
@@ -106,6 +137,29 @@ function HotsPanel({
       </Row>
       <Row gutter={[16, 16]}>
         <Col span={24}>
+          <Control>
+            <div>
+              <span>级别</span>&ensp;
+              <Select
+                value={selectedLevel}
+                onChange={value => setSelectedLevel(value)}
+              >
+                {levels.map(d => (
+                  <Option key={d.key}>{d.name}</Option>
+                ))}
+              </Select>
+              &ensp;&ensp;
+              <span>种类</span>&ensp;
+              <Select
+                value={selectedType}
+                onChange={value => setSelectedType(value)}
+              >
+                {types.map(d => (
+                  <Option key={d.key}>{d.name}</Option>
+                ))}
+              </Select>
+            </div>
+          </Control>
           <Areachart {...areaPros} />
         </Col>
       </Row>
@@ -119,7 +173,11 @@ function HotsPanel({
 }
 
 export default connect(
-  ({ hots, loading }) => ({ ...hots, loading: loading.models.hots }),
+  ({ hots, loading, news }) => ({
+    ...hots,
+    loading: loading.models.hots || loading.models.news,
+    dataByDate: news.dataByDate
+  }),
   {
     getData: () => ({ type: "hots/getData" }),
     setSelectedName: name => ({

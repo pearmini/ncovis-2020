@@ -44,18 +44,14 @@ export default function({
                     data
                   }))
                 )
-                .map(([a, b]) => {
-                  return {
-                    region,
-                    date: new Date(b.date),
-                    ...Object.keys(b.data).reduce(
-                      (obj, key) => (
-                        (obj[key] = b.data[key] - a.data[key]), obj
-                      ),
-                      {}
-                    )
-                  };
-                })
+                .map(([a, b]) => ({
+                  region,
+                  date: new Date(b.date),
+                  ...Object.keys(b.data).reduce(
+                    (obj, key) => ((obj[key] = b.data[key] - a.data[key]), obj),
+                    {}
+                  )
+                }))
             )
           : [],
       [dataByRegion]
@@ -72,7 +68,7 @@ export default function({
 
   const width = 1200,
     height = 600,
-    margin = { top: 40, right: 30, bottom: 20, left: 60 },
+    margin = { top: 50, right: 30, bottom: 20, left: 60 },
     maxCellWidth = 15,
     padding = 80,
     nodeWidth = 100,

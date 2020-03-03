@@ -33,7 +33,7 @@ function NewsPanel({
   dataByRegion,
   getData,
   loading,
-  range
+  range,
 }) {
   const [selectedRegion, setSelectedRegion] = useState("全国");
   const [selectedType, setSelectedType] = useState("confirm");
