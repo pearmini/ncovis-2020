@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import useFrame from "../hook/useFrame";
+import mouse from "../utils/mouse";
 import * as d3 from "d3";
 
 const Svg = styled.svg`
@@ -18,6 +19,7 @@ const Slider = styled.rect`
 const Dot = styled.circle`
   cursor: pointer;
 `;
+
 export default function({
   time,
   selectedTime,
@@ -26,9 +28,11 @@ export default function({
   setRunning
 }) {
   const { requestFrame, pauseFrame, setFrame } = useFrame(step);
+  const dragging = useRef(false);
+  const sliderRef = useRef(null);
+  const dotRef = useRef(null);
   const [, total] = time.domain(),
-    range = time.range(),
-    formatDate = d => new Date(d).getFullYear();
+    range = time.range();
   const width = 1200,
     height = 50,
     margin = { top: 20, right: 30, bottom: 20, left: 60 };
@@ -56,10 +60,34 @@ export default function({
     }
   }
 
-  function onChange(value) {
+  function changeValue(value) {
     setFrame(time.invert(value));
     setSelectedTime(value);
   }
+
+  function handleClick(e) {
+    const [mouseX] = mouse(e, sliderRef.current);
+    const t = x.invert(mouseX + margin.left);
+    changeValue(t);
+  }
+
+  useEffect(() => {
+    const handleMouseUp = () => (dragging.current = false);
+    const handleMouseMove = e => {
+      if (!dragging.current) return;
+      const [mouseX] = mouse(e, sliderRef.current);
+      const t = x.invert(mouseX + margin.left);
+      changeValue(t);
+    };
+
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  });
 
   const startButton = (
     <svg
@@ -109,34 +137,27 @@ export default function({
     </svg>
   );
   return (
-    // <Container>
-    //   <ControlButton
-    //     shape="circle"
-    //     icon={running ? "pause-circle" : "play-circle"}
-    //     type="primary"
-    //     onClick={toggleAnimation}
-    //   />
-    //   <StyledSlider
-    //     min={range[0]}
-    //     max={range[1]}
-    //     value={selectedTime}
-    //     onChange={onChange}
-    //     tipFormatter={formatDate}
-    //   />
-    // </Container>
     <Svg viewBox={[0, 0, width, height]}>
       <Button transform={`translate(${10}, ${10})`} onClick={toggleAnimation}>
         {running ? pauseButton : startButton}
       </Button>
       <Slider
+        ref={sliderRef}
         x={margin.left}
         y={margin.top}
         width={width - margin.left - margin.right}
         height={10}
         fill="#eee"
         rx={5}
+        onClick={handleClick}
       ></Slider>
-      <Dot cx={x(selectedTime) || margin.left} cy={height / 2} r={7}></Dot>
+      <Dot
+        ref={dotRef}
+        cx={x(selectedTime) || margin.left}
+        cy={height / 2}
+        r={7}
+        onMouseDown={() => (dragging.current = true)}
+      ></Dot>
     </Svg>
   );
 }

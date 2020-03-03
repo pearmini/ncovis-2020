@@ -1,84 +1,123 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Svg from "./Svg";
 import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
+import {
+  find,
+  eachBefore,
+  filter,
+  treeHeight,
+  hasChildren
+} from "../utils/tree";
 
 const d3 = {
   ...d3All,
   ...d3Array
 };
-function find(source, cb) {
-  let target;
-  eachBefore(source, d => {
-    if (cb(d)) target = d;
-  });
-  return target;
-}
-
-function eachBefore(node, cb) {
-  node.children && node.children.forEach(d => eachBefore(d, cb));
-  cb(node);
-}
 
 export default function({
   dataByRegion,
-  all,
   selectedRegion,
   selectedDate,
   setSelectedDate,
   setSelectedRegion,
   selectedType,
-  range,
   loading
 }) {
+  const [regions, setRegions] = useState(regionsData),
+    visableRegions = new Set(
+      filter(regions, d => !d.hide && !hasChildren(d, d => !d.hide)).map(
+        d => d.title
+      )
+    ),
+    th = treeHeight(regions);
+
+  const all = useMemo(
+      () =>
+        dataByRegion
+          ? Array.from(dataByRegion).flatMap(([region, dataByDate]) =>
+              d3
+                .pairs(
+                  Array.from(dataByDate).map(([date, data]) => ({
+                    date: new Date(date),
+                    data
+                  }))
+                )
+                .map(([a, b]) => {
+                  return {
+                    region,
+                    date: new Date(b.date),
+                    ...Object.keys(b.data).reduce(
+                      (obj, key) => (
+                        (obj[key] = b.data[key] - a.data[key]), obj
+                      ),
+                      {}
+                    )
+                  };
+                })
+            )
+          : [],
+      [dataByRegion]
+    ),
+    data = all
+      .map(d => ({
+        date: d.date,
+        region: d.region,
+        value: d[selectedType]
+      }))
+      .filter(({ value }) => !isNaN(value) && value !== "")
+      .filter(d => visableRegions.has(d.region)),
+    days = Array.from(new Set(data.map(d => d.date.getTime())));
+
   const width = 1200,
-    treeW = 150,
-    matrixW = width - treeW,
     height = 600,
-    margin = { top: 40, right: 30, bottom: 30, left: 60 },
+    margin = { top: 40, right: 30, bottom: 20, left: 60 },
+    maxCellWidth = 15,
+    padding = 80,
+    nodeWidth = 100,
+    treeW = nodeWidth * th,
+    maxMatrixWidth = width - margin.left - margin.right - padding - treeW,
+    matrixWidth = Math.min(days.length * maxCellWidth, maxMatrixWidth),
     colors = {
       dead: d3.interpolateBuPu,
       confirm: d3.interpolatePuRd,
       cue: d3.interpolateYlGn,
       suspect: d3.interpolateOrRd
-    };
+    },
+    highlightColor = "red",
+    normalColor = "black",
+    highlightRectColor = "steelblue",
+    buttonSize = 20,
+    legendWidth = 150,
+    legendHeight = 10,
+    formatDate = d3.timeFormat("%x");
 
-  const [regions, setRegions] = useState(regionsData);
-  const root = tree(regions);
-  const visableNodes = new Set(
-    root
-      .descendants()
-      .filter(
-        d => !d.data.hide && (!d.children || d.children.every(d => d.data.hide))
-      )
-      .map(d => d.data.title)
-  );
-  const data = all
-    .map(d => ({
-      region: d.region,
-      date: new Date(d.date),
-      value: d.data[selectedType]
-    }))
-    .filter(d => visableNodes.has(d.region));
-
-  let maxtirxLeft = -1,
-    cellWidth = Infinity,
+  const root = tree(regions),
+    cellHeight = d3
+      .pairs(root.leaves())
+      .reduce(
+        (total, [a, b]) => Math.min(total, Math.abs(a.x - b.x)),
+        Infinity
+      ),
     nodeByTitle = d3.rollup(
       root.descendants(),
       ([d]) => d,
       d => d.data.title
     );
-  root.each(d => !d.data.hide && (maxtirxLeft = Math.max(maxtirxLeft, d.y)));
-  d3.pairs(root.leaves()).forEach(([a, b]) => {
-    cellWidth = Math.min(cellWidth, Math.abs(a.x - b.x));
-  });
 
-  const days = Array.from(new Set(data.map(d => d.date.getTime())));
+  function tree(data) {
+    const root = d3.hierarchy(data);
+    return d3
+      .tree()
+      .size([height - margin.top - margin.bottom, treeW])
+      .separation((a, b) => (a.parent === b.parent ? 1 : 1.5))(root);
+  }
+
   const x = d3
     .scaleBand()
     .domain(days)
-    .range([0, matrixW - margin.right - 120]);
+    .range([0, matrixWidth]);
 
   const y = title => {
     const node = nodeByTitle.get(title);
@@ -86,42 +125,52 @@ export default function({
     return d3.min(node.children, d => d.x);
   };
 
-  const formatDate = d3.timeFormat("%x");
-
-  const cellHeight = title => {
+  const h = title => {
     const node = nodeByTitle.get(title);
-    if (!node.children) return cellWidth;
+    if (!node.children) return cellHeight;
     const [a, b] = d3.extent(node.children, d => d.x);
-    return Math.abs(a - b) + cellWidth;
+    return Math.abs(a - b) + cellHeight;
   };
 
-  const color = value => {
-    const scale = d3
-      .scaleSequential(colors[selectedType])
-      .domain(d3.extent(data, d => d.value));
-    return scale(value);
-  };
+  const color = d3
+    .scaleSequential(colors[selectedType])
+    .domain(d3.extent(data, d => d.value));
 
   const pathLink = d3
     .linkHorizontal()
     .x(d => d.y)
     .y(d => d.x);
 
-  function tree(data) {
-    const root = d3.hierarchy(data);
-    return d3
-      .tree()
-      .size([height - margin.top - margin.bottom, treeW])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 1))(root);
+  const stroke = d3
+    .scaleSequential(colors[selectedType])
+    .domain([0, legendWidth]);
+
+  function handleClickNode({ data }) {
+    const node = find(regions, d => d.title === data.title);
+    setSelectedRegion(node.title);
+    if (!node.children || !node.children.length) return;
+    const { hideChildren } = node;
+    if (hideChildren) {
+      // 如果要展开孩子，只展开一层
+      node.children.forEach(n => (n.hide = false));
+    } else {
+      // 如果要隐藏孩子，隐藏所有的
+      node.children.forEach(n =>
+        eachBefore(n, d => (d.hide = d.hideChildren = true))
+      );
+    }
+
+    node.hideChildren = !node.hideChildren;
+    setRegions({ ...regions });
   }
 
-  function handleClick({ data }) {
-    const node = find(regions, d => d.title === data.title);
-    node.children &&
-      node.children.forEach(n =>
-        eachBefore(n, d => (d.hide = !(d.hide | false)))
-      );
-    setRegions({ ...regions });
+  function isSelect(d) {
+    return selectedRegion === d.region && selectedDate === d.date.getTime();
+  }
+
+  function handleClickRect({ region, date }) {
+    setSelectedRegion(region);
+    setSelectedDate(date.getTime());
   }
 
   function noData(data) {
@@ -129,17 +178,63 @@ export default function({
   }
 
   useEffect(() => {
-    // const xAxis = g =>
-    //   g
-    //     .call(
-    //       d3
-    //         .axisBottom(x)
-    //         .ticks(width / 50)
-    //         .tickSizeOuter(0)
-    //     )
-    //     .call(g => g.selectAll("text").attr("transform", `rotate(-15)`));
-    // d3.select(".treeMatrix-xAxis").call(xAxis);
+    // 绘制坐标轴
+    const scaleTime = d3
+      .scaleTime()
+      .domain(d3.extent(days).map(d3.timeDay))
+      .range([0, maxMatrixWidth]);
+
+    const scaleLegend = d3
+      .scaleLinear()
+      .domain(color.domain())
+      .range([0, legendWidth]);
+
+    const legendAxis = d3
+      .axisBottom(scaleLegend)
+      .ticks(legendWidth / 50)
+      .tickSizeOuter(0);
+
+    const xAxis = d3.axisBottom(scaleTime).tickSizeOuter(0);
+
+    d3.select(".tree-xAxis").call(xAxis);
+    d3.select(".tree-legend").call(legendAxis);
   });
+
+  const minusButton = (
+    <svg
+      t="1583216776327"
+      className="icon"
+      viewBox="0 0 1024 1024"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      p-id="1313"
+      width={buttonSize}
+      height={buttonSize}
+    >
+      <path
+        d="M512 128c211.968 0 384 172.032 384 384s-172.032 384-384 384-384-172.032-384-384 172.032-384 384-384z m-187.221333 425.6h371.2a41.6 41.6 0 1 0 0-83.2h-371.2a41.6 41.6 0 0 0 0 83.2z"
+        p-id="1314"
+      ></path>
+    </svg>
+  );
+
+  const plusButton = (
+    <svg
+      t="1583216820149"
+      className="icon"
+      viewBox="0 0 1024 1024"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      p-id="1443"
+      width={buttonSize}
+      height={buttonSize}
+    >
+      <path
+        d="M458.922667 503.210667H314.965333a41.6 41.6 0 1 0 0 83.2h143.957334v144a41.6 41.6 0 0 0 83.2 0v-144h144a41.6 41.6 0 0 0 0-83.2h-144V359.253333a41.6 41.6 0 0 0-83.2 0v143.957334zM502.186667 160.853333c211.968 0 384 172.032 384 384s-172.032 384-384 384-384-172.032-384-384 172.032-384 384-384z"
+        p-id="1444"
+      ></path>
+    </svg>
+  );
 
   return (
     <Svg
@@ -147,36 +242,27 @@ export default function({
       loading={loading}
       nodata={noData(data)}
     >
-      <g transform={`translate(${margin.left}, ${margin.top})`}>
-        {root.descendants().map(node => (
-          <g
-            key={node.data.title}
-            transform={`translate(${node.y}, ${node.x})`}
-            style={{
-              display: node.data.hide && "none"
-            }}
-          >
-            <circle
-              r={2.5}
-              onClick={() => handleClick(node)}
-              cursor="pointer"
-            ></circle>
-            <text
-              dy="0.31em"
-              x={
-                node.children && node.children.every(d => !d.data.hide) ? -6 : 6
-              }
-              textAnchor={
-                node.children && node.children.every(d => !d.data.hide)
-                  ? "end"
-                  : "start"
-              }
-              fill="currentColor"
-            >
-              {node.data.title}
-            </text>
-          </g>
+      <g
+        transform={`translate(${width -
+          margin.right -
+          legendWidth}, ${margin.top / 2})`}
+      >
+        {d3.range(0, legendWidth).map(l => (
+          <line
+            key={l}
+            x1={l}
+            y1={-legendHeight / 2}
+            x2={l}
+            y2={legendHeight / 2}
+            stroke={stroke(l)}
+          />
         ))}
+        <g
+          className="tree-legend"
+          transform={`translate(0, ${legendHeight / 2})`}
+        ></g>
+      </g>
+      <g transform={`translate(${margin.left}, ${margin.top})`}>
         {root.links().map((link, index) => (
           <path
             style={{
@@ -190,28 +276,60 @@ export default function({
             d={pathLink(link)}
           ></path>
         ))}
-        <g transform={`translate(${maxtirxLeft + 80}, ${-cellWidth / 2})`}>
-          <g>
-            {data.map(d => (
-              <rect
-                key={d.region + d.date.toString()}
-                x={x(d.date.getTime()) - 0.5}
-                y={y(d.region) - 0.5}
-                width={x.bandwidth() - 1}
-                height={cellHeight(d.region) - 1}
-                fill={color(d.value)}
-                cursor="pointer"
-              >
-                <title>{`${d.region}:${d.value}(${formatDate(d.date)})`}</title>
-              </rect>
-            ))}
-          </g>
+        {root.descendants().map(node => (
           <g
-            className="treeMatrix-xAxis"
+            key={node.data.title}
+            transform={`translate(${node.y}, ${node.x})`}
+            style={{
+              display: node.data.hide && "none"
+            }}
+            fill={
+              selectedRegion === node.data.title ? highlightColor : normalColor
+            }
+            onClick={() => handleClickNode(node)}
+            cursor="pointer"
+          >
+            <circle r={3}></circle>
+            <text
+              dy="0.31em"
+              x={hasChildren(node, d => !d.data.hide) ? -6 : 6}
+              textAnchor={
+                hasChildren(node, d => !d.data.hide) ? "end" : "start"
+              }
+            >
+              {node.data.title}
+            </text>
+          </g>
+        ))}
+      </g>
+      <g
+        transform={`translate(${width -
+          margin.right -
+          maxMatrixWidth}, ${margin.top - cellHeight / 2})`}
+      >
+        <g>
+          {data.map(d => (
+            <rect
+              key={d.region + d.date.toString()}
+              x={x(d.date.getTime()) - 0.5}
+              y={y(d.region) - 0.5}
+              width={x.bandwidth() - 1}
+              height={h(d.region) - 1}
+              fill={color(d.value)}
+              cursor="pointer"
+              onClick={() => handleClickRect(d)}
+              stroke={isSelect(d) ? highlightRectColor : "none"}
+              strokeWidth={isSelect(d) ? 3 : 0}
+            >
+              <title>{`${d.region}:${d.value}(${formatDate(d.date)})`}</title>
+            </rect>
+          ))}
+          <g
+            className="tree-xAxis"
             transform={`translate(0, ${height -
               margin.bottom -
               margin.top +
-              10})`}
+              3})`}
           ></g>
         </g>
       </g>

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import useSize from "../hook/useSize";
-import { Button, Popover, Empty, Spin } from "antd";
+import { Popover, Empty, Spin, Icon } from "antd";
 
 const Container = styled.div.attrs(
   props =>
@@ -13,7 +13,7 @@ const Container = styled.div.attrs(
         top: "50%",
         transform: "translate(-50%, -50%)",
         width: "90%",
-        maxWidth: 900
+        maxWidth: 1200
       }
     }
 )`
@@ -25,23 +25,6 @@ const Container = styled.div.attrs(
   &:hover {
     box-shadow: 0px 0px 10px 3px rgba(0, 0, 0, 0.1);
   }
-`;
-
-const Row = styled.div`
-  display: flex;
-  justify-content: space-around;
-`;
-
-const DownloadButton = styled(Button)`
-  right: 5px;
-  top: 5px;
-  position: absolute;
-`;
-
-const ZoomButton = styled(Button)`
-  right: 40px;
-  top: 5px;
-  position: absolute;
 `;
 
 const Layer = styled.div`
@@ -80,6 +63,58 @@ const MiddleEmpty = styled(Empty)`
   margin: 0;
 `;
 
+const Grid = styled.div`
+  right: 0px;
+  top: 0px;
+  position: absolute;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+`;
+
+const More = styled.div`
+  position: absolute;
+  right: 13px;
+  top: 19px;
+  cursor: pointer;
+
+  &,
+  &::before,
+  &::after {
+    content: "";
+    width: 5px;
+    height: 5px;
+    display: block;
+    background: black;
+    border-radius: 50%;
+  }
+
+  &::before {
+    transform: translateY(-7px);
+  }
+
+  &::after {
+    transform: translateY(2px);
+  }
+`;
+
+const Content = styled.ul`
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  & li {
+    list-style: none;
+    padding: 0.5em 1em;
+  }
+
+  & span {
+    margin-left: 0.75em;
+  }
+
+  & li:hover {
+  }
+`;
+
 function State({ type, width, height }) {
   return (
     <Box width={width} height={height}>
@@ -110,38 +145,26 @@ function Card({
   const [hovered, setHovered] = useState(false);
 
   const content = (
-    <Row>
-      <Button onClick={() => onDownloadPng && onDownloadPng()}>png</Button>
-      <Button onClick={() => onDownloadSvg && onDownloadSvg()}>svg</Button>
-    </Row>
-  );
-
-  const buttonGroup = (
-    <>
-      <ZoomButton
-        icon={zoom ? "fullscreen-exit" : "fullscreen"}
-        size="small"
-        type="primary"
-        onClick={() => setZoom(!zoom)}
-      />
-      {onDownload ? (
-        <DownloadButton
-          icon="download"
-          type="primary"
-          size="small"
-          onClick={() => onDownload && onDownload()}
-        />
-      ) : (
-        <Popover
-          placement="bottomRight"
-          title={"选择一种格式下载"}
-          content={content}
-          trigger="click"
-        >
-          <DownloadButton icon="download" type="primary" size="small" />
-        </Popover>
+    <Content>
+      <li onClick={() => setZoom(!zoom)}>
+        <Icon type={zoom ? "fullscreen-exit" : "fullscreen"} />
+        <span>{zoom ? "缩小" : "放大"}</span>
+      </li>
+      <li onClick={onDownload ? onDownload : onDownloadPng}>
+        <Icon type="download" />
+        <span>PNG</span>
+      </li>
+      {onDownloadSvg && (
+        <li onClick={onDownloadSvg}>
+          <Icon type="download" />
+          <span>SVG</span>
+        </li>
       )}
-    </>
+      <li>
+        <Icon type="question" />
+        <span>详情</span>
+      </li>
+    </Content>
   );
 
   return (
@@ -158,7 +181,18 @@ function Card({
         ) : nodata ? (
           <State width={width} height={height} />
         ) : (
-          hovered && buttonGroup
+          hovered && (
+            <Popover
+              placement="bottomRight"
+              content={content}
+              trigger="click"
+              arrowPointAtCenter
+            >
+              <Grid>
+                <More></More>
+              </Grid>
+            </Popover>
+          )
         )}
         {children}
       </Container>

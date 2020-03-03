@@ -18,8 +18,7 @@ export default {
   state: {
     dataByRegion: d3.map(),
     selectedDate: new Date().getTime(),
-    range: [],
-    data: []
+    range: []
   },
   reducers: {
     init: (state, action) => ({ ...state, ...action.payload }),
@@ -46,7 +45,7 @@ export default {
           [, selectedDate] = range;
         yield put({
           type: "init",
-          payload: { dataByRegion, selectedDate, range, data }
+          payload: { dataByRegion, selectedDate, range }
         });
       } catch (e) {
         console.error(e);

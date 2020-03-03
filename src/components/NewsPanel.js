@@ -33,8 +33,7 @@ function NewsPanel({
   dataByRegion,
   getData,
   loading,
-  range,
-  data: all
+  range
 }) {
   const [selectedRegion, setSelectedRegion] = useState("全国");
   const [selectedType, setSelectedType] = useState("confirm");
@@ -70,7 +69,7 @@ function NewsPanel({
     setSelectedRegion,
     selectedType,
     loading,
-    all
+    dataByRegion
   };
 
   function disabledDate(current) {
