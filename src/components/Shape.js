@@ -1,28 +1,14 @@
-import React, { useRef, useEffect } from "react";
-import Card from "./Card";
-import styled from "styled-components";
-import download from "../utils/download";
-const StyledCanvas = styled.canvas`
-  width: 100%;
-  height: 100%;
-  background: white;
-`;
+import React, { useState } from "react";
+import Canvas from "./Canvas";
 
-function Shape({ data, loading, loadingImage, setLoadingImage }) {
+function Shape({ data, loading }) {
+  const [loadingImage, setLoadingImage] = useState(false);
   const width = 3600,
     height = 2400,
-    { key, fill } = data || {},
-    filename = "shapewordle";
+    { key, fill } = data || {};
 
-  function downloadImage() {
-    const canvas = ref.current;
-    canvas.toBlob(blob => {
-      download(blob, filename);
-    });
-  }
-
-  function setupCanvas(_) {
-    const canvas = arguments.length ? _ : document.createElement("canvas");
+  function createOffscreenCanvas() {
+    const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
     return [canvas, canvas.getContext("2d")];
@@ -53,33 +39,31 @@ function Shape({ data, loading, loadingImage, setLoadingImage }) {
     context.fillRect(0, 0, width, height);
   }
 
-  const ref = useRef(null);
-  useEffect(() => {
-    (async () => {
-      if (!key) return;
-      const [, context] = setupCanvas(ref.current),
-        [canvasFill, contextFill] = setupCanvas(),
-        [canvasKey, contextKey] = setupCanvas();
-      setLoadingImage(true);
-      await Promise.all([
-        drawImage(contextFill, fill, "orange"),
-        drawImage(contextKey, key, "purple")
-      ]);
-      drawBackground(context, "white");
-      context.drawImage(canvasFill, 0, 0);
-      context.drawImage(canvasKey, 0, 0);
-      setLoadingImage(false);
-    })();
-  }, [key, fill]);
+  async function draw(context) {
+    if (!key) return;
+    const [canvasFill, contextFill] = createOffscreenCanvas(),
+      [canvasKey, contextKey] = createOffscreenCanvas();
+    setLoadingImage(true);
+    await Promise.all([
+      drawImage(contextFill, fill, "orange"),
+      drawImage(contextKey, key, "purple")
+    ]);
+    drawBackground(context, "white");
+    context.drawImage(canvasFill, 0, 0);
+    context.drawImage(canvasKey, 0, 0);
+    setLoadingImage(false);
+  }
 
   return (
-    <Card
-      onDownload={() => downloadImage()}
+    <Canvas
+      width={width}
+      height={height}
       loading={loading || loadingImage}
       nodata={data === undefined}
+      dependcies={[key, fill]}
     >
-      <StyledCanvas ref={ref} width={width} height={height}></StyledCanvas>
-    </Card>
+      {draw}
+    </Canvas>
   );
 }
 

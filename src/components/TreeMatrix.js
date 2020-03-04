@@ -41,7 +41,7 @@ export default function({
                 .pairs(
                   Array.from(dataByDate).map(([date, data]) => ({
                     date: new Date(date),
-                    data
+                    data: data.data
                   }))
                 )
                 .map(([a, b]) => ({
@@ -241,7 +241,8 @@ export default function({
       <g
         transform={`translate(${width -
           margin.right -
-          legendWidth}, ${margin.top / 2})`}
+          legendWidth -
+          10}, ${margin.top / 2})`}
       >
         {d3.range(0, legendWidth).map(l => (
           <line
@@ -307,10 +308,10 @@ export default function({
           {data.map(d => (
             <rect
               key={d.region + d.date.toString()}
-              x={x(d.date.getTime()) - 0.5}
-              y={y(d.region) - 0.5}
-              width={x.bandwidth() - 1}
-              height={h(d.region) - 1}
+              x={x(d.date.getTime()) - 1}
+              y={y(d.region) - 1}
+              width={x.bandwidth() - 2}
+              height={h(d.region) - 2}
               fill={color(d.value)}
               cursor="pointer"
               onClick={() => handleClickRect(d)}

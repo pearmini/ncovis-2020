@@ -33,11 +33,10 @@ function NewsPanel({
   dataByRegion,
   getData,
   loading,
-  range,
+  range
 }) {
   const [selectedRegion, setSelectedRegion] = useState("全国");
   const [selectedType, setSelectedType] = useState("confirm");
-  const [loadingImage, setLoadingImage] = useState(false);
   const types = [
     { name: "确诊", key: "confirm" },
     { name: "治愈", key: "cue" },
@@ -50,14 +49,15 @@ function NewsPanel({
   const shapeProps = {
     data,
     loading,
-    loadingImage,
-    setLoadingImage,
     selectedDate,
     selectedRegion
   };
 
   const pieProps = {
-    loading
+    loading,
+    all: data,
+    selectedDate,
+    selectedRegion
   };
 
   const treeProps = {

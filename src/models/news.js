@@ -38,7 +38,7 @@ export default {
         }));
         const dataByRegion = d3.rollup(
             data,
-            ([d]) => ({ ...d.data, key: d.key, fill: d.fill }),
+            ([d]) => d,
             d => d.region,
             d => d.date
           ),

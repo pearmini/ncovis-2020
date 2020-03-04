@@ -1,12 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import Svg from "./Svg";
 import * as d3 from "d3";
+import mouse from "../utils/mouse";
 export default function({
   loading,
   dataByDate,
+  selectedTime,
   selectedType = "confirm",
-  selectedLevel = "top"
+  selectedLevel = "top",
+  range,
+  setSelectedTime
 }) {
+  const ref = useRef(null);
   const width = 1200,
     height = 300,
     margin = { top: 30, right: 30, bottom: 30, left: 60 };
@@ -22,23 +27,36 @@ export default function({
     "港澳台地区"
   ]);
 
-  const data = Array.from(dataByDate).map(([date, data]) => ({
-      date: new Date(date),
-      ...data
-        .filter(({ region }) => {
-          if (selectedLevel === "top") {
-            return region === "全国";
-          } else if (selectedLevel === "second") {
-            return secondLevelSet.has(region);
-          } else {
-            return region !== "全国" && !secondLevelSet.has(region);
-          }
-        })
-        .reduce(
-          (obj, { region, data }) => ((obj[region] = data[selectedType]), obj),
-          {}
-        )
-    })),
+  const all = useMemo(
+      () =>
+        Array.from(dataByDate).map(([date, data]) => ({
+          date: new Date(date),
+          ...data
+            .filter(({ region }) => {
+              if (selectedLevel === "top") {
+                return region === "全国";
+              } else if (selectedLevel === "second") {
+                return secondLevelSet.has(region);
+              } else {
+                return region !== "全国" && !secondLevelSet.has(region);
+              }
+            })
+            .reduce((obj, { region, data }) => ((obj[region] = data), obj), {})
+        })),
+      [dataByDate, selectedLevel]
+    ),
+    data = useMemo(
+      () =>
+        all.map(d =>
+          Object.keys(d).reduce(
+            (obj, key) => (
+              (obj[key] = key === "date" ? d[key] : d[key][selectedType]), obj
+            ),
+            {}
+          )
+        ),
+      [dataByDate, selectedType, selectedLevel]
+    ),
     [first] = data,
     keys = first ? Object.keys(first).filter(d => d !== "date") : [];
 
@@ -46,14 +64,14 @@ export default function({
 
   const x = d3
     .scaleTime()
-    .domain(d3.extent(data, d => d.date))
-    .range([margin.left, width - margin.right]);
+    .domain(range.map(d => new Date(d)))
+    .range([0, width - margin.right - margin.left]);
 
   const y = d3
     .scaleLinear()
     .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
     .nice()
-    .range([height - margin.bottom, margin.top]);
+    .range([height - margin.bottom - margin.top, 0]);
 
   const area = d3
     .area()
@@ -73,6 +91,22 @@ export default function({
               .reverse()
           );
 
+  function handleClickPath(e) {
+    const [mouseX] = mouse(e, ref.current);
+    const time = x.invert(mouseX).getTime();
+    setSelectedTime(time);
+  }
+
+  function noData(data) {
+    return (
+      !data ||
+      data.length === 0 ||
+      data.some(d =>
+        Object.keys(d).some(key => d[key] === undefined || isNaN(d[key]))
+      )
+    );
+  }
+
   useEffect(() => {
     const xAxis = d3.axisBottom(x);
     const yAxis = g =>
@@ -82,19 +116,42 @@ export default function({
   }, [data]);
 
   return (
-    <Svg
-      viewBox={[0, 0, width, height]}
-      loading={loading}
-      nodata={!data || data.length === 0}
-    >
-      {series.map(s => (
-        <path key={s.key} fill={color(s.key)} d={area(s)} />
-      ))}
-      <g
-        className="area-xAxis"
-        transform={`translate(0, ${height - margin.bottom})`}
-      />
-      <g className="area-yAxis" transform={`translate(${margin.left}, 0)`} />
-    </Svg>
+    <>
+      {noData(data) ? (
+        <Svg
+          viewBox={[0, 0, width, height]}
+          loading={loading}
+          nodata={true}
+        ></Svg>
+      ) : (
+        <Svg viewBox={[0, 0, width, height]} loading={loading}>
+          <g
+            cursor="pointer"
+            ref={ref}
+            onClick={handleClickPath}
+            transform={`translate(${margin.left}, ${margin.top})`}
+          >
+            {series.map(s => (
+              <path key={s.key} fill={color(s.key)} d={area(s)} />
+            ))}
+            <line
+              x1={x(new Date(selectedTime))}
+              y1={0}
+              x2={x(new Date(selectedTime))}
+              y2={height - margin.bottom - margin.top}
+              stroke="currentColor"
+            />
+          </g>
+          <g
+            className="area-xAxis"
+            transform={`translate(${margin.left}, ${height - margin.bottom})`}
+          />
+          <g
+            className="area-yAxis"
+            transform={`translate(${margin.left}, ${margin.top})`}
+          />
+        </Svg>
+      )}
+    </>
   );
 }

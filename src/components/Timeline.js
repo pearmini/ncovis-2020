@@ -32,7 +32,8 @@ export default function({
   const sliderRef = useRef(null);
   const dotRef = useRef(null);
   const [, total] = time.domain(),
-    range = time.range();
+    range = time.range(),
+    duration = time.invert(selectedTime);
   const width = 1200,
     height = 50,
     margin = { top: 20, right: 30, bottom: 20, left: 60 };
@@ -43,7 +44,9 @@ export default function({
     .range([margin.left, width - margin.right]);
 
   function step(duration) {
-    setSelectedTime(time(duration));
+    // 不能超过最大的时间
+    const t = Math.min(time(duration), range[1]);
+    setSelectedTime(t);
     if (duration > total) {
       setRunning(false);
       return false;
@@ -56,13 +59,14 @@ export default function({
       pauseFrame();
     } else {
       setRunning(true);
-      requestFrame();
+      requestFrame(duration >= total ? 0 : duration);
     }
   }
 
   function changeValue(value) {
-    setFrame(time.invert(value));
-    setSelectedTime(value);
+    const validValue = Math.max(range[0], Math.min(value, range[1]));
+    setFrame(time.invert(validValue));
+    setSelectedTime(validValue);
   }
 
   function handleClick(e) {
@@ -136,10 +140,33 @@ export default function({
       ></path>
     </svg>
   );
+
+  const restartButton = (
+    <svg
+      t="1583294650370"
+      className="icon"
+      viewBox="0 0 1024 1024"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      p-id="1815"
+      width="30"
+      height="30"
+    >
+      <path d="M471.616 361.728" p-id="1816"></path>
+      <path
+        d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0zM534.976 860.672c-100.992 0-191.616-44.48-253.312-114.944l63.36-55.424c3.712 4.224 7.488 8.32 11.52 12.288 47.68 47.68 111.104 73.92 178.56 73.92 67.456 0 130.816-26.304 178.56-73.92 47.68-47.68 73.92-111.104 73.92-178.56s-26.304-130.816-73.92-178.56c-47.68-47.68-111.104-73.92-178.56-73.92-67.456 0-130.816 26.304-178.56 73.92l94.4 94.4L198.336 439.872 198.336 187.328 296.96 285.952c60.928-60.928 145.088-98.624 238.016-98.624 185.92 0 336.64 150.72 336.64 336.64C871.616 709.888 720.896 860.672 534.976 860.672z"
+        p-id="1817"
+      ></path>
+    </svg>
+  );
   return (
     <Svg viewBox={[0, 0, width, height]}>
       <Button transform={`translate(${10}, ${10})`} onClick={toggleAnimation}>
-        {running ? pauseButton : startButton}
+        {running
+          ? pauseButton
+          : duration >= total
+          ? restartButton
+          : startButton}
       </Button>
       <Slider
         ref={sliderRef}

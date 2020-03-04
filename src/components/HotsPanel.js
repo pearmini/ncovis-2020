@@ -44,39 +44,38 @@ function HotsPanel({
   getData,
   loading
 }) {
-  const timeAt = d3
-    .scaleLinear()
-    .domain([0, 30000])
-    .range(range || [0, 0]);
-
   const names = [
-    { name: "微博", value: "weibo" },
-    { name: "知乎", value: "zhihu" }
-  ];
-
-  const levels = [
-    { name: "全国", key: "top" },
-    { name: "分区", key: "second" },
-    { name: "省份", key: "third" }
-  ];
+      { name: "微博", value: "weibo" },
+      { name: "知乎", value: "zhihu" }
+    ],
+    levels = [
+      { name: "全国", key: "top" },
+      { name: "分区", key: "second" },
+      { name: "省份", key: "third" }
+    ],
+    types = [
+      { name: "确诊", key: "confirm" },
+      { name: "治愈", key: "cue" },
+      { name: "疑似", key: "suspect" },
+      { name: "死亡", key: "dead" }
+    ];
 
   const [running, setRunning] = useState(false);
   const [selectedName, setSelectedName] = useState(names[0].value);
   const [selectedLevel, setSelectedLevel] = useState("third");
   const [selectedType, setSelectedType] = useState("confirm");
-  const types = [
-    { name: "确诊", key: "confirm" },
-    { name: "治愈", key: "cue" },
-    { name: "疑似", key: "suspect" },
-    { name: "死亡", key: "dead" }
-  ];
   const color = useRef(mc(d3.schemeSet3, 10));
-  const keyframes = dataByName.get(selectedName);
+  const namevalues = dataByName.get(selectedName);
+  const { listKeyframes, wordsKeyframes } = namevalues || {};
+  const timeAt = d3
+    .scaleLinear()
+    .domain([0, 30000])
+    .range(range || [0, 0]);
 
   const barsProps = {
     width: 600,
     height: 400,
-    keyframes,
+    keyframes: listKeyframes,
     selectedTime,
     color: color.current,
     running,
@@ -86,8 +85,11 @@ function HotsPanel({
   const storyProps = {
     width: 600,
     height: 400,
+    keyframes: wordsKeyframes,
+    selectedTime,
     color: color.current,
-    loading
+    loading,
+    running
   };
 
   const timeProps = {
@@ -104,7 +106,8 @@ function HotsPanel({
     selectedTime,
     setSelectedTime,
     selectedType,
-    selectedLevel
+    selectedLevel,
+    range
   };
 
   useEffect(() => {

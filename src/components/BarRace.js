@@ -35,6 +35,7 @@ export default function({ loading, keyframes, selectedTime, running, color }) {
   color.cur(titles);
 
   useEffect(() => {
+    // 保存上一帧的颜色
     color.pre(titles);
   });
 

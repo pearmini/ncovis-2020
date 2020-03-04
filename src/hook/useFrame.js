@@ -1,10 +1,11 @@
 import { useRef } from "react";
-export default function(cb, start = 0) {
+export default function(cb) {
   const timer = useRef();
-  const duration = useRef(start);
+  const duration = useRef(0);
   const pre = useRef();
 
-  const requestFrame = () => {
+  const requestFrame = (start) => {
+    start && (duration.current = start);
     timer.current = requestAnimationFrame(step);
   };
 

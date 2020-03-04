@@ -18,7 +18,7 @@ export default {
   state: {
     dataByName: d3.map(),
     range: [],
-    selectedTime: 0,
+    selectedTime: 0
   },
   reducers: {
     init: (state, action) => ({ ...action.payload }),
@@ -69,9 +69,20 @@ export default {
             .map(([date, data]) => [new Date(date), data])
             .sort(([a], [b]) => a - b);
 
+          const wordsKeyframes = Array.from(
+            d3.rollup(
+              words,
+              d => d,
+              d => d.time
+            )
+          ).sort((a, b) => a[0] - b[0]);
+
           const titles = new Set(list.map(d => d.title));
-          const keyframes = interpolate(10);
-          return keyframes;
+          const listKeyframes = interpolate(10);
+          return {
+            listKeyframes,
+            wordsKeyframes
+          };
 
           function interpolate(k) {
             const keyframes = [];
@@ -98,8 +109,7 @@ export default {
               title,
               reading: reading(title) || 0
             }));
-            data
-              .sort((a, b) => d3.descending(a.reading, b.reading));
+            data.sort((a, b) => d3.descending(a.reading, b.reading));
             for (let i = 0; i < data.length; ++i) data[i].rank = i;
             return data.slice(0, n);
           }
