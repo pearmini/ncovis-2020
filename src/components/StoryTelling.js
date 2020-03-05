@@ -13,7 +13,14 @@ export default function({ loading, selectedTime, keyframes, running }) {
         dependcies={[selectedTime]}
       ></Canvas>
     );
-  const interpolateAttrs = new Set(["x", "y", "size", "rotate", "height"]);
+  const interpolateAttrs = new Set([
+    "x",
+    "y",
+    "size",
+    "rotate",
+    "height",
+    "size"
+  ]);
   const words = interpolateData(selectedTime);
 
   function interpolateData(time) {
@@ -24,8 +31,16 @@ export default function({ loading, selectedTime, keyframes, running }) {
     if (!i || !running) return a[1];
     const b = keyframes[i - 1],
       t = (time - a[0]) / (b[0] - a[0]);
-    return a[1].map(word => {
-      const pre = b[1].find(d => d.word === word.word) || word;
+
+    // 找出消失的
+    const disappear = b[1]
+      .filter(word => !a[1].find(d => d.word === word.word))
+      .map(word => ({ ...word, size: 0, height: 0 }));
+    const all = [...disappear, ...a[1]];
+    return all.map(word => {
+      // 设置新出现的
+      const defaultWord = { ...word, size: 0, height: 0 };
+      const pre = b[1].find(d => d.word === word.word) || defaultWord;
       return Object.keys(word).reduce((obj, key) => {
         if (interpolateAttrs.has(key)) {
           obj[key] = word[key] * (1 - t) + pre[key] * t;

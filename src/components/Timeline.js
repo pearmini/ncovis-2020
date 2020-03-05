@@ -56,6 +56,8 @@ export default function({
   function toggleAnimation() {
     if (running) {
       setRunning(false);
+      // 防止出现过渡效果
+      setSelectedTime(selectedTime + 1);
       pauseFrame();
     } else {
       setRunning(true);
