@@ -21,6 +21,13 @@ export default function({ loading, selectedTime, keyframes, running }) {
     "height",
     "size"
   ]);
+  const initWord = ({ x, y, ...rest }) => ({
+    ...rest,
+    size: 0,
+    height: 0,
+    x,
+    y
+  });
   const words = interpolateData(selectedTime);
 
   function interpolateData(time) {
@@ -35,12 +42,10 @@ export default function({ loading, selectedTime, keyframes, running }) {
     // 找出消失的
     const disappear = b[1]
       .filter(word => !a[1].find(d => d.word === word.word))
-      .map(word => ({ ...word, size: 0, height: 0 }));
+      .map(initWord);
     const all = [...disappear, ...a[1]];
     return all.map(word => {
-      // 设置新出现的
-      const defaultWord = { ...word, size: 0, height: 0 };
-      const pre = b[1].find(d => d.word === word.word) || defaultWord;
+      const pre = b[1].find(d => d.word === word.word) || initWord(word);
       return Object.keys(word).reduce((obj, key) => {
         if (interpolateAttrs.has(key)) {
           obj[key] = word[key] * (1 - t) + pre[key] * t;

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import useSize from "../hook/useSize";
-import { Popover, Empty, Spin, Icon } from "antd";
+import { Popover, Empty, Spin, Icon, Drawer } from "antd";
 
 const Container = styled.div.attrs(
   props =>
@@ -115,6 +115,10 @@ const Content = styled.ul`
   }
 `;
 
+const StyledDrawer = styled(Drawer)`
+  position: absolute;
+`;
+
 function State({ type, width, height }) {
   return (
     <Box width={width} height={height}>
@@ -137,35 +141,44 @@ function Card({
   onDownloadSvg,
   loading,
   nodata,
+  title = "title",
+  introduction,
   ...rest
 }) {
   const ref = useRef(null);
   const { width, height } = useSize(ref);
   const [zoom, setZoom] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [more, setMore] = useState(false);
+  const [pop, setPop] = useState(false);
 
   const content = (
     <Content>
-      <li onClick={() => setZoom(!zoom)}>
+      <li onClick={() => onClickItem(() => setZoom(!zoom))}>
         <Icon type={zoom ? "fullscreen-exit" : "fullscreen"} />
         <span>{zoom ? "缩小" : "放大"}</span>
       </li>
-      <li onClick={onDownload ? onDownload : onDownloadPng}>
+      <li onClick={() => onClickItem(onDownload ? onDownload : onDownloadPng)}>
         <Icon type="download" />
         <span>PNG</span>
       </li>
       {onDownloadSvg && (
-        <li onClick={onDownloadSvg}>
+        <li onClick={() => onClickItem(onDownloadSvg)}>
           <Icon type="download" />
           <span>SVG</span>
         </li>
       )}
-      <li>
+      <li onClick={() => onClickItem(() => setMore(true))}>
         <Icon type="question" />
         <span>详情</span>
       </li>
     </Content>
   );
+
+  function onClickItem(cb) {
+    cb && cb();
+    setPop(false);
+  }
 
   return (
     <>
@@ -187,14 +200,25 @@ function Card({
               content={content}
               trigger="click"
               arrowPointAtCenter
+              visible={pop}
             >
               <Grid>
-                <More></More>
+                <More onClick={() => setPop(!pop)}></More>
               </Grid>
             </Popover>
           )
         )}
         {children}
+        <StyledDrawer
+          title={title}
+          placement="right"
+          closable={true}
+          onClose={() => setMore(false)}
+          visible={more}
+          getContainer={false}
+        >
+          {introduction}
+        </StyledDrawer>
       </Container>
       {zoom && <Layer onClick={() => setZoom(false)} />}
     </>
