@@ -76,7 +76,6 @@ export default {
               d => d.time
             )
           ).sort((a, b) => a[0] - b[0]);
-          console.log(wordsKeyframes)
 
           const titles = new Set(list.map(d => d.title));
           const listKeyframes = interpolate(10);

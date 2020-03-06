@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
-import useFrame from "../hook/useFrame";
+import useAnimation from "../hook/useAnimation";
 import mouse from "../utils/mouse";
 import * as d3 from "d3";
 
@@ -27,7 +27,7 @@ export default function({
   running,
   setRunning
 }) {
-  const { requestFrame, pauseFrame, setFrame } = useFrame(step);
+  const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
   const dragging = useRef(false);
   const sliderRef = useRef(null);
   const dotRef = useRef(null);
@@ -58,10 +58,10 @@ export default function({
       setRunning(false);
       // 防止出现过渡效果
       setSelectedTime(selectedTime + 1);
-      pauseFrame();
+      pauseAnimation();
     } else {
       setRunning(true);
-      requestFrame(duration >= total ? 0 : duration);
+      requestAnimation(duration >= total ? 0 : duration);
     }
   }
 

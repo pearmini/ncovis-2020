@@ -1,15 +1,16 @@
 import { useRef } from "react";
-export default function(cb) {
+export default function(cb, frameRate = 60) {
   const timer = useRef();
   const duration = useRef(0);
   const pre = useRef();
+  const preRenderTime = useRef();
 
-  const requestFrame = (start) => {
+  const requestAnimation = start => {
     start && (duration.current = start);
     timer.current = requestAnimationFrame(step);
   };
 
-  const cancelFrame = () => {
+  const cancelAnimation = () => {
     pre.current = undefined;
     duration.current = 0;
     cancelAnimationFrame(timer.current);
@@ -19,26 +20,32 @@ export default function(cb) {
     duration.current = time;
   };
 
-  const pauseFrame = () => {
+  const pauseAnimation = () => {
     pre.current = undefined;
     cancelAnimationFrame(timer.current);
   };
 
   function step(time) {
+    if (preRenderTime.current === undefined) preRenderTime.current = time;
     if (pre.current === undefined) pre.current = time;
     duration.current += time - pre.current;
     pre.current = time;
-    const end = cb(duration.current);
+    let end;
+    if (time > preRenderTime.current + 1000 / frameRate) {
+      end = cb(duration.current);
+      preRenderTime.current = time;
+    }
+
     if (end === false) {
-      cancelFrame();
+      cancelAnimation();
       return;
     }
     timer.current = requestAnimationFrame(step);
   }
 
   return {
-    requestFrame,
-    pauseFrame,
+    requestAnimation,
+    pauseAnimation,
     setFrame
   };
 }

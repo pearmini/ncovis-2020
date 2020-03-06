@@ -34,7 +34,11 @@ export default function({ loading, all }) {
 
   const arcs = pie(data);
   return (
-    <Svg viewBox={[-width / 2, -height / 2, width, height]} loading={loading}>
+    <Svg
+      viewBox={[-width / 2, -height / 2, width, height]}
+      loading={loading}
+      nodata={data.length === 0}
+    >
       {arcs.map(a => (
         <path key={a.data.name} d={arc(a)} fill={color(a.data.name)} />
       ))}

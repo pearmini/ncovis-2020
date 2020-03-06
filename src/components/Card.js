@@ -188,6 +188,7 @@ function Card({
         zoom={zoom}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onClick={() => setPop(false)}
       >
         {loading ? (
           <State width={width} height={height} type="loading" />
@@ -202,8 +203,13 @@ function Card({
               arrowPointAtCenter
               visible={pop}
             >
-              <Grid>
-                <More onClick={() => setPop(!pop)}></More>
+              <Grid
+                onClick={e => {
+                  setPop(!pop);
+                  e.stopPropagation();
+                }}
+              >
+                <More></More>
               </Grid>
             </Popover>
           )

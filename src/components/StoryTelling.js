@@ -11,6 +11,7 @@ export default function({ loading, selectedTime, keyframes, running }) {
         height={height}
         loading={loading}
         dependcies={[selectedTime]}
+        nodata={keyframes === undefined}
       ></Canvas>
     );
   const interpolateAttrs = new Set([
