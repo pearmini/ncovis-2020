@@ -22,12 +22,10 @@ export default function({ loading, selectedTime, keyframes, running }) {
     "height",
     "size"
   ]);
-  const initWord = ({ x, y, ...rest }) => ({
-    ...rest,
+  const initWord = word => ({
+    ...word,
     size: 0,
-    height: 0,
-    x,
-    y
+    height: 0
   });
   const words = interpolateData(selectedTime);
 
@@ -38,7 +36,7 @@ export default function({ loading, selectedTime, keyframes, running }) {
 
     if (!i || !running) return a[1];
     const b = keyframes[i - 1],
-      t = (time - a[0]) / (b[0] - a[0]);
+      t = d3.easeCircleInOut((time - a[0]) / (b[0] - a[0]));
 
     // 找出消失的
     const disappear = b[1]

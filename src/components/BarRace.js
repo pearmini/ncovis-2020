@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import Svg from "./Svg";
 import * as d3 from "d3";
 export default function({ loading, keyframes, selectedTime, running, color }) {
-
   const width = 600,
     height = 400,
     margin = { top: 30, right: 30, bottom: 30, left: 50 };

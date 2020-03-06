@@ -35,7 +35,7 @@ function NewsPanel({
   loading,
   range
 }) {
-  const [selectedRegion, setSelectedRegion] = useState("全国");
+  const [selectedRegion, setSelectedRegion] = useState("中国");
   const [selectedType, setSelectedType] = useState("confirm");
   const types = [
     { name: "确诊", key: "confirm" },
