@@ -25,12 +25,18 @@ export default function({
         ? d3.max(node.children, d => d.visableH) + 1
         : 0;
   });
-  const visableRegions = new Set(
-      treeData
-        .descendants()
+  const descendants = treeData.descendants(),
+    visableRegions = new Set(
+      descendants
         .filter(d => !d.hide && (!d.children || d.hideChildren))
         .map(d => d.data.title)
     ),
+    layers = d3
+      .groups(descendants, d => d.depth)
+      .filter(
+        ([depth, data]) =>
+          depth !== treeData.height && depth !== 0 && data.every(d => !d.hide)
+      ),
     th = treeData.visableH;
 
   const all = useMemo(
@@ -70,7 +76,7 @@ export default function({
     height = 600,
     margin = { top: 50, right: 30, bottom: 30, left: 60 },
     maxCellWidth = 15,
-    chartPadding = 80,
+    chartPadding = 90,
     nodeWidth = 100,
     treeW = nodeWidth * th,
     maxMatrixWidth = width - margin.left - margin.right - chartPadding - treeW,
@@ -150,33 +156,65 @@ export default function({
     .scaleSequential(colors[selectedType])
     .domain([0, legendWidth]);
 
-  async function handleClickNode(region) {
-    // 先执行动画，执行动画完成之后再刷新界面。
-    const node = treeData
-      .descendants()
-      .find(d => d.data.title === region.data.title);
-
+  async function toggleNode(node) {
     if (!node.children) return;
+
+    // animation
     const t = d3
       .transition()
       .duration(250)
       .ease(d3.easeExpOut);
-    await animate(region, t);
-    updateData(region);
+    animateSelectNode(node, t);
+    node.hideChildren
+      ? animateShowChildren(node, t)
+      : animateHideChildren(node, t);
+    !node.hideChildren && node.depth === 0 && animateHideButton(t);
+    animateHideLegend(t);
+    await t.end();
 
-    // 这里必须要拷贝一份，否者很麻烦
-    const newTreeData = d3.hierarchy(regionsData);
+    // update data
+    node.hideChildren ? showChildren(node) : hideChildren(node);
 
-    newTreeData.each(node => {
-      const old = nodeByTitle.get(node.data.title);
-      node.hideChildren = old.hideChildren;
-      node.hide = old.hide;
-    });
+    // upadte view
+    const newTreeData = copyTree();
     setTreeData(newTreeData);
     setSelectedRegion(node.data.title);
   }
 
-  function animate(node, t) {
+  async function toggleNodes(nodes) {
+    // animation
+    const t = d3
+      .transition()
+      .duration(250)
+      .ease(d3.easeExpOut);
+    const validNodes = nodes.filter(node => node.children);
+    const allHide = validNodes.every(d => d.hideChildren);
+    allHide
+      ? validNodes.forEach(d => animateShowChildren(d, t))
+      : validNodes
+          .filter(d => !d.hideChildren)
+          .forEach(d => animateHideChildren(d, t));
+    animateHideLegend(t);
+    animateHideAxis(t);
+    await t.end();
+
+    // update data
+    allHide
+      ? validNodes.forEach(showChildren)
+      : validNodes.filter(d => !d.hideChildren).forEach(hideChildren);
+
+    // update view
+    const newTreeData = copyTree();
+    setTreeData(newTreeData);
+  }
+
+  function animateHideButton(t) {
+    d3.select(".tree-btn")
+      .transition(t)
+      .attr("fill-opacity", 0);
+  }
+
+  function animateSelectNode(node, t) {
     // 改变当前节点的颜色
     if (selectedRegion !== node.data.title) {
       d3.select(`#node-${selectedRegion}`)
@@ -188,92 +226,112 @@ export default function({
         .transition(t)
         .attr("fill", highlightColor);
     }
+  }
 
+  function animateHideLegend(t) {
     // 坐标轴和 legend
-    d3.selectAll(`.tree-legend, .tree-line, .tree-xAxis`)
+    d3.selectAll(".tree-legend, .tree-line")
+      .transition(t)
+      .attr("stroke-opacity", 0)
+      .attr("fill-opacity", 0);
+  }
+
+  function animateHideAxis(t) {
+    d3.select(".tree-xAxis")
+      .transition(t)
+      .attr("stroke-opacity", 0)
+      .attr("fill-opacity", 0);
+  }
+
+  function animateHideChildren(node, t) {
+    const text = d3.select(`#node-${node.data.title} text`).node();
+    const { width } = text.getBBox();
+    d3.select(`#node-${node.data.title} text`)
+      .transition(t)
+      .attr("x", width + 6);
+
+    node.each(d => {
+      if (node.data.title === d.data.title) return;
+
+      // node
+      d3.select(`#node-${d.data.title}`)
+        .attr("fill-opacity", 1)
+        .transition(t)
+        .attr("transform", `translate(${node.y}, ${node.x})`)
+        .attr("fill-opacity", 0);
+
+      // link
+      d3.select(`#link-${d.data.title}`)
+        .transition(t)
+        .attr("d", () => {
+          const o = { x: node.x, y: node.y };
+          return pathLink({ source: o, target: o });
+        });
+
+      // rect
+      d3.selectAll(`.grid-${d.data.title}`)
+        .transition(t)
+        .attr("stroke-opacity", 0)
+        .attr("fill-opacity", 0);
+    });
+  }
+
+  function animateShowChildren(node, t) {
+    const text = d3.select(`#node-${node.data.title} text`).node();
+    const { width } = text.getBBox();
+    d3.select(`#node-${node.data.title} text`)
+      .transition(t)
+      .attr("x", -width - 6);
+
+    d3.selectAll(`.grid-${node.data.title} `)
       .transition(t)
       .attr("stroke-opacity", 0)
       .attr("fill-opacity", 0);
 
-    if (node.hideChildren) {
-      // 文字
-      const text = d3.select(`#node-${node.data.title} text`).node();
-      const { width } = text.getBBox();
-      d3.select(`#node-${node.data.title} text`)
+    // 移动到目的位置
+    node.each(d => {
+      if (node.data.title === d.data.title) return;
+      d3.select(`#node-${d.data.title}`)
         .transition(t)
-        .attr("x", -width - 6);
+        .attr("transform", `translate(${d.y}, ${d.x})`)
+        .attr("fill-opacity", 1);
 
-      d3.selectAll(`.grid-${node.data.title} `)
+      d3.select(`#link-${d.data.title}`)
         .transition(t)
-        .attr("stroke-opacity", 0)
-        .attr("fill-opacity", 0);
-      // 移动到目的位置
-      node.each(d => {
-        if (node.data.title === d.data.title) return;
-        d3.select(`#node-${d.data.title}`)
-          .transition(t)
-          .attr("transform", `translate(${d.y}, ${d.x})`)
-          .attr("fill-opacity", 1);
-
-        d3.select(`#link-${d.data.title}`)
-          .transition(t)
-          .attr("stroke-opacity", 0.4)
-          .attr("d", () => {
-            const o = { x: d.x, y: d.y };
-            const s = { x: d.parent.x, y: d.parent.y };
-            return pathLink({ source: s, target: o });
-          });
-      });
-    } else {
-      // 文字
-      const text = d3.select(`#node-${node.data.title} text`).node();
-      const { width } = text.getBBox();
-      d3.select(`#node-${node.data.title} text`)
-        .transition(t)
-        .attr("x", width + 6);
-
-      node.each(d => {
-        if (node.data.title === d.data.title) return;
-
-        // node
-        d3.select(`#node-${d.data.title}`)
-          .attr("fill-opacity", 1)
-          .transition(t)
-          .attr("transform", `translate(${node.y}, ${node.x})`)
-          .attr("fill-opacity", 0);
-
-        // link
-        d3.select(`#link-${d.data.title}`)
-          .transition(t)
-          .attr("d", () => {
-            const o = { x: node.x, y: node.y };
-            return pathLink({ source: o, target: o });
-          });
-
-        // rect
-        d3.selectAll(`.grid-${d.data.title}`)
-          .transition(t)
-          .attr("stroke-opacity", 0)
-          .attr("fill-opacity", 0);
-      });
-    }
-    return t.end();
+        .attr("stroke-opacity", 0.4)
+        .attr("d", () => {
+          const o = { x: d.x, y: d.y };
+          const s = { x: d.parent.x, y: d.parent.y };
+          return pathLink({ source: s, target: o });
+        });
+    });
   }
 
-  function updateData(node) {
-    if (node.hideChildren) {
-      node.hideChildren = false;
-      node.eachBefore(child => {
-        if (child.data.title === node.data.title) return;
-        child.hide = false;
-      });
-    } else {
-      node.hideChildren = true;
-      node.each(child => {
-        if (child.data.title === node.data.title) return;
-        child.hide = true;
-      });
-    }
+  function hideChildren(node) {
+    node.hideChildren = true;
+    node.each(child => {
+      if (child.data.title === node.data.title) return;
+      child.hide = true;
+    });
+  }
+
+  function showChildren(node) {
+    node.hideChildren = false;
+    node.eachBefore(child => {
+      if (child.data.title === node.data.title) return;
+      child.hide = false;
+    });
+  }
+
+  function copyTree() {
+    // 这里必须要拷贝一份，否者很麻烦
+    const newTreeData = d3.hierarchy(regionsData);
+    newTreeData.each(node => {
+      const old = nodeByTitle.get(node.data.title);
+      node.hideChildren = old.hideChildren;
+      node.hide = old.hide;
+    });
+    return newTreeData;
   }
 
   function isSelect(d) {
@@ -312,7 +370,9 @@ export default function({
     d3.select(".tree-xAxis").call(xAxis);
     d3.select(".tree-legend").call(legendAxis);
 
-    d3.selectAll(`.grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis`)
+    d3.selectAll(
+      `.grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn`
+    )
       .transition(t)
       .attr("stroke-opacity", 1)
       .attr("fill-opacity", 1);
@@ -328,6 +388,7 @@ export default function({
       p-id="1313"
       width={buttonSize}
       height={buttonSize}
+      cursor="pointer"
     >
       <path
         d="M512 128c211.968 0 384 172.032 384 384s-172.032 384-384 384-384-172.032-384-384 172.032-384 384-384z m-187.221333 425.6h371.2a41.6 41.6 0 1 0 0-83.2h-371.2a41.6 41.6 0 0 0 0 83.2z"
@@ -346,6 +407,7 @@ export default function({
       p-id="1443"
       width={buttonSize}
       height={buttonSize}
+      cursor="pointer"
     >
       <path
         d="M458.922667 503.210667H314.965333a41.6 41.6 0 1 0 0 83.2h143.957334v144a41.6 41.6 0 0 0 83.2 0v-144h144a41.6 41.6 0 0 0 0-83.2h-144V359.253333a41.6 41.6 0 0 0-83.2 0v143.957334zM502.186667 160.853333c211.968 0 384 172.032 384 384s-172.032 384-384 384-384-172.032-384-384 172.032-384 384-384z"
@@ -382,6 +444,19 @@ export default function({
           transform={`translate(0, ${legendHeight / 2})`}
         ></g>
       </g>
+      {layers.map(([depth, data]) => (
+        <g
+          className="tree-btn"
+          transform={`translate(${margin.left +
+            depth * nodeWidth -
+            buttonSize / 2}, ${height - margin.top + buttonSize / 2})`}
+          key={depth}
+          onClick={() => toggleNodes(data)}
+          fillOpacity={0}
+        >
+          {data.every(d => d.hideChildren) ? plusButton : minusButton}
+        </g>
+      ))}
       <g transform={`translate(${margin.left}, ${margin.top})`}>
         {root.links().map((link, index) => (
           <path
@@ -408,7 +483,7 @@ export default function({
                   : normalColor
               }
               fillOpacity={node.hide ? 0 : 1}
-              onClick={() => handleClickNode(node)}
+              onClick={() => toggleNode(node)}
               cursor="pointer"
             >
               <circle r={3}></circle>

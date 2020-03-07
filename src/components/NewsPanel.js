@@ -45,7 +45,6 @@ function NewsPanel({
   ];
   const dataByDate = dataByRegion.get(selectedRegion);
   const data = dataByDate && dataByDate.get(selectedDate);
-
   const shapeProps = {
     data,
     loading,
@@ -102,9 +101,9 @@ function NewsPanel({
           <span>日期</span>&ensp;
           <DatePicker
             value={moment(selectedDate)}
-            onChange={(date, string) =>
-              setSelectedDate(new Date(string).getTime())
-            }
+            onChange={(date, string) => {
+              setSelectedDate(string);
+            }}
             disabledDate={disabledDate}
             showTody={false}
           />
