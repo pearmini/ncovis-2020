@@ -36,11 +36,10 @@ function NewsPanel({
   range
 }) {
   const [selectedRegion, setSelectedRegion] = useState("中国");
-  const [selectedType, setSelectedType] = useState("confirm");
+  const [selectedType, setSelectedType] = useState("confirmed");
   const types = [
-    { name: "确诊", key: "confirm" },
-    { name: "治愈", key: "cue" },
-    { name: "疑似", key: "suspect" },
+    { name: "确诊", key: "confirmed" },
+    { name: "治愈", key: "cured" },
     { name: "死亡", key: "dead" }
   ];
   const dataByDate = dataByRegion.get(selectedRegion);

@@ -54,16 +54,15 @@ function HotsPanel({
       { name: "省份", key: "third" }
     ],
     types = [
-      { name: "确诊", key: "confirm" },
-      { name: "治愈", key: "cue" },
-      { name: "疑似", key: "suspect" },
+      { name: "确诊", key: "confirmed" },
+      { name: "治愈", key: "cured" },
       { name: "死亡", key: "dead" }
     ];
 
   const [running, setRunning] = useState(false);
   const [selectedName, setSelectedName] = useState(names[0].value);
   const [selectedLevel, setSelectedLevel] = useState("third");
-  const [selectedType, setSelectedType] = useState("confirm");
+  const [selectedType, setSelectedType] = useState("confirmed");
   const color = useRef(mc(d3.schemeSet3, 10));
   const namevalues = dataByName.get(selectedName);
   const { listKeyframes, wordsKeyframes } = namevalues || {};

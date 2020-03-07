@@ -8,13 +8,12 @@ export default function({
   selectedTime,
   selectedType = "confirm",
   selectedLevel = "top",
-  range,
   setSelectedTime
 }) {
   const ref = useRef(null);
   const width = 1200,
     height = 300,
-    margin = { top: 30, right: 30, bottom: 30, left: 60 };
+    margin = { top: 25, right: 30, bottom: 25, left: 60 };
 
   const secondLevelSet = new Set([
     "华北地区",
@@ -34,11 +33,11 @@ export default function({
           ...data
             .filter(({ region }) => {
               if (selectedLevel === "top") {
-                return region === "全国";
+                return region === "中国";
               } else if (selectedLevel === "second") {
                 return secondLevelSet.has(region);
               } else {
-                return region !== "全国" && !secondLevelSet.has(region);
+                return region !== "中国" && !secondLevelSet.has(region);
               }
             })
             .reduce((obj, { region, data }) => ((obj[region] = data), obj), {})
@@ -64,7 +63,7 @@ export default function({
 
   const x = d3
     .scaleTime()
-    .domain(range.map(d => new Date(d)))
+    .domain(d3.extent(data, d => new Date(d.date)))
     .range([0, width - margin.right - margin.left]);
 
   const y = d3
@@ -81,15 +80,14 @@ export default function({
 
   const color =
     selectedLevel === "top"
-      ? () => "steelblue"
+      ? () => "#61d4b3"
       : d3
           .scaleOrdinal()
           .domain(keys)
-          .range(
-            d3
-              .quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), keys.length)
-              .reverse()
-          );
+          .range(d3.quantize(d3.interpolateSpectral, keys.length).reverse());
+
+  const stroke = key =>
+    selectedLevel === "top" ? d3.color(color(key)).darker() : "none";
 
   function handleClickPath(e) {
     const [mouseX] = mouse(e, ref.current);
@@ -132,7 +130,15 @@ export default function({
             transform={`translate(${margin.left}, ${margin.top})`}
           >
             {series.map(s => (
-              <path key={s.key} fill={color(s.key)} d={area(s)} />
+              <path
+                key={s.key}
+                fill={color(s.key)}
+                d={area(s)}
+                stroke={stroke(s.key)}
+                strokeWidth={2}
+                stokeLinejoin="round"
+                strokeLinecap="round"
+              />
             ))}
             <line
               x1={x(new Date(selectedTime))}

@@ -45,10 +45,12 @@ export default function({
           ? Array.from(dataByRegion).flatMap(([region, dataByDate]) =>
               d3
                 .pairs(
-                  Array.from(dataByDate).map(([date, data]) => ({
-                    date: new Date(date),
-                    data: data.data
-                  }))
+                  Array.from(dataByDate)
+                    .map(([date, data]) => ({
+                      date: new Date(date),
+                      data: data.data
+                    }))
+                    .sort((a, b) => a.date - b.date)
                 )
                 .map(([a, b]) => ({
                   region,
@@ -75,17 +77,14 @@ export default function({
   const width = 1200,
     height = 600,
     margin = { top: 50, right: 30, bottom: 30, left: 60 },
-    maxCellWidth = 15,
     chartPadding = 90,
     nodeWidth = 100,
     treeW = nodeWidth * th,
-    maxMatrixWidth = width - margin.left - margin.right - chartPadding - treeW,
-    matrixWidth = Math.min(days.length * maxCellWidth, maxMatrixWidth),
+    matrixWidth = width - margin.left - margin.right - chartPadding - treeW,
     colors = {
       dead: d3.interpolateBuPu,
-      confirm: d3.interpolatePuRd,
-      cue: d3.interpolateYlGn,
-      suspect: d3.interpolateOrRd
+      confirmed: d3.interpolatePuRd,
+      cured: d3.interpolateYlGn
     },
     highlightColor = "red",
     normalColor = "black",
@@ -352,7 +351,7 @@ export default function({
     const scaleTime = d3
       .scaleTime()
       .domain(d3.extent(days).map(d3.timeDay))
-      .range([0, maxMatrixWidth]);
+      .range([0, matrixWidth]);
 
     const scaleLegend = d3
       .scaleLinear()
@@ -502,7 +501,7 @@ export default function({
       <g
         transform={`translate(${width -
           margin.right -
-          maxMatrixWidth}, ${margin.top - cellHeight / 2})`}
+          matrixWidth}, ${margin.top - cellHeight / 2})`}
       >
         <g>
           {data.map(d => (
