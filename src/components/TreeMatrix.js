@@ -380,6 +380,7 @@ export default function({
     node.eachBefore(child => {
       if (child.data.title === node.data.title) return;
       child.hide = false;
+      child.hideChildren = false;
     });
   }
 

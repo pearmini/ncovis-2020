@@ -18,7 +18,7 @@ export default function({
   const ref = useRef(null);
   const width = 1200,
     height = 300,
-    margin = { top: 25, right: 30, bottom: 25, left: 60 },
+    margin = { top: 30, right: 30, bottom: 25, left: 60 },
     formatDate = d3.timeFormat("%x"),
     bisect = d3.bisector(d => d.date).left;
 
