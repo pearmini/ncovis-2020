@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Svg from "./Svg";
 import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
@@ -18,6 +18,11 @@ export default function({
   selectedType,
   loading
 }) {
+  const width = 1200,
+    height = 600;
+  if (!dataByRegion.size)
+    return <Svg viewBox={[0, 0, width, height]} loading={loading}></Svg>;
+
   const [treeData, setTreeData] = useState(d3.hierarchy(regionsData));
   treeData.eachAfter(node => {
     node.visableH =
@@ -47,14 +52,14 @@ export default function({
                 .pairs(
                   Array.from(dataByDate)
                     .map(([date, data]) => ({
-                      date: new Date(date),
+                      date: date,
                       data: data.data
                     }))
-                    .sort((a, b) => a.date - b.date)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date))
                 )
                 .map(([a, b]) => ({
                   region,
-                  date: new Date(b.date),
+                  date: b.date,
                   ...Object.keys(b.data).reduce(
                     (obj, key) => ((obj[key] = b.data[key] - a.data[key]), obj),
                     {}
@@ -72,15 +77,15 @@ export default function({
       }))
       .filter(({ value }) => !isNaN(value) && value !== "")
       .filter(d => visableRegions.has(d.region)),
-    days = Array.from(new Set(data.map(d => d.date.getTime())));
+    days = new Set(data.map(d => d.date));
 
-  const width = 1200,
-    height = 600,
-    margin = { top: 50, right: 30, bottom: 30, left: 60 },
+  const margin = { top: 50, right: 30, bottom: 30, left: 60 },
     chartPadding = 90,
     nodeWidth = 100,
-    treeW = nodeWidth * th,
-    matrixWidth = width - margin.left - margin.right - chartPadding - treeW,
+    buttonSize = 20,
+    legendWidth = 150,
+    legendHeight = 10,
+    axisPadding = 5,
     colors = {
       dead: d3.interpolateBuPu,
       confirmed: d3.interpolatePuRd,
@@ -89,18 +94,28 @@ export default function({
     highlightColor = "red",
     normalColor = "black",
     highlightRectColor = "steelblue",
-    buttonSize = 20,
-    legendWidth = 150,
-    legendHeight = 10,
-    axisPadding = 10,
-    formatDate = d3.timeFormat("%x");
+    formatDate = d3.timeFormat("%x"),
+    labels = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "June",
+      "July",
+      "Aug",
+      "Sept",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    treeW = nodeWidth * th,
+    treeH = height - margin.top - margin.bottom - axisPadding,
+    matrixWidth = width - margin.left - margin.right - chartPadding - treeW;
 
   const tree = d3
       .tree()
-      .size([
-        height - margin.top - margin.bottom - axisPadding,
-        treeData.height * nodeWidth
-      ])
+      .size([treeH, treeData.height * nodeWidth])
       .separation((a, b) => (a.parent === b.parent ? 1 : 1.5)),
     root = tree(treeData),
     cellHeight = d3
@@ -117,7 +132,7 @@ export default function({
 
   const x = d3
     .scaleBand()
-    .domain(days)
+    .domain(Array.from(days))
     .range([0, matrixWidth]);
 
   const y = title => {
@@ -154,6 +169,52 @@ export default function({
   const stroke = d3
     .scaleSequential(colors[selectedType])
     .domain([0, legendWidth]);
+
+  useEffect(() => {
+    // 绘制坐标轴
+    const scaleLegend = d3
+      .scaleLinear()
+      .domain(color.domain())
+      .range([0, legendWidth]);
+
+    const legendAxis = d3
+      .axisBottom(scaleLegend)
+      .ticks(legendWidth / 50)
+      .tickSizeOuter(0);
+
+    const xAxis = d3
+      .axisBottom(x)
+      .tickSizeOuter(0)
+      .tickFormat(time => {
+        const date = new Date(time).getDate();
+        if (date !== 1) return date;
+        const month = new Date(time).getMonth();
+        return labels[month];
+      });
+
+    d3.select(".tree-xAxis")
+      .call(xAxis)
+      .call(g =>
+        g
+          .selectAll("text")
+          .filter(function() {
+            const label = d3.select(this).text();
+            return labels.indexOf(label) !== -1;
+          })
+          .attr("font-weight", "bold")
+      );
+
+    d3.select(".tree-legend").call(legendAxis);
+
+    // animation
+    const t = d3.transition().duration(200);
+    d3.selectAll(
+      `.grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn`
+    )
+      .transition(t)
+      .attr("stroke-opacity", 1)
+      .attr("fill-opacity", 1);
+  });
 
   async function toggleNode(node) {
     if (!node.children) return;
@@ -334,7 +395,7 @@ export default function({
   }
 
   function isSelect(d) {
-    return selectedRegion === d.region && selectedDate === d.date.getTime();
+    return selectedRegion === d.region && selectedDate === d.date;
   }
 
   function handleClickRect({ region, date }) {
@@ -345,37 +406,6 @@ export default function({
   function noData(data) {
     return data.filter(({ value }) => !isNaN(value)).length === 0;
   }
-
-  useEffect(() => {
-    // 绘制坐标轴
-    const scaleTime = d3
-      .scaleTime()
-      .domain(d3.extent(days).map(d3.timeDay))
-      .range([0, matrixWidth]);
-
-    const scaleLegend = d3
-      .scaleLinear()
-      .domain(color.domain())
-      .range([0, legendWidth]);
-
-    const legendAxis = d3
-      .axisBottom(scaleLegend)
-      .ticks(legendWidth / 50)
-      .tickSizeOuter(0);
-
-    const xAxis = d3.axisBottom(scaleTime).tickSizeOuter(0);
-
-    const t = d3.transition().duration(200);
-    d3.select(".tree-xAxis").call(xAxis);
-    d3.select(".tree-legend").call(legendAxis);
-
-    d3.selectAll(
-      `.grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn`
-    )
-      .transition(t)
-      .attr("stroke-opacity", 1)
-      .attr("fill-opacity", 1);
-  });
 
   const minusButton = (
     <svg
@@ -508,7 +538,7 @@ export default function({
             <rect
               className={`grid-${d.region} grid`}
               key={d.region + d.date.toString()}
-              x={x(d.date.getTime()) - 1}
+              x={x(d.date) - 1}
               y={y(d.region) - 1}
               width={x.bandwidth() - 2}
               height={h(d.region) - 2}
@@ -520,7 +550,9 @@ export default function({
               stroke={isSelect(d) ? highlightRectColor : "none"}
               strokeWidth={isSelect(d) ? 3 : 0}
             >
-              <title>{`${d.region}:${d.value}(${formatDate(d.date)})`}</title>
+              <title>{`${d.region}:${d.value}(${formatDate(
+                new Date(d.date)
+              )})`}</title>
             </rect>
           ))}
           <g

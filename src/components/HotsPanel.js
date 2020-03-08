@@ -59,6 +59,7 @@ function HotsPanel({
       { name: "死亡", key: "dead" }
     ];
 
+  const [focus, setFocus] = useState("");
   const [running, setRunning] = useState(false);
   const [selectedName, setSelectedName] = useState(names[0].value);
   const [selectedLevel, setSelectedLevel] = useState("third");
@@ -106,7 +107,10 @@ function HotsPanel({
     setSelectedTime,
     selectedType,
     selectedLevel,
-    range
+    range,
+    focus,
+    setFocus,
+    running
   };
 
   useEffect(() => {
@@ -144,7 +148,10 @@ function HotsPanel({
               <span>级别</span>&ensp;
               <Select
                 value={selectedLevel}
-                onChange={value => setSelectedLevel(value)}
+                onChange={value => {
+                  setSelectedLevel(value);
+                  setFocus("");
+                }}
               >
                 {levels.map(d => (
                   <Option key={d.key}>{d.name}</Option>

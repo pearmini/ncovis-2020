@@ -34,10 +34,10 @@ function getNews() {
 export default {
   namespace: "news",
   state: {
-    dataByRegion: d3.map(),
+    dataByRegion: new Map(),
     selectedDate: "2020-2-20",
     range: [],
-    dataByDate: d3.map()
+    dataByDate: new Map()
   },
   reducers: {
     init: (state, action) => ({ ...state, ...action.payload }),

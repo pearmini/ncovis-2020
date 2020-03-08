@@ -1,19 +1,26 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Svg from "./Svg";
 import * as d3 from "d3";
 import mouse from "../utils/mouse";
+import Tooltip from "./Tooltip";
+import { treemapBinary } from "d3";
 export default function({
   loading,
   dataByDate,
   selectedTime,
   selectedType = "confirm",
   selectedLevel = "top",
-  setSelectedTime
+  setSelectedTime,
+  focus,
+  setFocus,
+  running
 }) {
   const ref = useRef(null);
   const width = 1200,
     height = 300,
-    margin = { top: 25, right: 30, bottom: 25, left: 60 };
+    margin = { top: 25, right: 30, bottom: 25, left: 60 },
+    formatDate = d3.timeFormat("%x"),
+    bisect = d3.bisector(d => d.date).left;
 
   const secondLevelSet = new Set([
     "华北地区",
@@ -25,6 +32,9 @@ export default function({
     "华南地区",
     "港澳台地区"
   ]);
+
+  const [highlight, setHighlight] = useState(""),
+    [tip, setTip] = useState(null);
 
   const all = useMemo(
       () =>
@@ -46,18 +56,30 @@ export default function({
     ),
     data = useMemo(
       () =>
-        all.map(d =>
-          Object.keys(d).reduce(
-            (obj, key) => (
-              (obj[key] = key === "date" ? d[key] : d[key][selectedType]), obj
-            ),
-            {}
+        all
+          .map(d =>
+            Object.keys(d).reduce((obj, key) => {
+              if (key === "date") {
+                obj[key] = d[key];
+              } else if (focus === "" || focus === key) {
+                obj[key] = d[key][selectedType];
+              }
+              return obj;
+            }, {})
           )
-        ),
-      [dataByDate, selectedType, selectedLevel]
+          .sort((a, b) => a.date - b.date),
+      [dataByDate, selectedType, selectedLevel, focus]
     ),
     [first] = data,
-    keys = first ? Object.keys(first).filter(d => d !== "date") : [];
+    keys = first ? Object.keys(first).filter(d => d !== "date") : [],
+    cnt = selectedLevel === "second" ? 4 : 6,
+    legendWidth = selectedLevel === "second" ? 90 : 65,
+    legendHeight = 25,
+    disableColor = "#efefef",
+    tw = selectedLevel === "second" ? 100 : 70,
+    th = 20,
+    tipW = Math.max(tw * Math.ceil(keys.length / cnt), 100),
+    tipH = Math.min(keys.length, cnt) * th + 30;
 
   const series = d3.stack().keys(keys)(data);
 
@@ -72,27 +94,51 @@ export default function({
     .nice()
     .range([height - margin.bottom - margin.top, 0]);
 
+  const legendX = index => ((index / cnt) | 0) * legendWidth;
+
+  const legendY = index => (index % cnt) * legendHeight;
+
+  const tipX = index => ((index / cnt) | 0) * tw;
+  const tipY = index => (index % cnt) * th;
+
+  const lineX = () => {
+    if (running) return x(new Date(selectedTime));
+    if (tip) return x(tip.time);
+    return x(new Date(0));
+  };
+
   const area = d3
     .area()
     .x(d => x(d.data.date))
     .y0(d => y(d[0]))
     .y1(d => y(d[1]));
 
-  const color =
-    selectedLevel === "top"
+  const colorScale =
+    keys.length === 1
       ? () => "#61d4b3"
       : d3
           .scaleOrdinal()
           .domain(keys)
           .range(d3.quantize(d3.interpolateSpectral, keys.length).reverse());
 
+  const color = key =>
+    highlight === "" || key === highlight ? colorScale(key) : disableColor;
+
   const stroke = key =>
     selectedLevel === "top" ? d3.color(color(key)).darker() : "none";
 
-  function handleClickPath(e) {
+  function handleChangeSelectedTime(e) {
     const [mouseX] = mouse(e, ref.current);
     const time = x.invert(mouseX).getTime();
     setSelectedTime(time);
+  }
+
+  function handleChangeTip(e) {
+    const [mouseX, mouseY] = mouse(e, ref.current);
+    const time = x.invert(mouseX).getTime();
+    const i = bisect(data, new Date(time), 0, data.length - 1),
+      a = data[i];
+    setTip({ ...a, time, x: mouseX, y: mouseY });
   }
 
   function noData(data) {
@@ -122,31 +168,108 @@ export default function({
           nodata={true}
         ></Svg>
       ) : (
-        <Svg viewBox={[0, 0, width, height]} loading={loading}>
+        <Svg
+          viewBox={[0, 0, width, height]}
+          loading={loading}
+          onClick={() => setFocus("")}
+          onMouseLeave={() => setHighlight("")}
+        >
           <g
             cursor="pointer"
             ref={ref}
-            onClick={handleClickPath}
             transform={`translate(${margin.left}, ${margin.top})`}
+            onMouseLeave={() => setTip(null)}
           >
-            {series.map(s => (
-              <path
-                key={s.key}
-                fill={color(s.key)}
-                d={area(s)}
-                stroke={stroke(s.key)}
-                strokeWidth={2}
-                stokeLinejoin="round"
-                strokeLinecap="round"
-              />
-            ))}
+            <g onMouseMove={handleChangeTip} onClick={handleChangeSelectedTime}>
+              {series.map(s => (
+                <path
+                  key={s.key}
+                  fill={color(s.key)}
+                  d={area(s)}
+                  stroke={stroke(s.key)}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                />
+              ))}
+            </g>
             <line
-              x1={x(new Date(selectedTime))}
+              x1={lineX()}
               y1={0}
-              x2={x(new Date(selectedTime))}
+              x2={lineX()}
               y2={height - margin.bottom - margin.top}
               stroke="currentColor"
             />
+            <g transform={`translate(${20},${5})`}>
+              <rect
+                onMouseLeave={() => setHighlight("")}
+                x={-10}
+                y={-10}
+                fill="transparent"
+                width={legendWidth * Math.ceil(keys.length / cnt)}
+                height={Math.min(keys.length, cnt) * legendHeight}
+              ></rect>
+              {keys.map((key, index) => (
+                <g
+                  key={key}
+                  transform={`translate(${legendX(index)}, ${legendY(index)})`}
+                  onMouseEnter={() => setHighlight(key)}
+                  onClick={e => {
+                    setFocus(key);
+                    e.stopPropagation();
+                  }}
+                >
+                  <circle fill={color(key)} cx={0} cy={0} r={5}></circle>
+                  <text dy={5} dx={10} fill="currentColor">
+                    {key}
+                  </text>
+                </g>
+              ))}
+            </g>
+            {tip && (
+              <Tooltip
+                extent={[
+                  0,
+                  0,
+                  width - margin.left - margin.right,
+                  height - margin.top - margin.bottom
+                ]}
+                size={[tipW, tipH]}
+                pos={[tip.x, 10]}
+              >
+                {(x, y) => (
+                  <g transform={`translate(${x}, ${y})`}>
+                    <rect
+                      width={tipW}
+                      height={tipH}
+                      rx={10}
+                      ry={10}
+                      fill="white"
+                      stroke="currentColor"
+                    ></rect>
+                    <text dx={10} dy={20}>
+                      {formatDate(tip.date)}
+                    </text>
+                    <g transform={`translate(10, 40)`}>
+                      {Object.keys(tip)
+                        .filter(
+                          d =>
+                            d !== "time" &&
+                            d !== "x" &&
+                            d !== "y" &&
+                            d !== "date"
+                        )
+                        .map((key, index) => (
+                          <text
+                            fontSize="10"
+                            x={tipX(index)}
+                            y={tipY(index)}
+                          >{`${key}: ${tip[key]}`}</text>
+                        ))}
+                    </g>
+                  </g>
+                )}
+              </Tooltip>
+            )}
           </g>
           <g
             className="area-xAxis"
