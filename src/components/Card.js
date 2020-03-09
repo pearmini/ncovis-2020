@@ -187,7 +187,10 @@ function Card({
         {...rest}
         zoom={zoom}
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseLeave={() => {
+          setHovered(false);
+          setPop(false);
+        }}
         onClick={() => setPop(false)}
       >
         {loading ? (

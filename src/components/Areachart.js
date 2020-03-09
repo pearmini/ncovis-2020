@@ -95,9 +95,7 @@ export default function({
     .range([height - margin.bottom - margin.top, 0]);
 
   const legendX = index => ((index / cnt) | 0) * legendWidth;
-
   const legendY = index => (index % cnt) * legendHeight;
-
   const tipX = index => ((index / cnt) | 0) * tw;
   const tipY = index => (index % cnt) * th;
 
@@ -258,9 +256,11 @@ export default function({
                             d !== "y" &&
                             d !== "date"
                         )
+                        .sort((a, b) => tip[b] - tip[a])
                         .map((key, index) => (
                           <text
                             fontSize="10"
+                            key={key}
                             x={tipX(index)}
                             y={tipY(index)}
                           >{`${key}: ${tip[key]}`}</text>

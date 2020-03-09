@@ -126,12 +126,12 @@ function NewsPanel({
         </Col>
       </Row>
       <Row gutter={[16, 16]}>
-        <Col span={24} md={12}>
+        {/* <Col span={24} md={12}>
           <Shape {...shapeProps} />
         </Col>
         <Col span={24} md={12}>
           <Piechart {...pieProps} />
-        </Col>
+        </Col> */}
       </Row>
     </Container>
   );

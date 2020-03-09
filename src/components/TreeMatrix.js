@@ -24,6 +24,7 @@ export default function({
     return <Svg viewBox={[0, 0, width, height]} loading={loading}></Svg>;
 
   const [treeData, setTreeData] = useState(d3.hierarchy(regionsData));
+  const [highlight, setHighlight] = useState([]);
   treeData.eachAfter(node => {
     node.visableH =
       node.children && !node.hideChildren
@@ -79,21 +80,28 @@ export default function({
       .filter(d => visableRegions.has(d.region)),
     days = new Set(data.map(d => d.date));
 
+  const hset = new Set(highlight.map(d => d.data.title));
+  const colorData = highlight.length
+    ? data.filter(d => hset.has(d.region))
+    : data;
+
   const margin = { top: 50, right: 30, bottom: 30, left: 60 },
     chartPadding = 90,
     nodeWidth = 100,
-    buttonSize = 20,
+    buttonSize = 15,
     legendWidth = 150,
     legendHeight = 10,
     axisPadding = 5,
     colors = {
-      dead: d3.interpolateBuPu,
-      confirmed: d3.interpolatePuRd,
-      cured: d3.interpolateYlGn
+      dead: d3.interpolateGnBu,
+      confirmed: d3.interpolateBuPu,
+      cured: d3.interpolateBuGn,
+      special: d3.interpolateOrRd
     },
     highlightColor = "red",
     normalColor = "black",
     highlightRectColor = "steelblue",
+    disabledColor = "#eeeeee",
     formatDate = d3.timeFormat("%x"),
     labels = [
       "Jan",
@@ -157,9 +165,26 @@ export default function({
     return x1 - x0 + cellHeight;
   };
 
-  const color = d3
-    .scaleSequential(colors[selectedType])
-    .domain(d3.extent(data, d => d.value));
+  const colorScale = d3.scaleSequential(colors[selectedType]).domain(
+    d3.extent(
+      colorData.filter(d => d.region !== "湖北" && d.region !== "华中地区"),
+      d => d.value
+    )
+  );
+
+  const specialColorScale = d3.scaleSequential(colors.special).domain(
+    d3.extent(
+      colorData.filter(d => d.region === "湖北" || d.region === "华中地区"),
+      d => d.value
+    )
+  );
+
+  const color = node => {
+    if (highlight.length && !hset.has(node.region)) return disabledColor;
+    if (node.region === "湖北" || node.region === "华中地区")
+      return specialColorScale(node.value);
+    return colorScale(node.value);
+  };
 
   const pathLink = d3
     .linkHorizontal()
@@ -170,15 +195,29 @@ export default function({
     .scaleSequential(colors[selectedType])
     .domain([0, legendWidth]);
 
+  const strokeSpecial = d3
+    .scaleSequential(colors.special)
+    .domain([0, legendWidth]);
+
   useEffect(() => {
     // 绘制坐标轴
     const scaleLegend = d3
       .scaleLinear()
-      .domain(color.domain())
+      .domain(colorScale.domain())
+      .range([0, legendWidth]);
+
+    const specialScaleLegend = d3
+      .scaleLinear()
+      .domain(specialColorScale.domain())
       .range([0, legendWidth]);
 
     const legendAxis = d3
       .axisBottom(scaleLegend)
+      .ticks(legendWidth / 50)
+      .tickSizeOuter(0);
+
+    const specialLegendAxis = d3
+      .axisBottom(specialScaleLegend)
       .ticks(legendWidth / 50)
       .tickSizeOuter(0);
 
@@ -205,26 +244,47 @@ export default function({
       );
 
     d3.select(".tree-legend").call(legendAxis);
+    d3.select(".tree-legend-special").call(specialLegendAxis);
 
     // animation
     const t = d3.transition().duration(200);
     d3.selectAll(
-      `.grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn`
+      ".grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn, .tree-legend-special"
     )
       .transition(t)
       .attr("stroke-opacity", 1)
       .attr("fill-opacity", 1);
   });
 
+  function toggleHighlightNode(node) {
+    if (!node.parent) return;
+
+    const old = highlight.find(d => d.data.title === node.data.title);
+    const hasChildren = highlight.some(
+      d => d.parent.data.title === node.data.title
+    );
+    if (old || hasChildren) {
+      const deleteNodes = node.hideChildren ? [node] : node.leaves();
+      for (let d of deleteNodes) {
+        const index = highlight.indexOf(d);
+        highlight.splice(index, 1);
+      }
+    } else {
+      node.hideChildren
+        ? highlight.push(node)
+        : highlight.push(...node.leaves());
+    }
+    setHighlight([...highlight]);
+    setSelectedRegion(node.data.title);
+  }
+
   async function toggleNode(node) {
     if (!node.children) return;
-
     // animation
     const t = d3
       .transition()
       .duration(250)
       .ease(d3.easeExpOut);
-    animateSelectNode(node, t);
     node.hideChildren
       ? animateShowChildren(node, t)
       : animateHideChildren(node, t);
@@ -238,7 +298,7 @@ export default function({
     // upadte view
     const newTreeData = copyTree();
     setTreeData(newTreeData);
-    setSelectedRegion(node.data.title);
+    setHighlight([]);
   }
 
   async function toggleNodes(nodes) {
@@ -247,6 +307,7 @@ export default function({
       .transition()
       .duration(250)
       .ease(d3.easeExpOut);
+
     const validNodes = nodes.filter(node => node.children);
     const allHide = validNodes.every(d => d.hideChildren);
     allHide
@@ -266,6 +327,7 @@ export default function({
     // update view
     const newTreeData = copyTree();
     setTreeData(newTreeData);
+    setHighlight([]);
   }
 
   function animateHideButton(t) {
@@ -274,23 +336,9 @@ export default function({
       .attr("fill-opacity", 0);
   }
 
-  function animateSelectNode(node, t) {
-    // 改变当前节点的颜色
-    if (selectedRegion !== node.data.title) {
-      d3.select(`#node-${selectedRegion}`)
-        .transition(t)
-        .attr("fill", normalColor);
-
-      d3.select(`#node-${node.data.title}`)
-        .attr("fill", normalColor)
-        .transition(t)
-        .attr("fill", highlightColor);
-    }
-  }
-
   function animateHideLegend(t) {
     // 坐标轴和 legend
-    d3.selectAll(".tree-legend, .tree-line")
+    d3.selectAll(".tree-legend, .tree-line, .tree-legend-special")
       .transition(t)
       .attr("stroke-opacity", 0)
       .attr("fill-opacity", 0);
@@ -308,7 +356,7 @@ export default function({
     const { width } = text.getBBox();
     d3.select(`#node-${node.data.title} text`)
       .transition(t)
-      .attr("x", width + 6);
+      .attr("x", width + 8);
 
     node.each(d => {
       if (node.data.title === d.data.title) return;
@@ -341,7 +389,7 @@ export default function({
     const { width } = text.getBBox();
     d3.select(`#node-${node.data.title} text`)
       .transition(t)
-      .attr("x", -width - 6);
+      .attr("x", -width - 8);
 
     d3.selectAll(`.grid-${node.data.title} `)
       .transition(t)
@@ -401,7 +449,7 @@ export default function({
 
   function handleClickRect({ region, date }) {
     setSelectedRegion(region);
-    setSelectedDate(date.getTime());
+    setSelectedDate(date);
   }
 
   function noData(data) {
@@ -451,6 +499,7 @@ export default function({
       viewBox={[0, 0, width, height]}
       loading={loading}
       nodata={noData(data)}
+      onClick={() => setHighlight([])}
     >
       <g
         transform={`translate(${width -
@@ -473,7 +522,39 @@ export default function({
           className="tree-legend"
           transform={`translate(0, ${legendHeight / 2})`}
         ></g>
+        <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
+          其他地区
+        </text>
       </g>
+      {th && (
+        <g
+          transform={`translate(${width -
+            margin.right -
+            legendWidth -
+            legendWidth -
+            100}, ${margin.top / 2})`}
+        >
+          {d3.range(0, legendWidth).map(l => (
+            <line
+              className="tree-line"
+              key={l}
+              x1={l}
+              y1={-legendHeight / 2}
+              x2={l}
+              y2={legendHeight / 2}
+              stroke={strokeSpecial(l)}
+            />
+          ))}
+          <g
+            className="tree-legend-special"
+            transform={`translate(0, ${legendHeight / 2})`}
+          ></g>
+          <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
+            华中或湖北地区
+          </text>
+        </g>
+      )}
+
       {layers.map(([depth, data]) => (
         <g
           className="tree-btn"
@@ -481,7 +562,10 @@ export default function({
             depth * nodeWidth -
             buttonSize / 2}, ${height - margin.top + buttonSize / 2})`}
           key={depth}
-          onClick={() => toggleNodes(data)}
+          onClick={e => {
+            toggleNodes(data);
+            e.stopPropagation(); // 这行代码很关键
+          }}
           fillOpacity={0}
         >
           {data.every(d => d.hideChildren) ? plusButton : minusButton}
@@ -513,16 +597,42 @@ export default function({
                   : normalColor
               }
               fillOpacity={node.hide ? 0 : 1}
-              onClick={() => toggleNode(node)}
               cursor="pointer"
             >
-              <circle r={3}></circle>
+              {!node.children ? (
+                <circle r={3}></circle>
+              ) : (
+                <>
+                  <circle
+                    r={buttonSize / 2 - 5}
+                    fill="white"
+                    onClick={e => {
+                      toggleNode(node);
+                      e.stopPropagation();
+                    }}
+                  ></circle>
+                  <g
+                    transform={`translate(${-buttonSize / 2}, ${-buttonSize /
+                      2})`}
+                    onClick={e => {
+                      toggleNode(node);
+                      e.stopPropagation();
+                    }}
+                  >
+                    {!node.hideChildren ? minusButton : plusButton}
+                  </g>
+                </>
+              )}
               <text
                 dy="0.31em"
-                x={!node.children || node.hideChildren ? 6 : -6}
+                x={!node.children || node.hideChildren ? 8 : -8}
                 textAnchor={
                   !node.children || node.hideChildren ? "start" : "end"
                 }
+                onClick={e => {
+                  toggleHighlightNode(node);
+                  e.stopPropagation();
+                }}
               >
                 {node.data.title}
               </text>
@@ -543,11 +653,14 @@ export default function({
               y={y(d.region) - 1}
               width={x.bandwidth() - 2}
               height={h(d.region) - 2}
-              fill={color(d.value)}
+              fill={color(d)}
               fillOpacity={0}
               strokeOpacity={0}
               cursor="pointer"
-              onClick={() => handleClickRect(d)}
+              onClick={e => {
+                handleClickRect(d);
+                e.stopPropagation();
+              }}
               stroke={isSelect(d) ? highlightRectColor : "none"}
               strokeWidth={isSelect(d) ? 3 : 0}
             >
