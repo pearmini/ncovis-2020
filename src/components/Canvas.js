@@ -21,6 +21,7 @@ export default function({
   filename = "words",
   ...rest
 }) {
+  const ratio = 4;
   function onDownload() {
     const canvas = ref.current;
     canvas.toBlob(blob => {
@@ -41,8 +42,8 @@ export default function({
 
   const canvasProps = {
     ref,
-    width: width * 2,
-    height: height * 2,
+    width: width * ratio,
+    height: height * ratio,
     ...rest
   };
 
@@ -51,7 +52,7 @@ export default function({
     const context = canvas.getContext("2d");
     context.restore();
     context.save();
-    context.scale(2, 2);
+    context.scale(ratio, ratio);
     children && children(context);
   }, dependcies);
 

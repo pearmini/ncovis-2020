@@ -31,21 +31,24 @@ function NewsPanel({
   selectedDate,
   setSelectedDate,
   dataByRegion,
+  newsByRegion,
+  getNewsData,
   getData,
   loading,
   range
 }) {
-  const [selectedRegion, setSelectedRegion] = useState("中国");
+  const [selectedRegion, setSelectedRegion] = useState("湖北");
   const [selectedType, setSelectedType] = useState("confirmed");
   const types = [
     { name: "确诊", key: "confirmed" },
     { name: "治愈", key: "cured" },
     { name: "死亡", key: "dead" }
   ];
-  const dataByDate = dataByRegion.get(selectedRegion);
-  const data = dataByDate && dataByDate.get(selectedDate);
+  const newsByDate = newsByRegion.get(selectedRegion);
+  const news = newsByDate && newsByDate.get(selectedDate);
+  const { words, tags } = news || {};
   const shapeProps = {
-    data,
+    data: words,
     loading,
     selectedDate,
     selectedRegion
@@ -53,7 +56,7 @@ function NewsPanel({
 
   const pieProps = {
     loading,
-    all: data,
+    data: tags,
     selectedDate,
     selectedRegion
   };
@@ -76,8 +79,17 @@ function NewsPanel({
   }
 
   useEffect(() => {
-    getData();
-  }, [getData]);
+    // 请求所有的数据
+    if (!dataByRegion.size) {
+      console.log("request data...");
+      getData();
+    }
+    // 如果有日期数据且 news 数据为空的话就请求
+    if (news === undefined && selectedDate !== "") {
+      console.log(`request data:${selectedRegion}, ${selectedDate}`);
+      getNewsData(selectedRegion, `${selectedDate}`);
+    }
+  }, [getData, selectedDate, selectedRegion, getNewsData]);
   return (
     <Container>
       <An id="news" />
@@ -99,7 +111,7 @@ function NewsPanel({
         <div>
           <span>日期</span>&ensp;
           <DatePicker
-            value={moment(selectedDate)}
+            value={selectedDate === "" ? null : moment(selectedDate)}
             onChange={(date, string) => {
               setSelectedDate(string);
             }}
@@ -126,12 +138,12 @@ function NewsPanel({
         </Col>
       </Row>
       <Row gutter={[16, 16]}>
-        {/* <Col span={24} md={12}>
+        <Col span={24} md={12}>
           <Shape {...shapeProps} />
         </Col>
         <Col span={24} md={12}>
           <Piechart {...pieProps} />
-        </Col> */}
+        </Col>
       </Row>
     </Container>
   );
@@ -145,6 +157,10 @@ export default connect(
     setSelectedDate: time => ({
       type: "news/setSelectedDate",
       payload: time
+    }),
+    getNewsData: (region, date) => ({
+      type: "news/getNewsData",
+      payload: { region, date }
     }),
     getData: () => ({ type: "news/getData" })
   }

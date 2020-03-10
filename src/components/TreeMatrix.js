@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Svg from "./Svg";
 import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
@@ -497,7 +497,7 @@ export default function({
   return (
     <Svg
       viewBox={[0, 0, width, height]}
-      loading={loading}
+      loading={loading && noData(data)}
       nodata={noData(data)}
       onClick={() => setHighlight([])}
     >

@@ -1,66 +1,72 @@
-import React, { useState } from "react";
+import React from "react";
 import Canvas from "./Canvas";
 
-function Shape({ data, loading }) {
-  const [loadingImage, setLoadingImage] = useState(false);
-  const width = 3600,
-    height = 2400,
-    { key, fill } = data || {};
+function Shape({ data, loading, selectedDate, selectedRegion }) {
+  const width = 900,
+    height = 600,
+    marginRight = 50,
+    marginBottom = 60,
+    { keywords, fillingWords } = data || {};
 
-  function createOffscreenCanvas() {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    return [canvas, canvas.getContext("2d")];
+  function drawText(context, words, { fillStyle, textAlign, textBaseline }) {
+    context.textAlign = textAlign;
+    context.textBaseline = textBaseline;
+    context.fillStyle = fillStyle;
+    for (let word of words) {
+      const { name, transX, transY, rotate, fontSize, fillX, fillY } = word;
+      context.save();
+      context.font = `${fontSize}px 微软雅黑`;
+      context.translate(transX, transY);
+      context.rotate(rotate);
+      context.fillText(name, fillX, fillY);
+      context.restore();
+    }
   }
 
-  function drawImage(context, src, color) {
-    let resolve, reject;
-    const promise = new Promise((y, n) => ((resolve = y), (reject = n)));
-    const image = new Image();
+  function drawLabel(context) {
+    context.save();
+    // region
+    context.translate(width - marginRight, height - marginBottom);
+    context.fillStyle = "#777";
+    context.textAlign = "end";
+    context.textBaseline = "bottom";
+    context.font = `bold 50px 微软雅黑`;
+    context.fillText(selectedRegion, 0, 0);
 
-    // 这里的原理暂时不知
-    // 这两行主要是为了解决跨域的问题
-    image.src = src + "?time=" + new Date().valueOf();
-    image.crossOrigin = "Anonymous";
-    image.onerror = reject;
-    image.onload = () => {
-      context.drawImage(image, 0, 0, width, height);
-      context.globalCompositeOperation = "source-atop";
-      context.fillStyle = color;
-      context.fillRect(0, 0, width, height);
-      resolve();
-    };
-    return promise;
+    context.font = "normal 25px 微软雅黑";
+    context.fillText(selectedDate, 0, 35);
+    // date
+    context.restore();
   }
 
-  function drawBackground(context, fill) {
-    context.fillStyle = fill;
+  function draw(context) {
+    if (!keywords || !fillingWords) return;
+    context.fillStyle = "white";
     context.fillRect(0, 0, width, height);
-  }
 
-  async function draw(context) {
-    if (!key) return;
-    const [canvasFill, contextFill] = createOffscreenCanvas(),
-      [canvasKey, contextKey] = createOffscreenCanvas();
-    setLoadingImage(true);
-    await Promise.all([
-      drawImage(contextFill, fill, "orange"),
-      drawImage(contextKey, key, "purple")
-    ]);
-    drawBackground(context, "white");
-    context.drawImage(canvasFill, 0, 0);
-    context.drawImage(canvasKey, 0, 0);
-    setLoadingImage(false);
+    // 绘制地区和时间信息
+    drawLabel(context);
+
+    // 绘制词云
+    drawText(context, keywords, {
+      fillStyle: "steelblue",
+      textAlign: "center",
+      textBaseline: "alphabet"
+    });
+    drawText(context, fillingWords, {
+      fillStyle: "red",
+      textAlign: "start",
+      textBaseline: "middle"
+    });
   }
 
   return (
     <Canvas
       width={width}
       height={height}
-      loading={loading || loadingImage}
+      loading={loading}
       nodata={data === undefined}
-      dependcies={[key, fill]}
+      dependcies={[data]}
     >
       {draw}
     </Canvas>

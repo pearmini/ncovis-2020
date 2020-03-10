@@ -11,11 +11,11 @@ const d3 = {
   ...d3Array
 };
 
-function getNews() {
-  const client = new ApolloClient({
-    uri: "https://api.ncovis.mllab.cn:4431/graphql",
-    headers: {}
-  });
+const client = new ApolloClient({
+  uri: "https://api.ncovis.mllab.cn:4431/graphql"
+});
+
+function getNcov() {
   return client.query({
     query: gql`
       {
@@ -31,25 +31,92 @@ function getNews() {
   });
 }
 
+function getNews(region, date) {
+  return client.query({
+    query: gql`
+      {
+        news(region: "${region}", date: "${date}T16:00:00Z") {
+          news {
+            date
+            tags {
+              name
+              count
+            }
+            keywords {
+              name
+              color
+              fontSize
+              transX
+              transY
+              fillX
+              fillY
+              rotate
+            }
+            fillingWords {
+              name
+              color
+              fontSize
+              transX
+              transY
+              fillX
+              fillY
+              rotate
+            }
+          }
+        }
+      }
+    `
+  });
+}
+
 export default {
   namespace: "news",
   state: {
     dataByRegion: new Map(),
-    selectedDate: "2020-2-20",
+    selectedDate: "",
     range: [],
+    newsByRegion: new Map(),
     dataByDate: new Map()
   },
   reducers: {
     init: (state, action) => ({ ...state, ...action.payload }),
+    addNews: (state, action) => {
+      const { region, dataByDate } = action.payload;
+      const { newsByRegion } = state;
+      newsByRegion.set(region, dataByDate);
+      return { ...state, newsByRegion };
+    },
     setSelectedDate: (state, action) => ({
       ...state,
       selectedDate: action.payload
     })
   },
   effects: {
+    *getNewsData(action, { call, put }) {
+      try {
+        // 这里要处理一下时间的问题
+        const { region, date } = action.payload;
+        const result = yield call(getNews, region, date);
+        const { tags, keywords, fillingWords } = result.data.news.news[0];
+        const data = {
+          tags,
+          words: {
+            keywords,
+            fillingWords
+          }
+        };
+        const dataByDate = new Map([[date, data]]);
+        yield put({
+          type: "addNews",
+          payload: { region, dataByDate }
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    },
     *getData(action, { call, put }) {
       try {
-        const result = yield call(getNews);
+        const result = yield call(getNcov);
         const news = result.data.ncov;
         const data = preprocess(news),
           dataByRegion = d3.rollup(
@@ -68,7 +135,9 @@ export default {
               })),
             d => d.date
           ),
-          selectedDate = formatDate(new Date(range[1]));
+          selectedDate = "2020-02-10";
+        // selectedDate = formatDate(new Date(range[1]));
+
         yield put({
           type: "init",
           payload: { dataByRegion, selectedDate, range, dataByDate }
