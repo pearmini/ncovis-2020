@@ -38,11 +38,14 @@ const Control = styled.div`
 function HotsPanel({
   dataByName,
   dataByDate,
-  range,
+  getData,
+  loadingHots,
+  loadingNews,
+  timeByName,
+  getTime,
   selectedTime,
   setSelectedTime,
-  getData,
-  loading
+  updateDataByTime
 }) {
   const names = [
       { name: "微博", value: "weibo" },
@@ -61,16 +64,24 @@ function HotsPanel({
 
   const [focus, setFocus] = useState("");
   const [running, setRunning] = useState(false);
-  const [selectedName, setSelectedName] = useState(names[0].value);
+  const [selectedName, setSelectedName] = useState(names[1].value);
   const [selectedLevel, setSelectedLevel] = useState("third");
   const [selectedType, setSelectedType] = useState("confirmed");
+
   const color = useRef(mc(d3.schemeSet3, 10));
   const namevalues = dataByName.get(selectedName);
-  const { listKeyframes, wordsKeyframes } = namevalues || {};
-  const timeAt = d3
+  const { listKeyframes, cloudsKeyframes } = namevalues || {};
+
+  // 获得热搜数据和条形图时间的交集
+  const hotTimeRange = timeByName.get(selectedName);
+  const totalTimeRange = d3.extent(
+    Array.from(dataByDate).map(([date]) => new Date(date).getTime())
+  );
+
+  const timeScale = d3
     .scaleLinear()
     .domain([0, 30000])
-    .range(range || [0, 0]);
+    .range(totalTimeRange || [0, 0]);
 
   const barsProps = {
     width: 600,
@@ -79,21 +90,21 @@ function HotsPanel({
     selectedTime,
     color: color.current,
     running,
-    loading
+    loading: loadingHots
   };
 
   const storyProps = {
     width: 600,
     height: 400,
-    keyframes: wordsKeyframes,
+    keyframes: cloudsKeyframes,
     selectedTime,
     color: color.current,
-    loading,
+    loading: false,
     running
   };
 
   const timeProps = {
-    time: timeAt,
+    time: timeScale,
     selectedTime,
     running,
     setRunning,
@@ -101,21 +112,39 @@ function HotsPanel({
   };
 
   const areaPros = {
-    loading,
+    loading: loadingNews,
     dataByDate,
     selectedTime,
     setSelectedTime,
     selectedType,
     selectedLevel,
-    range,
     focus,
     setFocus,
     running
   };
 
   useEffect(() => {
-    getData();
-  }, [getData]);
+    // 获得时间范围
+    if (!hotTimeRange) {
+      getTime(selectedName);
+      return;
+    }
+
+    // 请求数据
+    const bisect = d3.bisector(d => d.time);
+    const index = bisect.left(hotTimeRange, selectedTime),
+      tick = hotTimeRange[index];
+    if (tick.request) return;
+    const limit = 10;
+    getData({
+      name: selectedName,
+      from: tick.time,
+      limit
+    });
+    for (let i = index; i < hotTimeRange.length && i < index + limit; i++)
+      hotTimeRange[i].request = true;
+    updateDataByTime(selectedName, hotTimeRange);
+  }, [getData, getTime, selectedName, hotTimeRange]);
 
   return (
     <Container>
@@ -135,10 +164,10 @@ function HotsPanel({
       </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          <StoryTelling {...storyProps} />
+          {/* <BarRace {...barsProps} /> */}
         </Col>
         <Col span={24} md={12}>
-          <BarRace {...barsProps} />
+          <StoryTelling {...storyProps} />
         </Col>
       </Row>
       <Row gutter={[16, 16]}>
@@ -184,11 +213,15 @@ function HotsPanel({
 export default connect(
   ({ hots, loading, news }) => ({
     ...hots,
-    loading: loading.models.hots || loading.models.news,
+    loadingHots: loading.models.hots,
+    loadingNews: loading.models.news,
     dataByDate: news.dataByDate
   }),
   {
-    getData: () => ({ type: "hots/getData" }),
+    getData: options => ({
+      type: "hots/getData",
+      payload: options
+    }),
     setSelectedName: name => ({
       type: "hots/setSelectedName",
       payload: name
@@ -196,6 +229,11 @@ export default connect(
     setSelectedTime: time => ({
       type: "hots/setSelectedTime",
       payload: time
+    }),
+    getTime: name => ({ type: "hots/getTime", payload: { name } }),
+    updateDataByTime: (name, range) => ({
+      type: "hots/updateDataByTime",
+      payload: { name, range }
     })
   }
 )(HotsPanel);

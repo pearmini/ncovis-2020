@@ -5,24 +5,25 @@ const Logo = styled.div`
   color: white;
   font-size: 25px;
   font-weight: bold;
-  color: white;
+  color: ${props => props.theme.font};
 `;
 
 const Container = styled.div`
   display: relative;
   height: 56px;
-  background: black;
+  background: ${props => props.theme.header};
   line-height: 56px;
   position: fixed;
   width: 100%;
   top: 0px;
   z-index: 15;
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
 `;
 
 const HeaderWrapper = styled.header`
   margin: 0 auto;
   max-width: 1200px;
-  background: black;
+  background: ${props => props.theme.header};
   width: 90%;
   display: flex;
   align-items: center;
@@ -39,7 +40,8 @@ const Nav = styled.nav`
     list-style-type: none;
   }
   & a {
-    color: white;
+    color: ${props => props.theme.font};
+    font-weight: bold;
   }
 
   @media (max-width: 700px) {
@@ -104,7 +106,7 @@ function Header() {
     <>
       <Container>
         <HeaderWrapper>
-          <Logo>nCoVIS</Logo>
+          <Logo>nCoVIS 2020</Logo>
           <Nav show={show}>
             <ul>
               {navs.map(nav => (

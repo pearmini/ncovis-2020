@@ -20,8 +20,9 @@ export default function({
 }) {
   const width = 1200,
     height = 600;
+    
   if (!dataByRegion.size)
-    return <Svg viewBox={[0, 0, width, height]} loading={loading}></Svg>;
+    return <Svg viewBox={[0, 0, width, height]} loading={loading} nodata={true}></Svg>;
 
   const [treeData, setTreeData] = useState(d3.hierarchy(regionsData));
   const [highlight, setHighlight] = useState([]);
@@ -241,6 +242,7 @@ export default function({
             return labels.indexOf(label) !== -1;
           })
           .attr("font-weight", "bold")
+          .attr("dy", "2em")
       );
 
     d3.select(".tree-legend").call(legendAxis);

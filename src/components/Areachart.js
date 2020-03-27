@@ -3,7 +3,6 @@ import Svg from "./Svg";
 import * as d3 from "d3";
 import mouse from "../utils/mouse";
 import Tooltip from "./Tooltip";
-import { treemapBinary } from "d3";
 export default function({
   loading,
   dataByDate,
@@ -68,7 +67,7 @@ export default function({
             }, {})
           )
           .sort((a, b) => a.date - b.date),
-      [dataByDate, selectedType, selectedLevel, focus]
+      [all, selectedType, focus]
     ),
     [first] = data,
     keys = first ? Object.keys(first).filter(d => d !== "date") : [],

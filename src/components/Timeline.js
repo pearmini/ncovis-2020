@@ -42,7 +42,7 @@ export default function({
     .scaleLinear()
     .domain(range)
     .range([margin.left, width - margin.right]);
-
+  
   function step(duration) {
     // 不能超过最大的时间
     const t = Math.min(time(duration), range[1]);

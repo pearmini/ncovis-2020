@@ -4,16 +4,17 @@ import * as d3 from "d3";
 export default function({ loading, selectedTime, keyframes, running }) {
   const width = 1200,
     height = 800;
-  if (keyframes === undefined)
+  if (keyframes === undefined || keyframes.length === 0)
     return (
       <Canvas
         width={width}
         height={height}
         loading={loading}
-        dependcies={[selectedTime]}
+        dependcies={[selectedTime, draw]}
         nodata={keyframes === undefined}
       ></Canvas>
     );
+
   const interpolateAttrs = new Set([
     "x",
     "y",
@@ -22,11 +23,13 @@ export default function({ loading, selectedTime, keyframes, running }) {
     "height",
     "size"
   ]);
+
   const initWord = word => ({
     ...word,
     size: 0,
     height: 0
   });
+  const text = d => d.text;
   const words = interpolateData(selectedTime);
 
   function interpolateData(time) {
@@ -40,11 +43,11 @@ export default function({ loading, selectedTime, keyframes, running }) {
 
     // 找出消失的
     const disappear = b[1]
-      .filter(word => !a[1].find(d => d.word === word.word))
+      .filter(word => !a[1].find(d => text(d) === text(word)))
       .map(initWord);
     const all = [...disappear, ...a[1]];
     return all.map(word => {
-      const pre = b[1].find(d => d.word === word.word) || initWord(word);
+      const pre = b[1].find(d => text(d) === text(word)) || initWord(word);
       return Object.keys(word).reduce((obj, key) => {
         if (interpolateAttrs.has(key)) {
           obj[key] = word[key] * (1 - t) + pre[key] * t;
@@ -59,27 +62,22 @@ export default function({ loading, selectedTime, keyframes, running }) {
   function draw(context) {
     context.fillStyle = "white";
     context.fillRect(0, 0, width, height);
+    context.save();
+    context.translate(width / 2, height / 2);
+    context.textAlign = "center";
     for (let word of words) {
-      context.save();
-      context.fillStyle = word.color;
-      if (word.angle === 0) {
-        context.translate(word.x, word.y);
-        context.font = `${word.size}px 微软雅黑`;
-      } else {
-        context.translate(word.x, word.y - word.height);
-        context.rotate((Math.PI * word.angle) / 180);
-        context.font = `${word.size}px 微软雅黑`;
-      }
-      context.fillText(word.word, 0, 0);
-      context.restore();
+      context.fillStyle = "black";
+      context.font = `${word.size}px 微软雅黑`;
+      context.fillText(text(word), word.x, word.y);
     }
+    context.restore();
   }
 
   return (
     <Canvas
       width={width}
       height={height}
-      dependcies={[selectedTime]}
+      dependcies={[selectedTime, draw]}
       loading={loading}
       nodata={words.length === 0}
     >

@@ -5,7 +5,7 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
   const width = 600,
     height = 400,
     margin = { top: 50, right: 35, bottom: 40, left: 40 },
-    legendHeight = 20;
+    legendHeight = 25;
 
   const arc = d3
     .arc()
@@ -26,14 +26,17 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
     .sort(null)
     .value(d => d.count);
 
-  const color = d3
-    .scaleOrdinal()
-    .domain(names)
-    .range(
-      d3
-        .quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length)
-        .reverse()
-    );
+  const color =
+    data.length === 1
+      ? () => "#61d4b3"
+      : d3
+          .scaleOrdinal()
+          .domain(names)
+          .range(
+            d3
+              .quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length)
+              .reverse()
+          );
 
   const arcs = pie(data);
   return (
