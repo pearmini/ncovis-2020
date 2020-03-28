@@ -2,7 +2,6 @@ import data from "../assets/data/news.json";
 import regionTree from "../assets/data/region_options.json";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
-import formatDate from "../utils/formatDate";
 import ApolloClient from "apollo-boost";
 import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";

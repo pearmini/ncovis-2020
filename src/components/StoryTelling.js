@@ -15,19 +15,11 @@ export default function({ loading, selectedTime, keyframes, running }) {
       ></Canvas>
     );
 
-  const interpolateAttrs = new Set([
-    "x",
-    "y",
-    "size",
-    "rotate",
-    "height",
-    "size"
-  ]);
+  const interpolateAttrs = new Set(["x", "y", "size"]);
 
   const initWord = word => ({
     ...word,
-    size: 0,
-    height: 0
+    size: 0
   });
   const text = d => d.text;
   const words = interpolateData(selectedTime);
@@ -37,7 +29,7 @@ export default function({ loading, selectedTime, keyframes, running }) {
     const i = bisect(keyframes, time, 0, keyframes.length - 1),
       a = keyframes[i];
 
-    if (!i || !running) return a[1];
+    if (!i || !running || time > a[0]) return a[1];
     const b = keyframes[i - 1],
       t = d3.easeCircleInOut((time - a[0]) / (b[0] - a[0]));
 

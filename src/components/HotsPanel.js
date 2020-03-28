@@ -75,12 +75,17 @@ function HotsPanel({
   // 获得热搜数据和条形图时间的交集
   const hotTimeRange = timeByName.get(selectedName);
   const totalTimeRange = d3.extent(
-    Array.from(dataByDate).map(([date]) => new Date(date).getTime())
-  );
+      Array.from(dataByDate).map(([date]) => new Date(date).getTime())
+    ),
+    ticks = d3.timeHour
+      .every(12) // 每隔 12 小时展现一次
+      .range(totalTimeRange[0], totalTimeRange[1])
+      .map(d => d.getTime()),
+    totalDuration = ticks.length * 1500; // 1小时 0.75秒
 
   const timeScale = d3
     .scaleLinear()
-    .domain([0, 30000])
+    .domain([0, totalDuration])
     .range(totalTimeRange || [0, 0]);
 
   const barsProps = {
@@ -99,7 +104,7 @@ function HotsPanel({
     keyframes: cloudsKeyframes,
     selectedTime,
     color: color.current,
-    loading: false,
+    loading: loadingHots,
     running
   };
 
@@ -131,20 +136,33 @@ function HotsPanel({
     }
 
     // 请求数据
+    const limit = 10,
+      forward = 3;
     const bisect = d3.bisector(d => d.time);
-    const index = bisect.left(hotTimeRange, selectedTime),
-      tick = hotTimeRange[index];
+    const index = bisect.right(hotTimeRange, selectedTime),
+      tick = hotTimeRange[index],
+      nextIndex = Math.min(hotTimeRange.length - 1, index + limit),
+      nextTick = hotTimeRange[nextIndex];
+
+    const lo = d3.bisectLeft(ticks, tick.time),
+      hi = d3.bisectLeft(ticks, nextTick.time);
+    const f = ticks.slice(lo, hi);
+    
+    // 如果离的很近了还是要请求
     if (tick.request) return;
-    const limit = 10;
+    console.log("request", index);
+    console.log(lo, hi, f, index, nextIndex);
+
     getData({
+      ticks: f,
       name: selectedName,
-      from: tick.time,
+      from: (tick.time / 1000) | 0,
       limit
     });
     for (let i = index; i < hotTimeRange.length && i < index + limit; i++)
       hotTimeRange[i].request = true;
     updateDataByTime(selectedName, hotTimeRange);
-  }, [getData, getTime, selectedName, hotTimeRange]);
+  }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
 
   return (
     <Container>
