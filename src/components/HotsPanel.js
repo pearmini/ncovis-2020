@@ -63,7 +63,8 @@ function HotsPanel({
     ];
 
   const [focus, setFocus] = useState("");
-  const [running, setRunning] = useState(false);
+  const [running, setRunning] = useState(false); // 用户是否点击播放
+  const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
   const [selectedName, setSelectedName] = useState(names[1].value);
   const [selectedLevel, setSelectedLevel] = useState("third");
   const [selectedType, setSelectedType] = useState("confirmed");
@@ -78,10 +79,10 @@ function HotsPanel({
       Array.from(dataByDate).map(([date]) => new Date(date).getTime())
     ),
     ticks = d3.timeHour
-      .every(12) // 每隔 12 小时展现一次
+      .every(12) // 每隔 12 小时获取一下数据
       .range(totalTimeRange[0], totalTimeRange[1])
       .map(d => d.getTime()),
-    totalDuration = ticks.length * 1500; // 1小时 0.75秒
+    totalDuration = ticks.length * 3000; // 1小时 0.75秒
 
   const timeScale = d3
     .scaleLinear()
@@ -95,7 +96,8 @@ function HotsPanel({
     selectedTime,
     color: color.current,
     running,
-    loading: loadingHots
+    loading: loadingHots,
+    selectedName: selectedName === "weibo" ? "微博" : "知乎"
   };
 
   const storyProps = {
@@ -105,7 +107,8 @@ function HotsPanel({
     selectedTime,
     color: color.current,
     loading: loadingHots,
-    running
+    running: running || pause,
+    selectedName: selectedName === "weibo" ? "微博" : "知乎"
   };
 
   const timeProps = {
@@ -113,7 +116,10 @@ function HotsPanel({
     selectedTime,
     running,
     setRunning,
-    setSelectedTime
+    setSelectedTime,
+    loading: loadingHots,
+    pause,
+    setPause
   };
 
   const areaPros = {
@@ -137,31 +143,41 @@ function HotsPanel({
 
     // 请求数据
     const limit = 10,
-      forward = 3;
-    const bisect = d3.bisector(d => d.time);
-    const index = bisect.right(hotTimeRange, selectedTime),
+      bisectStart = d3.bisector(d => d.time),
+      bisectEnd = d3.bisector(d => d.request),
+      len = hotTimeRange.length - 1;
+
+    // 一直向右找，找到第一个为 true 的请求
+    const index = bisectStart.right(hotTimeRange, selectedTime),
       tick = hotTimeRange[index],
-      nextIndex = Math.min(hotTimeRange.length - 1, index + limit),
+      nextIndex = Math.min(
+        bisectEnd.right(hotTimeRange, true, index, len),
+        index + limit
+      ),
       nextTick = hotTimeRange[nextIndex];
 
+    // console.log(bisectEnd.right(hotTimeRange, true, index, len), hotTimeRange, index);
+
     const lo = d3.bisectLeft(ticks, tick.time),
-      hi = d3.bisectLeft(ticks, nextTick.time);
-    const f = ticks.slice(lo, hi);
-    
-    // 如果离的很近了还是要请求
+      hi = d3.bisectLeft(ticks, nextTick.time),
+      subTicks = ticks.slice(lo, hi + 1); // 这需要 +1 让前后两个时刻有重复
+
     if (tick.request) return;
     console.log("request", index);
-    console.log(lo, hi, f, index, nextIndex);
+    console.log(lo, hi, subTicks, index, nextIndex);
 
     getData({
-      ticks: f,
+      ticks: subTicks,
       name: selectedName,
       from: (tick.time / 1000) | 0,
       limit
     });
-    for (let i = index; i < hotTimeRange.length && i < index + limit; i++)
-      hotTimeRange[i].request = true;
-    updateDataByTime(selectedName, hotTimeRange);
+
+    const newHotTimeRange = hotTimeRange.map((d, i) => ({
+      ...d,
+      request: i >= index && i < nextIndex ? true : false
+    }));
+    updateDataByTime(selectedName, newHotTimeRange);
   }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
 
   return (
@@ -182,7 +198,7 @@ function HotsPanel({
       </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          {/* <BarRace {...barsProps} /> */}
+          <BarRace {...barsProps} />
         </Col>
         <Col span={24} md={12}>
           <StoryTelling {...storyProps} />

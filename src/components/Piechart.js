@@ -79,7 +79,7 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
             fill="currentColor"
             textAnchor="middle"
           >
-            <text>{a.data.count}</text>
+            <text fill="currentColor">{a.data.count}</text>
           </g>
         ))}
       </g>

@@ -49,12 +49,12 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
 
     // 绘制词云
     drawText(context, keywords, {
-      fillStyle: "steelblue",
+      fillStyle: "#665c84",
       textAlign: "center",
       textBaseline: "alphabet"
     });
     drawText(context, fillingWords, {
-      fillStyle: "red",
+      fillStyle: "#ff7657",
       textAlign: "start",
       textBaseline: "middle"
     });

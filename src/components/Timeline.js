@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import useAnimation from "../hook/useAnimation";
 import mouse from "../utils/mouse";
@@ -25,7 +25,10 @@ export default function({
   selectedTime,
   setSelectedTime,
   running,
-  setRunning
+  setRunning,
+  pause,
+  setPause,
+  loading
 }) {
   const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
   const dragging = useRef(false);
@@ -38,11 +41,23 @@ export default function({
     height = 50,
     margin = { top: 20, right: 30, bottom: 20, left: 60 };
 
+  if (running && loading && !pause) {
+    pauseAnimation();
+    setRunning(false);
+    setPause(true);
+  }
+
+  if (pause && !loading && !running) {
+    setPause(false);
+    setRunning(true);
+    requestAnimation(duration >= total ? 0 : duration);
+  }
+
   const x = d3
     .scaleLinear()
     .domain(range)
     .range([margin.left, width - margin.right]);
-  
+
   function step(duration) {
     // 不能超过最大的时间
     const t = Math.min(time(duration), range[1]);
@@ -56,8 +71,7 @@ export default function({
   function toggleAnimation() {
     if (running) {
       setRunning(false);
-      // 防止出现过渡效果
-      setSelectedTime(selectedTime + 1);
+      setSelectedTime(selectedTime + 1); // 防止出现过渡效果
       pauseAnimation();
     } else {
       setRunning(true);

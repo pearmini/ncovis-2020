@@ -1,9 +1,18 @@
 import React from "react";
 import Canvas from "./Canvas";
+import formatDate from "../utils/formatDate";
 import * as d3 from "d3";
-export default function({ loading, selectedTime, keyframes, running }) {
-  const width = 1200,
-    height = 800;
+export default function({
+  loading,
+  selectedTime,
+  keyframes,
+  running,
+  selectedName
+}) {
+  const width = 900,
+    height = 600,
+    marginRight = 50,
+    marginBottom = 60;
   if (keyframes === undefined || keyframes.length === 0)
     return (
       <Canvas
@@ -51,9 +60,24 @@ export default function({ loading, selectedTime, keyframes, running }) {
     });
   }
 
-  function draw(context) {
-    context.fillStyle = "white";
-    context.fillRect(0, 0, width, height);
+  function drawLabel(context) {
+    context.save();
+    // region
+    context.translate(width - marginRight, height - marginBottom);
+    context.fillStyle = "#777";
+    context.textAlign = "end";
+    context.textBaseline = "bottom";
+    context.font = `bold 50px 微软雅黑`;
+    context.fillText(selectedName, 0, 0);
+
+    // date
+    context.font = "normal 25px 微软雅黑";
+    context.fillText(formatDate(new Date(selectedTime)), 0, 35);
+
+    context.restore();
+  }
+
+  function drawText(context) {
     context.save();
     context.translate(width / 2, height / 2);
     context.textAlign = "center";
@@ -63,6 +87,13 @@ export default function({ loading, selectedTime, keyframes, running }) {
       context.fillText(text(word), word.x, word.y);
     }
     context.restore();
+  }
+
+  function draw(context) {
+    context.fillStyle = "white";
+    context.fillRect(0, 0, width, height);
+    drawText(context);
+    drawLabel(context);
   }
 
   return (

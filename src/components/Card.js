@@ -42,7 +42,7 @@ const Box = styled.div`
   height: ${props => props.height}px;
   line-height: ${props => props.height}px;
   z-index: 10;
-  background: white;
+  background: transparent;
   position: absolute;
   left: 0;
   top: 0;

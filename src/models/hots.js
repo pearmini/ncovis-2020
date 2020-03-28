@@ -48,7 +48,6 @@ function getHots({ name = "zhihu", cursor, from, limit = 10 }) {
             }
             topics {
               heat
-              qid
               title
             }
           }
@@ -71,36 +70,6 @@ function getTimeRange(platform = "zhihu") {
 }
 
 function preprocess(data, ticks) {
-  // const wordsKeyframes = Array.from(
-  //   d3.rollup(
-  //     data,
-  //     ([d]) => d.keywords,
-  //     d => d.time
-  //   )
-  // ).sort(([a], [b]) => a - b);
-  // console.log(data);
-
-  const datevalues = Array.from(
-    d3.rollup(
-      data,
-      ([d]) =>
-        d3.rollup(
-          d.topics,
-          ([{ heat }]) => heat,
-          d => d.qid
-        ),
-      d => d.time
-    )
-  )
-    .map(([date, data]) => [new Date(date), data])
-    .sort(([a], [b]) => a - b);
-
-  const topics = new Set(
-    data.flatMap(d => d.topics.map(({ qid, title }) => ({ qid, title })))
-  );
-  const listKeyframes = interpolate(10);
-
-  // 一天用 12s 来展现，那么一天插值成至少 12 帧，最大的间隔就是 1 小时
   const datewords = Array.from(
     d3.rollup(
       data,
@@ -114,37 +83,48 @@ function preprocess(data, ticks) {
     )
   );
 
-  const [start, end] = d3.extent(datewords, d => d[0]);
-  // 对数据进行一下筛选，将间隔太小的删除
-  // const minInterval = 60 * 60 * 3;
-  // const hello = datewords.reduce((total, cur) => {
-  //   const len = total.length;
-  //   if (len === 0) return [cur];
-  //   const interval = cur[0] - total[len - 1][0];
-  //   if (interval < minInterval) return total;
-  //   else return [...total, cur];
-  // }, []);
+  const datetopics = Array.from(
+    d3.rollup(
+      data,
+      ([d]) =>
+        d3.rollup(
+          d.topics,
+          ([{ heat }]) => heat,
+          d => d.title
+        ),
+      d => d.time
+    )
+  ).sort(([a], [b]) => a - b);
 
   const words = new Set(data.flatMap(d => d.keywords.map(d => d.name)));
-  // 对词云进行一下插值，将间隔时间太长的缩小
-  // 否者会出现变换很慢的情况
-  // 对数据进行插值，让它们等间隔
-  // const wordsKeyframes = interpolateValues(hello, words, minInterval);
-  // console.log(wordsKeyframes);
+  const topics = new Set(data.flatMap(d => d.topics.map(d => d.title)));
+  const topicsTicks = interploateTicks(ticks, 20);
 
-  // 根据 ticks 进行插值
-  // 根据返回的数据找到 ticks 的范围，然后进行插值
-  // const lo = d3.bisectLeft(ticks, start * 1000),
-  //   hi = d3.bisectLeft(ticks, end * 1000);
-  // const f = ticks.slice(lo, hi);
-  // const r = f.map(tick => interpolateWordsValues(datewords, words, tick));
-  // console.log(r, lo, hi, start, end);
-  const r = ticks.map(tick => interpolateWordsValues(datewords, words, tick));
+  // 第一个 ticks 上面一帧已经插值过了，所以就不需要再才插值了
+  // 但是需要它来获取数据
+  const wordsKeyframes = ticks
+    .slice(0, ticks.length - 1)
+    .map(tick => interpolateWordsValues(datewords, words, tick));
+  const listKeyframes = topicsTicks
+    .slice(0, topicsTicks.length - 1)
+    .map(tick => interpolateTopicsValues(datetopics, topics, tick));
 
   return {
     listKeyframes,
-    wordsKeyframes: r
+    wordsKeyframes
   };
+
+  function interploateTicks(ticks, k) {
+    const res = [];
+    for (let [a, b] of d3.pairs(ticks)) {
+      for (let i = 0; i < k; i++) {
+        const t = i / k;
+        res.push(a * (1 - t) + b * t);
+      }
+    }
+    res.push(ticks[ticks.length - 1]);
+    return res;
+  }
 
   function interpolateWordsValues(data, names, time) {
     const bisect = d3.bisector(d => d[0] * 1000).left;
@@ -156,28 +136,40 @@ function preprocess(data, ticks) {
       t = (time / 1000 - a[0]) / (b[0] - a[0]);
     return [
       time / 1000,
-      interpolateWord(names, key => a[1].get(key) * (1 - t) + b[1].get(key) * t)
+      interpolateWord(names, key => {
+        const v1 = a[1].get(key) || 0;
+        const v2 = b[1].get(key) || 0;
+        return v1 * (1 - t) + v2 * t;
+      })
     ];
   }
 
-  function interpolateValues(datevalues, names, minInterval) {
-    const keyframes = [];
-    let ka, a, kb, b;
-    for ([[ka, a], [kb, b]] of d3.pairs(datevalues)) {
-      const k = Math.ceil((kb - ka) / minInterval);
-      for (let i = 0; i < k; i++) {
-        const t = i / k;
-        keyframes.push([
-          new Date(ka * (1 - t) + kb * t).getTime(),
-          interpolateWord(names, key => a.get(key) * (1 - t) + b.get(key) * t)
-        ]);
-      }
-    }
-    keyframes.push([
-      new Date(kb).getTime(),
-      interpolateWord(names, key => b.get(key))
-    ]);
-    return keyframes;
+  function interpolateTopicsValues(data, names, time) {
+    const bisect = d3.bisector(d => d[0] * 1000).left;
+    const i = bisect(data, time, 0, data.length - 1),
+      a = data[i];
+    if (!i) return [time / 1000, interpolateTopic(names, key => a[1].get(key))];
+
+    const b = data[i - 1],
+      t = (time / 1000 - a[0]) / (b[0] - a[0]);
+    return [
+      time / 1000,
+      interpolateTopic(names, key => {
+        const v1 = a[1].get(key) || 0;
+        const v2 = b[1].get(key) || 0;
+        return v1 * (1 - t) + v2 * t;
+      })
+    ];
+  }
+
+  function interpolateTopic(names, value) {
+    const data = Array.from(names, name => ({
+      title: name,
+      heat: value(name)
+    }));
+    data.sort((a, b) => d3.descending(a.heat, b.heat));
+    for (let i = 0; i < data.length; ++i) data[i].rank = i;
+    return data.slice(0, 10);
   }
 
   function interpolateWord(names, value) {
@@ -188,55 +180,27 @@ function preprocess(data, ticks) {
     data.sort((a, b) => d3.descending(a.value, b.value));
     return data;
   }
-
-  function interpolate(k) {
-    const keyframes = [];
-    let ka, a, kb, b;
-    for ([[ka, a], [kb, b]] of d3.pairs(datevalues)) {
-      for (let i = 0; i < k; i++) {
-        const t = i / k;
-        keyframes.push([
-          new Date(ka * (1 - t) + kb * t).getTime(),
-          rank(qid => a.get(qid) * (1 - t) + b.get(qid) * t)
-        ]);
-      }
-    }
-    keyframes.push([new Date(kb).getTime(), rank(qid => b.get(qid))]);
-    return keyframes;
-  }
-
-  function rank(heat) {
-    const n = 10;
-    const data = Array.from(topics, ({ qid, title }) => ({
-      qid,
-      heat: heat(qid) || 0,
-      title
-    }));
-    data.sort((a, b) => d3.descending(a.heat, b.heat));
-    for (let i = 0; i < data.length; ++i) data[i].rank = i;
-    return data.slice(0, n);
-  }
 }
 
 function computeWordCloud(data, n = 20) {
-  // console.log(data);
   const words = data =>
     data
       .map(d => ({
         text: d.name,
         value: d.weight || d.value
       }))
+      .sort((a, b) => b.value - a.value)
       .slice(0, n);
   return Promise.all(
     data.map(
       ([date, d]) =>
         new Promise((resolve, reject) => {
           cloud()
-            .size([1200, 800])
+            .size([900, 600])
             .words(words(d))
             .padding(5)
             .rotate(0)
-            .fontSize(d => d.value * 170)
+            .fontSize(d => d.value * 120)
             .on("end", words => resolve([date * 1000, words]))
             .start();
         })
@@ -280,14 +244,18 @@ export default {
           cloudsKeyframes
         });
       else {
+        // const { listKeyframes: oldL, cloudsKeyframes: oldC } = value;
+        // const newL = [listKeyframes, ...oldL].sort((a, b) => a[0] - b[0]).filter
         value.listKeyframes.push(...listKeyframes);
+        value.listKeyframes.sort((a, b) => a[0] - b[0]);
 
+        console.log(d3.pairs(value.listKeyframes).map(([a, b]) => b[0] - a[0]));
         // 添加并且排序
         value.cloudsKeyframes.push(...cloudsKeyframes);
         value.cloudsKeyframes.sort((a, b) => a[0] - b[0]);
-        console.log(
-          d3.pairs(value.cloudsKeyframes).map(([a, b]) => b[0] - a[0])
-        );
+        // console.log(
+        //   d3.pairs(value.cloudsKeyframes).map(([a, b]) => b[0] - a[0])
+        // );
       }
       return { ...state, dataByName };
     }
