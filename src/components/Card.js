@@ -17,6 +17,7 @@ const Container = styled.div.attrs(
       }
     }
 )`
+  display: ${props => (props.show ? "block" : "none")};
   position: relative;
   border-radius: 10px;
   overflow: hidden;
@@ -42,7 +43,7 @@ const Box = styled.div`
   height: ${props => props.height}px;
   line-height: ${props => props.height}px;
   z-index: 10;
-  background: transparent;
+  background: ${props => (props.type === "loading " ? "transparent" : "white")};
   position: absolute;
   left: 0;
   top: 0;
@@ -121,7 +122,7 @@ const StyledDrawer = styled(Drawer)`
 
 function State({ type, width, height }) {
   return (
-    <Box width={width} height={height}>
+    <Box width={width} height={height} type={type}>
       {type === "loading" ? (
         <MiddleSpin />
       ) : (
@@ -143,6 +144,7 @@ function Card({
   nodata,
   title = "title",
   introduction,
+  show = true,
   ...rest
 }) {
   const ref = useRef(null);
@@ -184,6 +186,7 @@ function Card({
     <>
       <Container
         ref={ref}
+        show={show}
         {...rest}
         zoom={zoom}
         onMouseEnter={() => setHovered(true)}

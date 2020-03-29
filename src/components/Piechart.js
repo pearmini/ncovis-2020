@@ -45,19 +45,21 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
       loading={loading}
       nodata={data.length === 0}
     >
-      <g
-        transform={`translate(${width - margin.right}, ${height -
-          margin.bottom})`}
-        textAnchor="end"
-        fill="#777"
-      >
-        <text fontSize={35} fontWeight="bold">
-          {selectedRegion}
-        </text>
-        <text fontSize={15} dy="1.5em">
-          {selectedDate}
-        </text>
-      </g>
+      {data.length && (
+        <g
+          transform={`translate(${width - margin.right}, ${height -
+            margin.bottom})`}
+          textAnchor="end"
+          fill="#777"
+        >
+          <text fontSize={35} fontWeight="bold">
+            {selectedRegion}
+          </text>
+          <text fontSize={15} dy="1.5em">
+            {selectedDate}
+          </text>
+        </g>
+      )}
       <g transform={`translate(${margin.left}, ${margin.top})`}>
         {names.map((d, index) => (
           <g key={d} transform={`translate(${0}, ${legendHeight * index})`}>

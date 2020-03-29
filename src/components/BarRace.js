@@ -123,8 +123,8 @@ export default function({
               <rect
                 x="0"
                 y="0"
-                // width={Math.min(x(d.heat) - x(0) - 8, 0)}
-                width={x(d.heat) - x(0) - 8}
+                width={Math.max(x(d.heat) - x(0) - 8, 0)}
+                // width={x(d.heat) - x(0) - 8}
                 height={barSize}
               />
             </clipPath>

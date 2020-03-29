@@ -7,12 +7,14 @@ export default function({
   selectedTime,
   keyframes,
   running,
-  selectedName
+  selectedName,
+  color
 }) {
   const width = 900,
     height = 600,
     marginRight = 50,
     marginBottom = 60;
+
   if (keyframes === undefined || keyframes.length === 0)
     return (
       <Canvas
@@ -82,7 +84,8 @@ export default function({
     context.translate(width / 2, height / 2);
     context.textAlign = "center";
     for (let word of words) {
-      context.fillStyle = "black";
+      const fill = color(text(word));
+      context.fillStyle = `${fill}`;
       context.font = `${word.size}px 微软雅黑`;
       context.fillText(text(word), word.x, word.y);
     }

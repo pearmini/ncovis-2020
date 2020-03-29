@@ -72,7 +72,7 @@ export default function({
     [first] = data,
     keys = first ? Object.keys(first).filter(d => d !== "date") : [],
     cnt = selectedLevel === "second" ? 4 : 6,
-    legendWidth = selectedLevel === "second" ? 90 : 65,
+    legendWidth = selectedLevel === "second" ? 75 : 55,
     legendHeight = 25,
     disableColor = "#efefef",
     tw = selectedLevel === "second" ? 100 : 70,
@@ -216,7 +216,7 @@ export default function({
                   }}
                 >
                   <circle fill={color(key)} cx={0} cy={0} r={5}></circle>
-                  <text dy={5} dx={10} fill="currentColor">
+                  <text dy={5} dx={10} fill="currentColor" fontSize="12">
                     {key}
                   </text>
                 </g>

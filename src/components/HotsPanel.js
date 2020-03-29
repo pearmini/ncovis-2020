@@ -8,6 +8,7 @@ import BarRace from "../components/BarRace";
 import StoryTelling from "../components/StoryTelling";
 import Areachart from "../components/Areachart";
 import mc from "../utils/memorizedColor";
+import rc from "../utils/randomColor";
 import * as d3 from "d3";
 
 const { Option } = Select;
@@ -15,10 +16,6 @@ const { Group } = Radio;
 
 const Container = styled.div`
   position: relative;
-`;
-
-const RadioGroup = styled(Group)`
-  margin-bottom: 0.5em;
 `;
 
 const An = styled.div`
@@ -47,11 +44,7 @@ function HotsPanel({
   setSelectedTime,
   updateDataByTime
 }) {
-  const names = [
-      { name: "微博", value: "weibo" },
-      { name: "知乎", value: "zhihu" }
-    ],
-    levels = [
+  const levels = [
       { name: "全国", key: "top" },
       { name: "分区", key: "second" },
       { name: "省份", key: "third" }
@@ -65,11 +58,12 @@ function HotsPanel({
   const [focus, setFocus] = useState("");
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
-  const [selectedName, setSelectedName] = useState(names[1].value);
+  const selectedName = "zhihu";
   const [selectedLevel, setSelectedLevel] = useState("third");
   const [selectedType, setSelectedType] = useState("confirmed");
 
-  const color = useRef(mc(d3.schemeSet3, 10));
+  const barColor = useRef(mc(d3.schemeSet3, 10));
+  const wordColor = useRef(rc(d3.schemeTableau10));
   const namevalues = dataByName.get(selectedName);
   const { listKeyframes, cloudsKeyframes } = namevalues || {};
 
@@ -94,7 +88,7 @@ function HotsPanel({
     height: 400,
     keyframes: listKeyframes,
     selectedTime,
-    color: color.current,
+    color: barColor.current,
     running,
     loading: loadingHots,
     selectedName: selectedName === "weibo" ? "微博" : "知乎"
@@ -105,7 +99,7 @@ function HotsPanel({
     height: 400,
     keyframes: cloudsKeyframes,
     selectedTime,
-    color: color.current,
+    color: wordColor.current,
     loading: loadingHots,
     running: running || pause,
     selectedName: selectedName === "weibo" ? "微博" : "知乎"
@@ -185,17 +179,6 @@ function HotsPanel({
       <An id="hots" />
       <h1>人们在网络上都在讨论些啥？</h1>
       <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p>
-      <span>选择一个社交平台</span>&ensp;
-      <RadioGroup
-        value={selectedName}
-        onChange={e => setSelectedName(e.target.value)}
-      >
-        {names.map(d => (
-          <Radio key={d.value} value={d.value}>
-            {d.name}
-          </Radio>
-        ))}
-      </RadioGroup>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <BarRace {...barsProps} />

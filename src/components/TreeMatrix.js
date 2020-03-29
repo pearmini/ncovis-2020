@@ -16,13 +16,29 @@ export default function({
   setSelectedDate,
   setSelectedRegion,
   selectedType,
-  loading
+  loading,
+  show,
+  setShow,
+  width,
+  height,
+  colors,
+  all,
+  highlightColor,
+  normalColor,
+  highlightRectColor,
+  disabledColor,
+  legendWidth,
+  legendHeight
 }) {
-  const width = 1200,
-    height = 600;
-    
   if (!dataByRegion.size)
-    return <Svg viewBox={[0, 0, width, height]} loading={loading} nodata={true}></Svg>;
+    return (
+      <Svg
+        viewBox={[0, 0, width, height]}
+        loading={loading}
+        nodata={true}
+        show={show}
+      ></Svg>
+    );
 
   const [treeData, setTreeData] = useState(d3.hierarchy(regionsData));
   const [highlight, setHighlight] = useState([]);
@@ -46,32 +62,7 @@ export default function({
       ),
     th = treeData.visableH;
 
-  const all = useMemo(
-      () =>
-        dataByRegion
-          ? Array.from(dataByRegion).flatMap(([region, dataByDate]) =>
-              d3
-                .pairs(
-                  Array.from(dataByDate)
-                    .map(([date, data]) => ({
-                      date: date,
-                      data: data.data
-                    }))
-                    .sort((a, b) => new Date(a.date) - new Date(b.date))
-                )
-                .map(([a, b]) => ({
-                  region,
-                  date: b.date,
-                  ...Object.keys(b.data).reduce(
-                    (obj, key) => ((obj[key] = b.data[key] - a.data[key]), obj),
-                    {}
-                  )
-                }))
-            )
-          : [],
-      [dataByRegion]
-    ),
-    data = all
+  const data = all
       .map(d => ({
         date: d.date,
         region: d.region,
@@ -90,19 +81,7 @@ export default function({
     chartPadding = 90,
     nodeWidth = 100,
     buttonSize = 15,
-    legendWidth = 150,
-    legendHeight = 10,
     axisPadding = 5,
-    colors = {
-      dead: d3.interpolateGnBu,
-      confirmed: d3.interpolateBuPu,
-      cured: d3.interpolateBuGn,
-      special: d3.interpolateOrRd
-    },
-    highlightColor = "red",
-    normalColor = "black",
-    highlightRectColor = "steelblue",
-    disabledColor = "#eeeeee",
     formatDate = d3.timeFormat("%x"),
     labels = [
       "Jan",
@@ -502,6 +481,7 @@ export default function({
       loading={loading && noData(data)}
       nodata={noData(data)}
       onClick={() => setHighlight([])}
+      show={show}
     >
       <g
         transform={`translate(${width -
@@ -633,6 +613,10 @@ export default function({
                 }
                 onClick={e => {
                   toggleHighlightNode(node);
+                  e.stopPropagation();
+                }}
+                onDoubleClick={e => {
+                  setShow(false);
                   e.stopPropagation();
                 }}
               >

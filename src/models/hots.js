@@ -249,7 +249,7 @@ export default {
         value.listKeyframes.push(...listKeyframes);
         value.listKeyframes.sort((a, b) => a[0] - b[0]);
 
-        console.log(d3.pairs(value.listKeyframes).map(([a, b]) => b[0] - a[0]));
+        // console.log(d3.pairs(value.listKeyframes).map(([a, b]) => b[0] - a[0]));
         // 添加并且排序
         value.cloudsKeyframes.push(...cloudsKeyframes);
         value.cloudsKeyframes.sort((a, b) => a[0] - b[0]);

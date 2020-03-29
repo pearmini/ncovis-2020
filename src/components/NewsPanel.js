@@ -8,6 +8,7 @@ import regions from "../assets/data/region_options.json";
 import Shape from "./Shape";
 import TreeMatrix from "./TreeMatrix";
 import Piechart from "./Piechart";
+import DateMap from "./DateMap";
 
 const { Option } = Select;
 const Container = styled.div`
@@ -134,7 +135,8 @@ function NewsPanel({
       </Control>
       <Row>
         <Col span={24}>
-          <TreeMatrix {...treeProps} />
+          <DateMap {...treeProps} />
+          {/* <TreeMatrix {...treeProps} /> */}
         </Col>
       </Row>
       <Row gutter={[16, 16]}>

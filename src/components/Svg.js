@@ -16,6 +16,7 @@ export default function({
   id,
   loading,
   nodata,
+  show = true,
   children,
   ...rest
 }) {
@@ -36,7 +37,8 @@ export default function({
     style,
     className,
     loading,
-    nodata
+    nodata,
+    show
   };
 
   return (
