@@ -8,7 +8,10 @@ export default function({
   keyframes,
   running,
   selectedName,
-  color
+  colorScale,
+  color,
+  selectedWords,
+  selectedTopic
 }) {
   const width = 900,
     height = 600,
@@ -33,7 +36,8 @@ export default function({
     size: 0
   });
   const text = d => d.text;
-  const words = interpolateData(selectedTime);
+  const words =
+    selectedTopic === null ? interpolateData(selectedTime) : selectedWords;
 
   function interpolateData(time) {
     const bisect = d3.bisector(d => d[0]).left;
@@ -84,7 +88,7 @@ export default function({
     context.translate(width / 2, height / 2);
     context.textAlign = "center";
     for (let word of words) {
-      const fill = color(text(word));
+      const fill = selectedTopic === null ? colorScale(text(word)) : color;
       context.fillStyle = `${fill}`;
       context.font = `${word.size}px 微软雅黑`;
       context.fillText(text(word), word.x, word.y);

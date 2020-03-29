@@ -8,7 +8,10 @@ export default function({
   selectedTime,
   running,
   color,
-  selectedName
+  selectedName,
+  showWordsOfTopic,
+  hideWordsOfTopic,
+  selectedTopic
 }) {
   const width = 600,
     height = 400,
@@ -41,8 +44,12 @@ export default function({
 
   const titles = bars.map(d => d.title);
   const id = d => `t-${d.heat}`;
-  color.cur(titles);
+  const colorScale = title =>
+    selectedTopic !== null && selectedTopic !== title
+      ? "#efefef"
+      : color(title);
 
+  color.cur(titles);
   useEffect(() => {
     // 保存上一帧的颜色
     color.pre(titles);
@@ -81,13 +88,27 @@ export default function({
   }
 
   return (
-    <Svg viewBox={[0, 0, width, height]} loading={loading}>
+    <Svg
+      viewBox={[0, 0, width, height]}
+      loading={loading}
+      onClick={hideWordsOfTopic}
+    >
       {bars.map(d => (
         <g
           transform={`translate(${margin.left}, ${running ? d.y : y(d.rank)})`}
           key={d.title}
         >
-          <rect width={x(d.heat) - x(0)} height={barSize} fill={color(d.title)}>
+          <rect
+            width={x(d.heat) - x(0)}
+            height={barSize}
+            fill={colorScale(d.title)}
+            cursor="pointer"
+            fillOpacity={0.7}
+            onClick={e => {
+              showWordsOfTopic(d.title);
+              e.stopPropagation();
+            }}
+          >
             <title>{d.title}</title>
           </rect>
         </g>
@@ -104,6 +125,11 @@ export default function({
             clipPath={`url(#${id(d)})`}
             fontWeight="bold"
             fontSize="13"
+            cursor="pointer"
+            onClick={e => {
+              showWordsOfTopic(d.title);
+              e.stopPropagation();
+            }}
           >
             {d.title}
             <title>{d.title}</title>

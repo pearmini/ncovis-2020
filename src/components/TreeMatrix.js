@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect} from "react";
 import Svg from "./Svg";
 import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
@@ -616,6 +616,7 @@ export default function({
                   e.stopPropagation();
                 }}
                 onDoubleClick={e => {
+                  setSelectedRegion(node.data.title);
                   setShow(false);
                   e.stopPropagation();
                 }}

@@ -1,4 +1,3 @@
-import data from "../assets/data/news.json";
 import regionTree from "../assets/data/region_options.json";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
@@ -147,7 +146,6 @@ export default {
             d => d.date
           ),
           selectedDate = "2020-02-10";
-        // selectedDate = formatDate(new Date(range[1]));
 
         yield put({
           type: "init",
@@ -164,6 +162,7 @@ export default {
               d => d.region,
               d => d.date
             )
+            .filter(([region]) => region !== "中国") // 这里有点奇怪
             .map(([region, data]) => [
               region,
               data.sort((a, b) => new Date(a[0]) - new Date(b[0]))

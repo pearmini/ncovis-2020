@@ -1,6 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
-import useAnimation from "../hook/useAnimation";
 import mouse from "../utils/mouse";
 import * as d3 from "d3";
 
@@ -21,69 +20,24 @@ const Dot = styled.circle`
 `;
 
 export default function({
-  time,
   selectedTime,
-  setSelectedTime,
   running,
-  setRunning,
-  pause,
-  setPause,
-  loading
+  toggleAnimation,
+  changeValue,
+  range,
+  finish
 }) {
-  const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
   const dragging = useRef(false);
   const sliderRef = useRef(null);
   const dotRef = useRef(null);
-  const [, total] = time.domain(),
-    range = time.range(),
-    duration = time.invert(selectedTime);
   const width = 1200,
     height = 50,
     margin = { top: 20, right: 30, bottom: 20, left: 60 };
-
-  if (running && loading && !pause) {
-    pauseAnimation();
-    setRunning(false);
-    setPause(true);
-  }
-
-  if (pause && !loading && !running) {
-    setPause(false);
-    setRunning(true);
-    requestAnimation(duration >= total ? 0 : duration);
-  }
 
   const x = d3
     .scaleLinear()
     .domain(range)
     .range([margin.left, width - margin.right]);
-
-  function step(duration) {
-    // 不能超过最大的时间
-    const t = Math.min(time(duration), range[1]);
-    setSelectedTime(t);
-    if (duration > total) {
-      setRunning(false);
-      return false;
-    }
-  }
-
-  function toggleAnimation() {
-    if (running) {
-      setRunning(false);
-      setSelectedTime(selectedTime + 1); // 防止出现过渡效果
-      pauseAnimation();
-    } else {
-      setRunning(true);
-      requestAnimation(duration >= total ? 0 : duration);
-    }
-  }
-
-  function changeValue(value) {
-    const validValue = Math.max(range[0], Math.min(value, range[1]));
-    setFrame(time.invert(validValue));
-    setSelectedTime(validValue);
-  }
 
   function handleClick(e) {
     const [mouseX] = mouse(e, sliderRef.current);
@@ -178,11 +132,7 @@ export default function({
   return (
     <Svg viewBox={[0, 0, width, height]}>
       <Button transform={`translate(${10}, ${10})`} onClick={toggleAnimation}>
-        {running
-          ? pauseButton
-          : duration >= total
-          ? restartButton
-          : startButton}
+        {running ? pauseButton : finish ? restartButton : startButton}
       </Button>
       <Slider
         ref={sliderRef}

@@ -38,6 +38,7 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
               .reverse()
           );
 
+  const text = d => ((d.endAngle - d.startAngle) / Math.PI * 50 | 0) + "%";
   const arcs = pie(data);
   return (
     <Svg
@@ -81,7 +82,7 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
             fill="currentColor"
             textAnchor="middle"
           >
-            <text fill="currentColor">{a.data.count}</text>
+            <text fill="currentColor" fontSize={12}>{text(a)}</text>
           </g>
         ))}
       </g>

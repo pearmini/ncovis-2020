@@ -11,7 +11,7 @@ export default function({
   selectedType,
   loading
 }) {
-  const [isTree, setIsTree] = useState(false);
+  const [isTree, setIsTree] = useState(true);
   const width = 1200,
     height = 600,
     legendWidth = 150,
@@ -72,7 +72,9 @@ export default function({
     highlightColor,
     normalColor,
     highlightRectColor,
-    disabledColor
+    disabledColor,
+    legendHeight,
+    legendWidth
   };
 
   const heatMapProps = {
@@ -84,7 +86,7 @@ export default function({
     all,
     selectedRegion,
     selectedType,
-    loading,
+    loading: false,
     selectedDate,
     highlightRectColor,
     disabledColor,

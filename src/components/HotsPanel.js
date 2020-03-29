@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
+import useAnimation from "../hook/useAnimation";
 import styled from "styled-components";
 import { connect } from "dva";
-import { Radio, Row, Col, Select } from "antd";
+import { Row, Col, Select } from "antd";
 
 import Timeline from "./Timeline";
 import BarRace from "../components/BarRace";
@@ -12,7 +13,6 @@ import rc from "../utils/randomColor";
 import * as d3 from "d3";
 
 const { Option } = Select;
-const { Group } = Radio;
 
 const Container = styled.div`
   position: relative;
@@ -42,7 +42,11 @@ function HotsPanel({
   getTime,
   selectedTime,
   setSelectedTime,
-  updateDataByTime
+  updateDataByTime,
+  getWords,
+  selectedWords,
+  setSelectedWords,
+  wordsByTime
 }) {
   const levels = [
       { name: "全国", key: "top" },
@@ -58,16 +62,20 @@ function HotsPanel({
   const [focus, setFocus] = useState("");
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
-  const selectedName = "zhihu";
   const [selectedLevel, setSelectedLevel] = useState("third");
   const [selectedType, setSelectedType] = useState("confirmed");
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
 
-  const barColor = useRef(mc(d3.schemeSet3, 10));
-  const wordColor = useRef(rc(d3.schemeTableau10));
+  const barColor = useRef(
+    mc([...d3.schemeTableau10, "#634294", "#d54087"], 10)
+  );
+  const wordColor = useRef(rc(d3.schemeCategory10));
+
+  const selectedName = "zhihu";
   const namevalues = dataByName.get(selectedName);
   const { listKeyframes, cloudsKeyframes } = namevalues || {};
 
-  // 获得热搜数据和条形图时间的交集
   const hotTimeRange = timeByName.get(selectedName);
   const totalTimeRange = d3.extent(
       Array.from(dataByDate).map(([date]) => new Date(date).getTime())
@@ -76,12 +84,13 @@ function HotsPanel({
       .every(12) // 每隔 12 小时获取一下数据
       .range(totalTimeRange[0], totalTimeRange[1])
       .map(d => d.getTime()),
-    totalDuration = ticks.length * 3000; // 1小时 0.75秒
+    totalDuration = ticks.length * 4000; // 1小时 0.75秒
 
   const timeScale = d3
-    .scaleLinear()
-    .domain([0, totalDuration])
-    .range(totalTimeRange || [0, 0]);
+      .scaleLinear()
+      .domain([0, totalDuration])
+      .range(totalTimeRange || [0, 0]),
+    duration = timeScale.invert(selectedTime);
 
   const barsProps = {
     width: 600,
@@ -91,29 +100,33 @@ function HotsPanel({
     color: barColor.current,
     running,
     loading: loadingHots,
-    selectedName: selectedName === "weibo" ? "微博" : "知乎"
+    selectedName: "知乎",
+    showWordsOfTopic,
+    hideWordsOfTopic: () => setSelectedTopic(null),
+    selectedTopic
   };
 
   const storyProps = {
     width: 600,
     height: 400,
     keyframes: cloudsKeyframes,
+    selectedWords,
+    selectedTopic,
     selectedTime,
-    color: wordColor.current,
+    color: barColor.current(selectedTopic),
+    colorScale: wordColor.current,
     loading: loadingHots,
     running: running || pause,
-    selectedName: selectedName === "weibo" ? "微博" : "知乎"
+    selectedName: "知乎"
   };
 
   const timeProps = {
-    time: timeScale,
     selectedTime,
     running,
-    setRunning,
-    setSelectedTime,
-    loading: loadingHots,
-    pause,
-    setPause
+    toggleAnimation,
+    changeValue,
+    range: totalTimeRange || [0, 0],
+    finish: duration >= totalDuration
   };
 
   const areaPros = {
@@ -124,9 +137,70 @@ function HotsPanel({
     selectedType,
     selectedLevel,
     focus,
-    setFocus,
-    running
+    setFocus
   };
+
+  if (running && loadingHots && !pause) {
+    stopAnimation();
+    setPause(true);
+  }
+
+  if (pause && !loadingHots && !running) {
+    startAnimation();
+    setPause(false);
+  }
+
+  function step(duration) {
+    // 不能超过最大的时间
+    const t = Math.min(timeScale(duration), totalTimeRange[1]);
+    setSelectedTime(t);
+    if (duration > totalDuration) {
+      setRunning(false);
+      return false;
+    }
+  }
+
+  function startAnimation() {
+    if (running) return;
+    if (selectedTopic !== null) setSelectedTopic(null);
+    setRunning(true);
+    requestAnimation(duration >= totalDuration ? 0 : duration);
+  }
+
+  function stopAnimation() {
+    if (!running) return;
+    setRunning(false);
+    setSelectedTime(selectedTime + 1); // 防止出现过渡效果
+    pauseAnimation();
+  }
+
+  function toggleAnimation() {
+    if (running) stopAnimation();
+    else startAnimation();
+  }
+
+  function changeValue(value) {
+    const validValue = Math.max(
+      totalTimeRange[0],
+      Math.min(value, totalTimeRange[1])
+    );
+    setFrame(timeScale.invert(validValue));
+    setSelectedTime(validValue);
+  }
+
+  function showWordsOfTopic(title) {
+    setSelectedTopic(title);
+    stopAnimation();
+    const bisect = d3.bisector(d => d.time);
+    const i = bisect.left(hotTimeRange, selectedTime),
+      time = hotTimeRange[i].time / 1000,
+      words = wordsByTime.get(time);
+    if (words) {
+      const sw = words.find(d => d.title === title);
+      const w = sw ? sw.keywords : [];
+      setSelectedWords(w);
+    } else getWords(selectedName, time, title);
+  }
 
   useEffect(() => {
     // 获得时间范围
@@ -136,29 +210,19 @@ function HotsPanel({
     }
 
     // 请求数据
-    const limit = 10,
-      bisectStart = d3.bisector(d => d.time),
-      bisectEnd = d3.bisector(d => d.request),
-      len = hotTimeRange.length - 1;
+    const limit = 10;
+    const bisectStart = d3.bisector(d => d.time);
 
-    // 一直向右找，找到第一个为 true 的请求
-    const index = bisectStart.right(hotTimeRange, selectedTime),
+    const index = bisectStart.left(hotTimeRange, selectedTime),
       tick = hotTimeRange[index],
-      nextIndex = Math.min(
-        bisectEnd.right(hotTimeRange, true, index, len),
-        index + limit
-      ),
+      nextIndex = Math.min(hotTimeRange.length - 1, index + limit),
       nextTick = hotTimeRange[nextIndex];
-
-    // console.log(bisectEnd.right(hotTimeRange, true, index, len), hotTimeRange, index);
 
     const lo = d3.bisectLeft(ticks, tick.time),
       hi = d3.bisectLeft(ticks, nextTick.time),
-      subTicks = ticks.slice(lo, hi + 1); // 这需要 +1 让前后两个时刻有重复
+      subTicks = ticks.slice(lo, hi + 1); // 这需要 -1 让前后两个时刻有重复
 
     if (tick.request) return;
-    console.log("request", index);
-    console.log(lo, hi, subTicks, index, nextIndex);
 
     getData({
       ticks: subTicks,
@@ -235,6 +299,18 @@ export default connect(
     dataByDate: news.dataByDate
   }),
   {
+    setSelectedWords: words => ({
+      type: "hots/setSelectedWords",
+      payload: words
+    }),
+    getWords: (name, time, title) => ({
+      type: "hots/getWords",
+      payload: {
+        name,
+        time,
+        title
+      }
+    }),
     getData: options => ({
       type: "hots/getData",
       payload: options

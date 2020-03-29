@@ -65,7 +65,7 @@ export default function({
 
   const cellSize = Math.min(
     (width - margin.left - margin.right) / totalWeek,
-    50
+    40
   );
 
   const chartWidth = (cellSize * totalWeek) | 0,
@@ -129,7 +129,7 @@ export default function({
           transform={`translate(${width -
             margin.right -
             legendWidth -
-            10}, ${margin.top / 2})`}
+            10}, ${margin.top})`}
         >
           {d3.range(0, legendWidth).map(l => (
             <line

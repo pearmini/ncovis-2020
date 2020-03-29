@@ -1,4 +1,3 @@
-import data from "../assets/data/hots.json";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
 import ApolloClient from "apollo-boost";
@@ -66,6 +65,29 @@ function getTimeRange(platform = "zhihu") {
         }
       }
     }`
+  });
+}
+
+function getWordsOfTopics({ name, time }) {
+  return client.query({
+    query: gql`
+      {
+        ${name}(
+          time:${time}
+        ){
+          data {
+            topics {
+              keywords {
+                name
+                weight
+              }
+              heat
+              title
+            }
+          }
+        }
+      }
+    `
   });
 }
 
@@ -182,28 +204,60 @@ function preprocess(data, ticks) {
   }
 }
 
-function computeWordCloud(data, n = 20) {
-  const words = data =>
-    data
-      .map(d => ({
-        text: d.name,
-        value: d.weight || d.value
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, n);
+function words(data, n = 20) {
+  const w = new Set([
+    "没有",
+    "知道",
+    "可能",
+    "觉得",
+    "时候",
+    "应该",
+    "还有",
+    "出来",
+    "需要",
+    "事情",
+    "大家",
+    "还有",
+    "看到"
+  ]);
+  return data
+    .map(d => ({
+      text: d.name,
+      value: d.weight || d.value
+    }))
+    .filter(d => !w.has(d.text))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, n);
+}
+
+function computeWordCloud(data, get) {
+  return new Promise(resolve => {
+    cloud()
+      .size([900, 600])
+      .words(data)
+      .padding(5)
+      .rotate(0)
+      .fontSize(d => Math.sqrt(d.value) * 80)
+      .on("end", words => resolve(get(words)))
+      .start();
+  });
+}
+
+function computePreFramesWordsCloud(data) {
   return Promise.all(
-    data.map(
-      ([date, d]) =>
-        new Promise((resolve, reject) => {
-          cloud()
-            .size([900, 600])
-            .words(words(d))
-            .padding(5)
-            .rotate(0)
-            .fontSize(d => d.value * 120)
-            .on("end", words => resolve([date * 1000, words]))
-            .start();
-        })
+    data.map(({ keywords, title }) =>
+      computeWordCloud(words(keywords), words => ({
+        keywords: words,
+        title
+      }))
+    )
+  );
+}
+
+function computeFramesWordCloud(data) {
+  return Promise.all(
+    data.map(([date, d]) =>
+      computeWordCloud(words(d), words => [date * 1000, words])
     )
   );
 }
@@ -214,9 +268,21 @@ export default {
     dataByName: d3.map(),
     timeByName: d3.map(),
     nextCursor: "",
-    selectedTime: null
+    selectedTime: null,
+    wordsByTime: d3.map(),
+    selectedWords: []
   },
   reducers: {
+    addWords: (state, action) => {
+      const { words, time } = action.payload;
+      const { wordsByTime } = state;
+      wordsByTime.set(time, words);
+      return { ...state, wordsByTime };
+    },
+    setSelectedWords: (state, action) => ({
+      ...state,
+      selectedWords: action.payload
+    }),
     addTimeRange: (state, action) => {
       const { range, name } = action.payload;
       const { timeByName, selectedTime } = state;
@@ -244,23 +310,31 @@ export default {
           cloudsKeyframes
         });
       else {
-        // const { listKeyframes: oldL, cloudsKeyframes: oldC } = value;
-        // const newL = [listKeyframes, ...oldL].sort((a, b) => a[0] - b[0]).filter
         value.listKeyframes.push(...listKeyframes);
         value.listKeyframes.sort((a, b) => a[0] - b[0]);
 
-        // console.log(d3.pairs(value.listKeyframes).map(([a, b]) => b[0] - a[0]));
         // 添加并且排序
         value.cloudsKeyframes.push(...cloudsKeyframes);
         value.cloudsKeyframes.sort((a, b) => a[0] - b[0]);
-        // console.log(
-        //   d3.pairs(value.cloudsKeyframes).map(([a, b]) => b[0] - a[0])
-        // );
       }
       return { ...state, dataByName };
     }
   },
   effects: {
+    *getWords(action, { call, put }) {
+      try {
+        const { time, name, title } = action.payload;
+        const data = yield call(getWordsOfTopics, { name, time });
+        const words = data.data[name].data[0].topics;
+        const wordsWithLayout = yield call(computePreFramesWordsCloud, words);
+        const selectedWords = wordsWithLayout.find(d => d.title === title);
+        const keywords = selectedWords ? selectedWords.keywords : [];
+        yield put({ type: "addWords", payload: { wordsWithLayout, time } });
+        yield put({ type: "setSelectedWords", payload: keywords });
+      } catch (e) {
+        console.error(e);
+      }
+    },
     *getTime(action, { call, put }) {
       try {
         const { name } = action.payload;
@@ -279,8 +353,12 @@ export default {
         const result = yield call(getHots, action.payload);
         const { name, ticks } = action.payload,
           data = result.data[name].data;
+        console.log(data, ticks);
         const { listKeyframes, wordsKeyframes } = preprocess(data, ticks);
-        const cloudsKeyframes = yield call(computeWordCloud, wordsKeyframes);
+        const cloudsKeyframes = yield call(
+          computeFramesWordCloud,
+          wordsKeyframes
+        );
         yield put({
           type: "addFrames",
           payload: { name, listKeyframes, cloudsKeyframes }

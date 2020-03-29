@@ -6,7 +6,6 @@ import styled from "styled-components";
 import regions from "../assets/data/region_options.json";
 
 import Shape from "./Shape";
-import TreeMatrix from "./TreeMatrix";
 import Piechart from "./Piechart";
 import DateMap from "./DateMap";
 
@@ -136,7 +135,6 @@ function NewsPanel({
       <Row>
         <Col span={24}>
           <DateMap {...treeProps} />
-          {/* <TreeMatrix {...treeProps} /> */}
         </Col>
       </Row>
       <Row gutter={[16, 16]}>

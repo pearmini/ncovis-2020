@@ -11,8 +11,7 @@ export default function({
   selectedLevel = "top",
   setSelectedTime,
   focus,
-  setFocus,
-  running
+  setFocus
 }) {
   const ref = useRef(null);
   const width = 1200,
@@ -99,9 +98,8 @@ export default function({
   const tipY = index => (index % cnt) * th;
 
   const lineX = () => {
-    if (running) return x(new Date(selectedTime));
     if (tip) return x(tip.time);
-    return x(new Date(0));
+    return x(new Date(selectedTime));
   };
 
   const area = d3
