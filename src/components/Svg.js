@@ -18,6 +18,8 @@ export default function({
   nodata,
   show = true,
   children,
+  introduction,
+  title,
   ...rest
 }) {
   const ref = useRef(null);
@@ -38,7 +40,9 @@ export default function({
     className,
     loading,
     nodata,
-    show
+    show,
+    introduction,
+    title
   };
 
   return (

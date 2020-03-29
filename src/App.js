@@ -9,7 +9,6 @@ import NewsPanel from "./components/NewsPanel";
 import Header from "./components/Header";
 import DiscoveryPanel from "./components/DiscoveryPanel";
 
-
 const Content = styled.div`
   margin: 0 auto;
   width: 90%;
@@ -30,8 +29,8 @@ function App() {
         <IntroductionPanel />
         <HotsPanel />
         <NewsPanel />
-        <StoryPanel />
-        <DiscoveryPanel />
+        {/* <StoryPanel /> */}
+        {/* <DiscoveryPanel /> */}
       </Content>
     </ThemeProvider>
   );

@@ -16,6 +16,7 @@ const { Option } = Select;
 
 const Container = styled.div`
   position: relative;
+  margin-bottom: 2em;
 `;
 
 const An = styled.div`
@@ -70,7 +71,7 @@ function HotsPanel({
   const barColor = useRef(
     mc([...d3.schemeTableau10, "#634294", "#d54087"], 10)
   );
-  const wordColor = useRef(rc(d3.schemeCategory10));
+  const wordColor = useRef(rc(d3.schemeTableau10));
 
   const selectedName = "zhihu";
   const namevalues = dataByName.get(selectedName);
@@ -84,7 +85,7 @@ function HotsPanel({
       .every(12) // 每隔 12 小时获取一下数据
       .range(totalTimeRange[0], totalTimeRange[1])
       .map(d => d.getTime()),
-    totalDuration = ticks.length * 4000; // 1小时 0.75秒
+    totalDuration = ticks.length * 3000; // 1小时 0.75秒
 
   const timeScale = d3
       .scaleLinear()
@@ -137,7 +138,8 @@ function HotsPanel({
     selectedType,
     selectedLevel,
     focus,
-    setFocus
+    setFocus,
+    running
   };
 
   if (running && loadingHots && !pause) {
@@ -241,8 +243,8 @@ function HotsPanel({
   return (
     <Container>
       <An id="hots" />
-      <h1>人们在网络上都在讨论些啥？</h1>
-      <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p>
+      <h1>人们在网络上都在讨论些什么？</h1>
+      {/* <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p> */}
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <BarRace {...barsProps} />

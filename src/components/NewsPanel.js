@@ -93,8 +93,8 @@ function NewsPanel({
   return (
     <Container>
       <An id="news" />
-      <h1>全国各地都在报道些啥?</h1>
-      <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p>
+      <h1>全国各地新闻都在报道些什么?</h1>
+      {/* <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p> */}
       <Control>
         <div>
           <span>区域</span>&ensp;

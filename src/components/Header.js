@@ -94,13 +94,16 @@ function Header() {
       id: "news"
     },
     {
-      name: "故事",
-      id: "story"
-    },
-    {
-      name: "发现",
-      id: "discovery"
+      name: "github"
     }
+    // {
+    //   name: "故事",
+    //   id: "story"
+    // },
+    // {
+    //   name: "发现",
+    //   id: "discovery"
+    // }
   ];
   return (
     <>

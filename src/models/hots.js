@@ -21,7 +21,7 @@ const cache = new InMemoryCache({});
   }))();
 
 const client = new ApolloClient({
-  cache,
+  // cache,
   uri:
     "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS"
 });
@@ -204,7 +204,7 @@ function preprocess(data, ticks) {
   }
 }
 
-function words(data, n = 20) {
+function words(data, n = 30) {
   const w = new Set([
     "没有",
     "知道",

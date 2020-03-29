@@ -87,11 +87,20 @@ export default function({
     });
   }
 
+  const introduction = (
+    <div>
+      <p>这里是一个动态的条形图。用于直观展现知乎热搜的热度随着时间的变化。</p>
+      <p>你可以在任意时刻，点击任意一个条。用于高亮对应的热搜数据以及回答中的关键词。</p>
+    </div>
+  );
+
   return (
     <Svg
       viewBox={[0, 0, width, height]}
       loading={loading}
       onClick={hideWordsOfTopic}
+      title="动态条形图"
+      introduction={introduction}
     >
       {bars.map(d => (
         <g

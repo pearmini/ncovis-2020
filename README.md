@@ -1,3 +1,1 @@
-# nCov social media visulization
-
-This is the visulization for nCov.
+# nCovis-2020

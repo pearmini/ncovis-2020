@@ -611,6 +611,7 @@ export default function({
                 textAnchor={
                   !node.children || node.hideChildren ? "start" : "end"
                 }
+                fontSize="12"
                 onClick={e => {
                   toggleHighlightNode(node);
                   e.stopPropagation();
