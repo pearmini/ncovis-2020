@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Button } from "antd";
+import { Button, Dropdown, Menu } from "antd";
 const Logo = styled.div`
   color: white;
   font-size: 25px;
   font-weight: bold;
   color: ${props => props.theme.font};
+  font-family: "Titan One", cursive;
 `;
 
 const Container = styled.div`
@@ -42,6 +43,11 @@ const Nav = styled.nav`
   & a {
     color: ${props => props.theme.font};
     font-weight: bold;
+    padding: 0.5em 0;
+  }
+
+  & a:hover {
+    border-bottom: 1px solid white;
   }
 
   @media (max-width: 700px) {
@@ -63,6 +69,7 @@ const Nav = styled.nav`
 
 const ToggleButton = styled(Button)`
   display: none;
+  transform: rotate(${props => props.angle}deg);
   @media (max-width: 700px) {
     display: block;
   }
@@ -82,7 +89,7 @@ function Header() {
   const [show, setShow] = useState(false);
   const navs = [
     {
-      name: "介绍",
+      name: "概览",
       id: "introduction"
     },
     {
@@ -94,17 +101,42 @@ function Header() {
       id: "news"
     },
     {
-      name: "github"
+      name: "发现",
+      id: "story"
     }
-    // {
-    //   name: "故事",
-    //   id: "story"
-    // },
-    // {
-    //   name: "发现",
-    //   id: "discovery"
-    // }
   ];
+
+  const menu = (
+    <Menu>
+      <Menu.Item>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="http://www.alipay.com/"
+        >
+          前端可视化
+        </a>
+      </Menu.Item>
+      <Menu.Item>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="http://www.taobao.com/"
+        >
+          后端爬虫
+        </a>
+      </Menu.Item>
+      <Menu.Item>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="http://www.tmall.com/"
+        >
+          数据处理
+        </a>
+      </Menu.Item>
+    </Menu>
+  );
   return (
     <>
       <Container>
@@ -119,9 +151,19 @@ function Header() {
                   </a>
                 </li>
               ))}
+              <li>
+                <Dropdown overlay={menu}>
+                  <a onClick={e => e.preventDefault()}>github</a>
+                </Dropdown>
+              </li>
             </ul>
           </Nav>
-          <ToggleButton icon="menu" ghost onClick={() => setShow(!show)} />
+          <ToggleButton
+            icon="menu"
+            ghost
+            onClick={() => setShow(!show)}
+            angle={show ? 90 : 0}
+          />
         </HeaderWrapper>
       </Container>
       {show && <Overlayer onClick={() => setShow(false)} />}

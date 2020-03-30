@@ -1,18 +1,19 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useWindowSize } from "react-use";
 import chinaURL from "../assets/images/china.png";
 import zhihuURL from "../assets/images/zhihu.png";
+import { connect } from "dva";
 
 const Container = styled.div`
-  margin: 1em 0;
+  padding: 56px 0;
   position: relative;
   height: ${props => props.height}px;
   width: 100%;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   display: flex;
-  flex-direction:column;
+  flex-direction: column;
 `;
 
 const An = styled.div`
@@ -20,80 +21,152 @@ const An = styled.div`
   top: -56px;
 `;
 
-const TitleTop = styled.h1`
-  font-size: 60px;
-  font-weight: bold;
-  margin-bottom: 0px;
-`;
-
 const Title = styled.h1`
+  margin-top: 1em;
   font-size: 60px;
   font-weight: bold;
-`;
 
-const Intro = styled.p`
-  /* color: ${props => props.theme.font}; */
+  @media (max-width: 992px) {
+    font-size: 40px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 40px;
+  }
+
+  @media (max-width: 576px) {
+    font-size: 25px;
+  }
 `;
 
 const Row = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: 60%;
+  }
 `;
 
 const China = styled.img`
   width: 50%;
+  @media (max-width: 768px) {
+    height: 50%;
+    width: initial;
+  }
 `;
 
 const Zhihu = styled.img`
   width: 50%;
+  @media (max-width: 768px) {
+    height: 50%;
+    width: initial;
+  }
 `;
 
-function Introduction() {
+const Time = styled.div`
+  margin: 1em auto;
+  color: #bfbfbf;
+  font-size: 11px;
+  display: flex;
+  flex-direction: row-reverse;
+`;
+
+const Box = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 0 1em;
+  width: 500px;
+  max-width: 100%;
+`;
+
+const CardContainer = styled.div`
+  display: flex;
+  margin-top: 1em;
+  justify-content: space-around;
+`;
+
+const Card = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Change = styled.div`
+  color: #999999;
+  line-height: 22px;
+  font-size: 12px;
+  & span {
+    margin-left: 2px;
+    color: ${props => props.color};
+  }
+`;
+
+const Value = styled.div`
+  font-size: 19px;
+  color: ${props => props.color};
+  font-weight: bold;
+`;
+
+const Name = styled.div`
+  font-weight: bold;
+  color: #444444;
+
+  @media (max-width: 700px) {
+    font-size: 10px;
+  }
+`;
+
+const DashBoard = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+`;
+
+function Introduction({ total = [], getTotal, loading }) {
   const { height } = useWindowSize();
-  const scrolling = useRef(false); // 是否在滚动中
-  const pre = useRef(0); // 上一次的 scrollY
+  const formate = date =>
+    `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+
+  const colorByName = {
+    累计确诊: "#F9345e",
+    累计死亡: "#6236ff",
+    累计治愈: "#1cb142",
+    现存确诊: "#fa6400"
+  };
 
   useEffect(() => {
-    // 如果在 scrollTo 的途中被打断，可能导致 scrolling 不能被设置为 false，
-    // 这样就会暂时失去切换效果
-    // 这里的根本原因是无法监听 scroll 停止的事件
-    const handler = e => {
-      const { scrollY } = window,
-        h = height - 56;
-      const step = scrollY - pre.current;
-      if (scrollY === 0 || scrollY >= h) scrolling.current = false;
-      if (scrolling.current) {
-        pre.current = scrollY;
-        return;
-      }
-      if (step < 0 && scrollY < h) {
-        window.scrollTo(0, 0);
-        scrolling.current = true;
-      } else if (0 < scrollY && scrollY < h) {
-        window.scrollTo(0, h);
-        scrolling.current = true;
-      }
-
-      pre.current = scrollY;
-    };
-
-    // 这里不能监听 sroll 事件，否者点击 a 的产生的滚动也会被监听
-    window.addEventListener("wheel", handler);
-    return () => window.removeEventListener("wheel", handler);
-  });
+    getTotal();
+  }, [getTotal]);
 
   return (
     <Container height={height}>
       <An id="introduction" />
-      <div>
-        <TitleTop>人们在讨论什么</TitleTop>
-        <Title>新闻在报道什么</Title>
-      </div>
-      <p>在疫情期间，我们爬取了知乎以及中国新闻网的数据，</p>
-      <p>
-        旨在探索：随着疫情确诊、治愈和死亡人数的变化，人们在讨论什么，新闻在报道什么？
-      </p>
-      <p>同时，这两者之间又有什么关系？</p>
+      <DashBoard>
+        <Title>Covid-19 舆论新闻可视化</Title>
+        <Box>
+          <CardContainer>
+            {total.data.map(({ name, value, change }) => (
+              <Card key={name}>
+                <Change color={colorByName[name]}>
+                  {change >= 0 ? "新增" : "减少"}
+                  <span>
+                    {change >= 0 ? "+" : "-"}
+                    {Math.abs(change)}
+                  </span>
+                </Change>
+                <Value color={colorByName[name]}>{value}</Value>
+                <Name>全国{name}</Name>
+              </Card>
+            ))}
+          </CardContainer>
+          <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
+        </Box>
+      </DashBoard>
       <Row>
         <Zhihu src={zhihuURL} />
         <China src={chinaURL} />
@@ -101,4 +174,12 @@ function Introduction() {
     </Container>
   );
 }
-export default Introduction;
+export default connect(
+  ({ total, loading }) => ({
+    total,
+    loading: loading.models.total
+  }),
+  {
+    getTotal: () => ({ type: "total/getData" })
+  }
+)(Introduction);

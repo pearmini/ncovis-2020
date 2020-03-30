@@ -5,6 +5,7 @@ import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
 import cloud from "d3-cloud";
+import 'array-flat-polyfill';
 
 const d3 = {
   ...d3All,
@@ -353,7 +354,6 @@ export default {
         const result = yield call(getHots, action.payload);
         const { name, ticks } = action.payload,
           data = result.data[name].data;
-        console.log(data, ticks);
         const { listKeyframes, wordsKeyframes } = preprocess(data, ticks);
         const cloudsKeyframes = yield call(
           computeFramesWordCloud,

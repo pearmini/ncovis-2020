@@ -5,6 +5,7 @@ import ApolloClient from "apollo-boost";
 import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
+import 'array-flat-polyfill';
 
 const d3 = {
   ...d3All,

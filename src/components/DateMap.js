@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import 'array-flat-polyfill';
 import TreeMatrix from "./TreeMatrix";
 import HeatMap from "./HeatMap";
 import * as d3 from "d3";
