@@ -13,6 +13,7 @@ function CommentPanel() {
     <Container>
       <An id="story" />
       <h1>发现</h1>
+      <p>敬请期待</p>
     </Container>
   );
 }

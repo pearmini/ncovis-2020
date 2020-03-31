@@ -78,8 +78,8 @@ export default function({
     : data;
 
   const margin = { top: 50, right: 30, bottom: 30, left: 60 },
-    chartPadding = 90,
-    nodeWidth = 100,
+    chartPadding = 75,
+    nodeWidth = 75,
     buttonSize = 15,
     axisPadding = 5,
     formatDate = d3.timeFormat("%x"),

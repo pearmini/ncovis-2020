@@ -212,6 +212,7 @@ export default function({
                   onMouseEnter={() => setHighlight(key)}
                   onClick={e => {
                     setFocus(key);
+                    setHighlight("");
                     e.stopPropagation();
                   }}
                 >

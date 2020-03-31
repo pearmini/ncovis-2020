@@ -12,16 +12,14 @@ import DateMap from "./DateMap";
 const { Option } = Select;
 const Container = styled.div`
   position: relative;
+  margin-bottom: 4em;
 `;
 
 const Control = styled.div`
   display: flex;
-  margin-bottom: 0.5em;
-
-  @media (max-width: 700px) {
-    flex-direction: column;
-  }
+  margin: 1em 0;
 `;
+
 const An = styled.div`
   position: absolute;
   top: -56px;
@@ -94,10 +92,28 @@ function NewsPanel({
     <Container>
       <An id="news" />
       <h1>全国各地新闻都在报道些什么?</h1>
-      {/* <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化</p> */}
+      <p>这里对全国各地新闻报道对内容和疫情相关的数据进行简单的可视化。</p>
       <Control>
         <div>
-          <span>区域</span>&ensp;
+          <span>种类</span>&ensp;
+          <Select
+            value={selectedType}
+            onChange={value => setSelectedType(value)}
+          >
+            {types.map(d => (
+              <Option key={d.key}>{d.name}</Option>
+            ))}
+          </Select>
+        </div>
+      </Control>
+      <Row>
+        <Col span={24}>
+          <DateMap {...treeProps} />
+        </Col>
+      </Row>
+      <Control>
+        <div>
+          <span>地区</span>&ensp;
           <TreeSelect
             showSearch
             value={selectedRegion}
@@ -119,24 +135,7 @@ function NewsPanel({
             showTody={false}
           />
         </div>
-        &emsp;
-        <div>
-          <span>种类</span>&ensp;
-          <Select
-            value={selectedType}
-            onChange={value => setSelectedType(value)}
-          >
-            {types.map(d => (
-              <Option key={d.key}>{d.name}</Option>
-            ))}
-          </Select>
-        </div>
       </Control>
-      <Row>
-        <Col span={24}>
-          <DateMap {...treeProps} />
-        </Col>
-      </Row>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <Shape {...shapeProps} />

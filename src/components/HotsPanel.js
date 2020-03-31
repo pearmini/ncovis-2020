@@ -16,7 +16,7 @@ const { Option } = Select;
 
 const Container = styled.div`
   position: relative;
-  margin-bottom: 2em;
+  margin-bottom: 4em;
 `;
 
 const An = styled.div`
@@ -243,16 +243,8 @@ function HotsPanel({
   return (
     <Container>
       <An id="hots" />
-      <h1>人们在网络上都在讨论些什么？</h1>
-      {/* <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p> */}
-      <Row gutter={[16, 16]}>
-        <Col span={24} md={12}>
-          <BarRace {...barsProps} />
-        </Col>
-        <Col span={24} md={12}>
-          <StoryTelling {...storyProps} />
-        </Col>
-      </Row>
+      <h1>人们在知乎上都在讨论些什么？</h1>
+      <p>这里是通过词云和条形图的方式对各大平台的热搜数据进行可视化。</p>
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <Control>
@@ -287,6 +279,14 @@ function HotsPanel({
       <Row>
         <Col span={24}>
           <Timeline {...timeProps} />
+        </Col>
+      </Row>
+      <Row gutter={[16, 16]}>
+        <Col span={24} md={12}>
+          <BarRace {...barsProps} />
+        </Col>
+        <Col span={24} md={12}>
+          <StoryTelling {...storyProps} />
         </Col>
       </Row>
     </Container>

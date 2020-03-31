@@ -2,10 +2,11 @@ import React from "react";
 import "antd/dist/antd.css";
 import styled, { ThemeProvider } from "styled-components";
 
+import OverviewPanel from "./components/OverviewPanel";
 import IntroductionPanel from "./components/IntroductionPanel";
 import HotsPanel from "./components/HotsPanel";
 import NewsPanel from "./components/NewsPanel";
-import DiscoveryPanel from "./components/DiscoveryPanel"
+import DiscoveryPanel from "./components/DiscoveryPanel";
 import Header from "./components/Header";
 
 const Content = styled.div`
@@ -24,10 +25,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <Header />
       <Content>
+        <OverviewPanel />
         <IntroductionPanel />
-        <HotsPanel />
         <NewsPanel />
-        <DiscoveryPanel />
+        <HotsPanel />
+        {/* <DiscoveryPanel /> */}
       </Content>
     </ThemeProvider>
   );

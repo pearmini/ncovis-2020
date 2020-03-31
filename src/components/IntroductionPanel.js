@@ -1,19 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
-import { useWindowSize } from "react-use";
-import chinaURL from "../assets/images/china.png";
-import zhihuURL from "../assets/images/zhihu.png";
-import { connect } from "dva";
+import talkImage from "../assets/images/talk.jpg";
 
 const Container = styled.div`
-  padding: 56px 0;
   position: relative;
-  height: ${props => props.height}px;
-  width: 100%;
-  justify-content: space-around;
-  align-items: center;
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 4em;
 `;
 
 const An = styled.div`
@@ -21,165 +12,89 @@ const An = styled.div`
   top: -56px;
 `;
 
-const Title = styled.h1`
-  margin-top: 1em;
-  font-size: 60px;
-  font-weight: bold;
-
-  @media (max-width: 992px) {
-    font-size: 40px;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 40px;
-  }
-
-  @media (max-width: 576px) {
-    font-size: 25px;
-  }
-`;
-
 const Row = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
 
   @media (max-width: 768px) {
     flex-direction: column;
-    height: 60%;
   }
 `;
 
-const China = styled.img`
-  width: 50%;
+const Intro = styled.div`
+  width: 60%;
+  & ul {
+    padding: 1em 0 0 2em;
+  }
   @media (max-width: 768px) {
-    height: 50%;
-    width: initial;
+    width: 100%;
   }
 `;
 
-const Zhihu = styled.img`
-  width: 50%;
-  @media (max-width: 768px) {
-    height: 50%;
-    width: initial;
-  }
-`;
+const TalkImage = styled.img``;
 
-const Time = styled.div`
-  margin: 1em auto;
-  color: #bfbfbf;
-  font-size: 11px;
-  display: flex;
-  flex-direction: row-reverse;
-`;
-
-const Box = styled.div`
-  background: white;
-  border-radius: 8px;
-  padding: 0 1em;
-  width: 500px;
-  max-width: 100%;
-`;
-
-const CardContainer = styled.div`
-  display: flex;
-  margin-top: 1em;
-  justify-content: space-around;
-`;
-
-const Card = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Change = styled.div`
-  color: #999999;
-  line-height: 22px;
-  font-size: 12px;
-  & span {
-    margin-left: 2px;
-    color: ${props => props.color};
-  }
-`;
-
-const Value = styled.div`
-  font-size: 19px;
-  color: ${props => props.color};
-  font-weight: bold;
-`;
-
-const Name = styled.div`
-  font-weight: bold;
-  color: #444444;
-
-  @media (max-width: 700px) {
-    font-size: 10px;
-  }
-`;
-
-const DashBoard = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-`;
-
-function Introduction({ total = [], getTotal, loading }) {
-  const { height } = useWindowSize();
-  const formate = date =>
-    `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-
-  const colorByName = {
-    累计确诊: "#F9345e",
-    累计死亡: "#6236ff",
-    累计治愈: "#1cb142",
-    现存确诊: "#fa6400"
-  };
-
-  useEffect(() => {
-    getTotal();
-  }, [getTotal]);
-
+function IntroductionPanel() {
   return (
-    <Container height={height}>
+    <Container>
       <An id="introduction" />
-      <DashBoard>
-        <Title>Covid-19 舆论新闻可视化</Title>
-        <Box>
-          <CardContainer>
-            {total.data.map(({ name, value, change }) => (
-              <Card key={name}>
-                <Change color={colorByName[name]}>
-                  {change >= 0 ? "新增" : "减少"}
-                  <span>
-                    {change >= 0 ? "+" : "-"}
-                    {Math.abs(change)}
-                  </span>
-                </Change>
-                <Value color={colorByName[name]}>{value}</Value>
-                <Name>全国{name}</Name>
-              </Card>
-            ))}
-          </CardContainer>
-          <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
-        </Box>
-      </DashBoard>
+      <h1>介绍</h1>
       <Row>
-        <Zhihu src={zhihuURL} />
-        <China src={chinaURL} />
+        <Intro>
+          <p>
+            <b>nCoVIS</b> 是山东大学{" "}
+            <a href="https://vislab.wang/" target="_blank">
+              VisLab
+            </a>{" "}
+            实验室为大众提供的一个在线可视化分析平台，旨在探索在 COVID-19
+            疫情出现到现在：
+            <ul>
+              <li>各地区新闻在报道什么？</li>
+              <li>人们在网络上讨论什么？</li>
+              <li>上面两者的关系以及对控制疫情有什么指导意义？</li>
+            </ul>
+          </p>
+          <p>
+            <b>COVID-19</b> 是人类历史上第一次在高度发达的
+            <b>自媒体、全媒体时代</b>
+            遇到的高传染性病毒。面对病毒，我们不能只关心患者的患病情况，同时也要关心群众们在讨论什么，防止出现恐慌。
+          </p>
+          <p>
+            在病毒传播初期，武汉曾出现过因为恐慌导致大量常规感冒、发烧患者挤兑医院，在医院造成大规模传染。并且因为恐慌效应在自媒体时代各种社交软件上的二次传播，加剧了人们对病毒的恐惧，促使大量疫情严重地区的人开始向其他地区逃离，进一步加大了空坠疫情的难度。
+          </p>
+          <p>
+            <b>新闻报道控制舆论导向，而舆论反过来也影响新闻报道。</b>
+            所以我们除了提供和疫情直接相关的数据可视化以外，还爬取了
+            <a target="_blank" href="https://www.chinanews.com/">
+              中国新闻网
+            </a>
+            各地区的新闻数据和
+            <a target="_blank" href="https://www.zhihu.com/">
+              知乎
+            </a>
+            的热搜数据，并提供相关的可视化。
+          </p>
+          <p>
+            在可视化技术方面，我们一方面使用了一些常见的可视化技术：面积图、条形图、饼状图等，另一方面使用了我们实验室在去年{" "}
+            <b>InfoVis2019</b> 发表的论文所提到的技术
+            <a
+              target="_blank"
+              href="https://vislab.wang/post/shapewordle:-tailoring-wordles-using-shape-aware-archimedean-spirals"
+            >
+              {" "}
+              ShapeWordle{" "}
+            </a>
+            ，让我们的可视化结果更加生动和有人情味。
+          </p>
+          <p>
+            最后，我们希望这场灾难早点过去，祝愿病人们早日康复，也向奋斗在一线的白衣天使和科学家们致以最崇高的敬意。中国加油，世界加油，那些不能打到我们的，只能让我们更强大！
+          </p>
+        </Intro>
+        <TalkImage src={talkImage} />
       </Row>
     </Container>
   );
 }
-export default connect(
-  ({ total, loading }) => ({
-    total,
-    loading: loading.models.total
-  }),
-  {
-    getTotal: () => ({ type: "total/getData" })
-  }
-)(Introduction);
+
+export default IntroductionPanel;

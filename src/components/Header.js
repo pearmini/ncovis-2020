@@ -1,19 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Button, Dropdown, Menu } from "antd";
-const Logo = styled.div`
-  color: white;
-  font-size: 25px;
-  font-weight: bold;
-  color: ${props => props.theme.font};
-  font-family: "Titan One", cursive;
-`;
 
 const Container = styled.div`
-  display: relative;
   height: 56px;
-  background: ${props => props.theme.header};
   line-height: 56px;
+  background: ${props => props.theme.header};
   position: fixed;
   width: 100%;
   top: 0px;
@@ -21,14 +13,37 @@ const Container = styled.div`
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
 `;
 
+const Logo = styled.span`
+  font-size: 25px;
+  font-family: "Titan One", cursive;
+`;
+
+const Left = styled.span`
+  font-weight: bold;
+`;
+
+const Lab = styled.a`
+  font-size: 16px;
+  margin-left: 10px;
+  font-family: "webfont" !important;
+  color: ${props => props.theme.font};
+  text-decoration: none;
+
+  &:hover {
+    color: ${props => props.theme.font};
+  }
+`;
+
 const HeaderWrapper = styled.header`
   margin: 0 auto;
   max-width: 1200px;
   background: ${props => props.theme.header};
   width: 90%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  color: ${props => props.theme.font};
 `;
 
 const Nav = styled.nav`
@@ -90,20 +105,25 @@ function Header() {
   const navs = [
     {
       name: "概览",
-      id: "introduction"
+      id: "overview"
     },
     {
-      name: "舆论可视化",
-      id: "hots"
+      name: "介绍",
+      id: "introduction"
     },
     {
       name: "新闻可视化",
       id: "news"
     },
     {
-      name: "发现",
-      id: "story"
+      name: "舆论可视化",
+      id: "hots"
     }
+
+    // {
+    //   name: "发现",
+    //   id: "story"
+    // }
   ];
 
   const menu = (
@@ -112,7 +132,7 @@ function Header() {
         <a
           target="_blank"
           rel="noopener noreferrer"
-          href="http://www.alipay.com/"
+          href="https://github.com/pearmini"
         >
           前端可视化
         </a>
@@ -121,7 +141,7 @@ function Header() {
         <a
           target="_blank"
           rel="noopener noreferrer"
-          href="http://www.taobao.com/"
+          href="https://github.com/vivym"
         >
           后端爬虫
         </a>
@@ -130,7 +150,7 @@ function Header() {
         <a
           target="_blank"
           rel="noopener noreferrer"
-          href="http://www.tmall.com/"
+          href="https://github.com/Kaiyiwing"
         >
           数据处理
         </a>
@@ -141,7 +161,12 @@ function Header() {
     <>
       <Container>
         <HeaderWrapper>
-          <Logo>nCoVIS 2020</Logo>
+          <Left>
+            <Logo>nCoVIS</Logo>
+            <Lab href="https://vislab.wang/" target="_blank">
+              山东大学 VisLab
+            </Lab>
+          </Left>
           <Nav show={show}>
             <ul>
               {navs.map(nav => (
@@ -153,7 +178,7 @@ function Header() {
               ))}
               <li>
                 <Dropdown overlay={menu}>
-                  <a onClick={e => e.preventDefault()}>github</a>
+                  <a onClick={e => e.preventDefault()}>联系我们</a>
                 </Dropdown>
               </li>
             </ul>
