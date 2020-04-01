@@ -38,13 +38,23 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
               .reverse()
           );
 
-  const text = d => ((d.endAngle - d.startAngle) / Math.PI * 50 | 0) + "%";
+  const text = d => ((((d.endAngle - d.startAngle) / Math.PI) * 50) | 0) + "%";
   const arcs = pie(data);
+  const introduction = (
+    <div>
+      <h3>说明</h3>
+      <p>目前只有省份和直辖市的数据，同时数据可能出现缺失的情况。</p>
+      <h3>交互</h3>
+      <p>无</p>
+    </div>
+  );
   return (
     <Svg
       viewBox={[0, 0, width, height]}
       loading={loading}
       nodata={data.length === 0}
+      introduction={introduction}
+      title="饼状图"
     >
       {data.length && (
         <g
@@ -79,10 +89,11 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
           <g
             key={a.data.name}
             transform={`translate(${arc.centroid(a)})`}
-            fill="currentColor"
             textAnchor="middle"
           >
-            <text fill="currentColor" fontSize={12}>{text(a)}</text>
+            <text fill="currentColor" fontSize={11}>
+              {text(a)}
+            </text>
           </g>
         ))}
       </g>

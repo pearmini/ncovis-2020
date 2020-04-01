@@ -9,7 +9,7 @@ const Container = styled.div`
   position: fixed;
   width: 100%;
   top: 0px;
-  z-index: 15;
+  z-index: 1001;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
 `;
 

@@ -249,7 +249,10 @@ function HotsPanel({
         <Col span={24}>
           <Control>
             <div>
-              <span>级别</span>&ensp;
+              <span>
+                <b>级别</b>
+              </span>
+              &ensp;
               <Select
                 value={selectedLevel}
                 onChange={value => {
@@ -262,7 +265,10 @@ function HotsPanel({
                 ))}
               </Select>
               &ensp;&ensp;
-              <span>种类</span>&ensp;
+              <span>
+                <b>种类</b>
+              </span>
+              &ensp;
               <Select
                 value={selectedType}
                 onChange={value => setSelectedType(value)}

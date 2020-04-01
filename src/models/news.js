@@ -5,7 +5,8 @@ import ApolloClient from "apollo-boost";
 import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
-import 'array-flat-polyfill';
+import "array-flat-polyfill";
+import formatDate from "../utils/formatDate";
 
 const d3 = {
   ...d3All,
@@ -146,7 +147,7 @@ export default {
               })),
             d => d.date
           ),
-          selectedDate = "2020-02-10";
+          selectedDate = "2020-03-27";
 
         yield put({
           type: "init",

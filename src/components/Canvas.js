@@ -19,6 +19,8 @@ export default function({
   width,
   height,
   filename = "words",
+  introduction,
+  title,
   ...rest
 }) {
   const ratio = 4;
@@ -37,7 +39,9 @@ export default function({
     style,
     className,
     loading,
-    nodata
+    nodata,
+    introduction,
+    title
   };
 
   const canvasProps = {

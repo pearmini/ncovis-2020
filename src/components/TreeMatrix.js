@@ -183,6 +183,37 @@ export default function({
     .interpolate(() => colors.special)
     .domain([0, legendWidth]);
 
+  const introduction = (
+    <div>
+      <h3>说明</h3>
+      <ul>
+        <li>
+          因为湖北和华中地区的数据远大于其他地区，所以选择了一种特殊的颜色范围。
+        </li>
+        <li>变化为 0 的格子不一定真的为 0 ，可能是因为数据缺失。</li>
+      </ul>
+      <h3>交互方法</h3>
+      <ul>
+        <li>
+          <b>单击“热力图”</b>中的任意格子，会高亮并且选择对应的日期和地区。
+        </li>
+        <li>
+          <b>点击“树”</b>中地区的名字后面的<b>按钮</b>会收缩或者展开该地区。
+        </li>
+        <li>
+          <b>单击“树”</b>中地区的<b>名字</b>
+          会选择该地区，并且只可视化选择的地区；再
+          <b>单击</b>一次，取消选择。
+        </li>
+        <li>
+          <b>双击“树”</b>中地区的<b>名字</b>会进入<b>日历热图</b>
+          ，只可视化该地区的数据；
+          <b>双击</b>空白地方返回。
+        </li>
+      </ul>
+    </div>
+  );
+
   useEffect(() => {
     // 绘制坐标轴
     const scaleLegend = d3
@@ -486,6 +517,8 @@ export default function({
       nodata={noData(data)}
       onClick={() => setHighlight([])}
       show={show}
+      title="树 + 热力图"
+      introduction={introduction}
     >
       <g
         transform={`translate(${width -

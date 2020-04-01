@@ -110,6 +110,24 @@ export default function({
     return data.filter(({ value }) => !isNaN(value)).length === 0;
   }
 
+  const introduction = (
+    <div>
+      <h3>说明</h3>
+      <ul>
+        <li>
+          因为湖北和华中地区的数据远大于其他地区，所以选择了一种特殊的颜色范围。
+        </li>
+        <li>变化为 0 的格子不一定真的为 0 ，可能是因为数据缺失。</li>
+      </ul>
+      <h3>交互方法</h3>
+      <ul>
+        <li>
+          <b>双击</b>空白地方返回。
+        </li>
+      </ul>
+    </div>
+  );
+
   useEffect(() => {
     // 绘制坐标轴
     const scaleLegend = special
@@ -131,12 +149,14 @@ export default function({
   });
 
   return (
-    <Container onClick={() => setShow(true)}>
+    <Container onDoubleClick={() => setShow(true)}>
       <Svg
         viewBox={[0, 0, width, height]}
         loading={loading}
         nodata={noData(data)}
         show={show}
+        introduction={introduction}
+        title="日历热图"
       >
         <g
           transform={`translate(${width - margin.right - legendWidth - 10}, ${

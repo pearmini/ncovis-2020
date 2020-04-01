@@ -1,5 +1,7 @@
 import React from "react";
 import Canvas from "./Canvas";
+import fontURL from "../assets/fonts/思源柔黑.ttf";
+import { useRef } from "react";
 
 function Shape({ data, loading, selectedDate, selectedRegion }) {
   const width = 900,
@@ -8,6 +10,8 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     marginBottom = 60,
     { keywords, fillingWords } = data || {};
 
+  const font = useRef(new FontFace("siyuan", `url(${fontURL})`));
+
   function drawText(context, words, { fillStyle, textAlign, textBaseline }) {
     context.textAlign = textAlign;
     context.textBaseline = textBaseline;
@@ -15,7 +19,7 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     for (let word of words) {
       const { name, transX, transY, rotate, fontSize, fillX, fillY } = word;
       context.save();
-      context.font = `${fontSize}px 微软雅黑`;
+      context.font = `${fontSize}px siyuan`;
       context.translate(transX, transY);
       context.rotate(rotate);
       context.fillText(name, fillX, fillY);
@@ -39,8 +43,16 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     context.restore();
   }
 
-  function draw(context) {
+  async function draw(context) {
     if (!keywords || !fillingWords) return;
+
+    // 加载字体
+    if (font.current.status === "unloaded") {
+      await font.current.load();
+      document.fonts.add(font.current);
+    }
+
+    // 绘制背景
     context.fillStyle = "white";
     context.fillRect(0, 0, width, height);
 
@@ -60,6 +72,14 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     });
   }
 
+  const introduction = (
+    <div>
+      <h3>说明</h3>
+      <p>目前只有省份和直辖市的数据，同时数据可能出现缺失的情况。</p>
+      <h3>交互</h3>
+      <p>无</p>
+    </div>
+  );
   return (
     <Canvas
       width={width}
@@ -67,6 +87,8 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
       loading={loading}
       nodata={data === undefined}
       dependcies={[data]}
+      introduction={introduction}
+      title="Shapewordle"
     >
       {draw}
     </Canvas>

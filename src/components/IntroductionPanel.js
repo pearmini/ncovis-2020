@@ -26,7 +26,7 @@ const Row = styled.div`
 const Intro = styled.div`
   width: 60%;
   & ul {
-    padding: 1em 0 0 2em;
+    padding-left: 2em;
   }
   @media (max-width: 768px) {
     width: 100%;
@@ -47,14 +47,14 @@ function IntroductionPanel() {
             <a href="https://vislab.wang/" target="_blank">
               VisLab
             </a>{" "}
-            实验室为大众提供的一个在线可视化分析平台，旨在探索在 COVID-19
-            疫情出现到现在：
-            <ul>
-              <li>各地区新闻在报道什么？</li>
-              <li>人们在网络上讨论什么？</li>
-              <li>上面两者的关系以及对控制疫情有什么指导意义？</li>
-            </ul>
+            实验室为大众提供的一个在线可视化分析平台，旨在探索从 COVID-19
+            疫情出现直到现在：
           </p>
+          <ul>
+            <li>各地区新闻在报道什么？</li>
+            <li>人们在网络上讨论什么？</li>
+            <li>上面两者的关系以及对控制疫情有什么指导意义？</li>
+          </ul>
           <p>
             <b>COVID-19</b> 是人类历史上第一次在高度发达的
             <b>自媒体、全媒体时代</b>
@@ -65,7 +65,14 @@ function IntroductionPanel() {
           </p>
           <p>
             <b>新闻报道控制舆论导向，而舆论反过来也影响新闻报道。</b>
-            所以我们除了提供和疫情直接相关的数据可视化以外，还爬取了
+            所以我们除了提供和疫情直接相关的数据（来自
+            <a
+              target="_blank"
+              href="https://github.com/BlankerL/DXY-COVID-19-Crawler?spm=5176.12282029.0.0.480b56f5rDZFu0"
+            >
+              丁香园
+            </a>
+            ）可视化以外，还爬取了
             <a target="_blank" href="https://www.chinanews.com/">
               中国新闻网
             </a>
