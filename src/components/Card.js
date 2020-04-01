@@ -19,7 +19,7 @@ const Container = styled.div.attrs(
 )`
   display: ${props => (props.show ? "block" : "none")};
   position: relative;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   transition: all 0.5s;
   background: white;

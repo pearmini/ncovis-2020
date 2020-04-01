@@ -15,12 +15,12 @@ export default function({
   const [isTree, setIsTree] = useState(true);
   const width = 1200,
     height = 600,
-    legendWidth = 150,
+    legendWidth = 200,
     legendHeight = 10;
 
   const highlightColor = "red",
     normalColor = "black",
-    highlightRectColor = "steelblue",
+    highlightRectColor = "red",
     disabledColor = "#eeeeee";
 
   const all = useMemo(
@@ -50,10 +50,10 @@ export default function({
   );
 
   const colors = {
-    dead: d3.interpolateGnBu,
-    confirmed: d3.interpolateBuPu,
-    cured: d3.interpolateBuGn,
-    special: d3.interpolateOrRd
+    dead: d3.interpolatePurples,
+    confirmed: d3.interpolateReds,
+    cured: d3.interpolateGreens,
+    special: d3.interpolatePuRd
   };
 
   const treeProps = {

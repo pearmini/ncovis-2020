@@ -138,10 +138,10 @@ function NewsPanel({
       </Control>
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
-          <Shape {...shapeProps} />
+          <Piechart {...pieProps} />
         </Col>
         <Col span={24} md={12}>
-          <Piechart {...pieProps} />
+          <Shape {...shapeProps} />
         </Col>
       </Row>
     </Container>

@@ -74,16 +74,24 @@ export default function({
   const special = selectedRegion === "湖北" || selectedRegion === "华中地区";
   const x = date => timeWeek.count(startMonth, date) * cellSize + 0.5,
     y = date => countDay(date) * cellSize + 0.5,
-    colorArray = special ? colors.special : colors[selectedType],
-    colorScale = d3.scaleSequential(colorArray).domain(valueExtent),
+    colorScale = special
+      ? d3
+          .scaleSqrt()
+          .interpolate(() => colors.special)
+          .domain(valueExtent)
+      : d3.scaleSequential(colors[selectedType]).domain(valueExtent),
     color = value => {
       if (value === null) return disabledColor;
       return colorScale(value);
     },
+    stroke = special
+      ? d3
+          .scaleSqrt()
+          .interpolate(() => colors.special)
+          .domain([0, legendWidth])
+      : d3.scaleSequential(colors[selectedType]).domain([0, legendWidth]),
     yDay = d => (countDay(d) + 0.5) * cellSize,
     isSelect = date => formatDate(date) === selectedDate;
-
-  const stroke = d3.scaleSequential(colorArray).domain([0, legendWidth]);
 
   const pathMonth = t => {
     const n = 7;
@@ -104,10 +112,15 @@ export default function({
 
   useEffect(() => {
     // 绘制坐标轴
-    const scaleLegend = d3
-      .scaleLinear()
-      .domain(colorScale.domain())
-      .range([0, legendWidth]);
+    const scaleLegend = special
+      ? d3
+          .scaleSqrt()
+          .domain(colorScale.domain())
+          .range([0, legendWidth])
+      : d3
+          .scaleLinear()
+          .domain(colorScale.domain())
+          .range([0, legendWidth]);
 
     const legendAxis = d3
       .axisBottom(scaleLegend)
@@ -126,10 +139,9 @@ export default function({
         show={show}
       >
         <g
-          transform={`translate(${width -
-            margin.right -
-            legendWidth -
-            10}, ${margin.top})`}
+          transform={`translate(${width - margin.right - legendWidth - 10}, ${
+            margin.top
+          })`}
         >
           {d3.range(0, legendWidth).map(l => (
             <line

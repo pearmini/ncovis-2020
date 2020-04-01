@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Svg from "./Svg";
 import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
@@ -152,12 +152,15 @@ export default function({
     )
   );
 
-  const specialColorScale = d3.scaleSequential(colors.special).domain(
-    d3.extent(
-      colorData.filter(d => d.region === "湖北" || d.region === "华中地区"),
-      d => d.value
-    )
-  );
+  const specialColorScale = d3
+    .scaleSqrt()
+    .interpolate(() => colors.special)
+    .domain(
+      d3.extent(
+        colorData.filter(d => d.region === "湖北" || d.region === "华中地区"),
+        d => d.value
+      )
+    );
 
   const color = node => {
     if (highlight.length && !hset.has(node.region)) return disabledColor;
@@ -176,7 +179,8 @@ export default function({
     .domain([0, legendWidth]);
 
   const strokeSpecial = d3
-    .scaleSequential(colors.special)
+    .scaleSqrt()
+    .interpolate(() => colors.special)
     .domain([0, legendWidth]);
 
   useEffect(() => {
@@ -187,7 +191,7 @@ export default function({
       .range([0, legendWidth]);
 
     const specialScaleLegend = d3
-      .scaleLinear()
+      .scaleSqrt()
       .domain(specialColorScale.domain())
       .range([0, legendWidth]);
 
