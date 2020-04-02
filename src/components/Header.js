@@ -112,12 +112,12 @@ function Header() {
       id: "introduction"
     },
     {
-      name: "新闻可视化",
-      id: "news"
-    },
-    {
       name: "舆论可视化",
       id: "hots"
+    },
+    {
+      name: "新闻可视化",
+      id: "news"
     }
 
     // {

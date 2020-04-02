@@ -27,8 +27,8 @@ function App() {
       <Content>
         <OverviewPanel />
         <IntroductionPanel />
-        <NewsPanel />
         <HotsPanel />
+        <NewsPanel />
         {/* <DiscoveryPanel /> */}
       </Content>
     </ThemeProvider>

@@ -105,6 +105,7 @@ function HotsPanel({
     color: barColor.current,
     running,
     loading: loadingHots,
+    // loading: false,
     selectedName: "知乎",
     showWordsOfTopic,
     hideWordsOfTopic: () => setSelectedTopic(null),
@@ -172,7 +173,13 @@ function HotsPanel({
     if (running) return;
     if (selectedTopic !== null) setSelectedTopic(null);
     setRunning(true);
-    requestAnimation(duration >= totalDuration ? 0 : duration);
+    if (duration >= totalDuration) {
+      const start = hotTimeRange[0].time,
+        startDuartion = timeScale.invert(start);
+      requestAnimation(startDuartion);
+    } else {
+      requestAnimation(duration);
+    }
   }
 
   function stopAnimation() {
