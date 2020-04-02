@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import Canvas from "./Canvas";
 import fontURL from "../assets/fonts/思源柔黑.ttf";
-import { useRef } from "react";
 
 function Shape({ data, loading, selectedDate, selectedRegion }) {
   const width = 900,
@@ -10,7 +9,13 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     marginBottom = 60,
     { keywords, fillingWords } = data || {};
 
-  const font = useRef(new FontFace("siyuan", `url(${fontURL})`));
+  const [loadFont, setLoadingFont] = useState(true);
+  // 在 edge 没有 FontFace 对象
+  const font =
+    typeof FontFace === "undefined"
+      ? null
+      : new FontFace("siyuan", `url(${fontURL})`);
+  const fontRef = useRef(font);
 
   function drawText(context, words, { fillStyle, textAlign, textBaseline }) {
     context.textAlign = textAlign;
@@ -34,42 +39,50 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     context.fillStyle = "#777";
     context.textAlign = "end";
     context.textBaseline = "bottom";
-    context.font = `bold 50px 微软雅黑`;
+    context.font = `bold 50px siyuan`;
     context.fillText(selectedRegion, 0, 0);
 
-    context.font = "normal 25px 微软雅黑";
+    context.font = "normal 25px siyuan";
     context.fillText(selectedDate, 0, 35);
     // date
     context.restore();
   }
 
   async function draw(context) {
-    if (!keywords || !fillingWords) return;
+    try {
+      if (!keywords || !fillingWords) return;
 
-    // 加载字体
-    if (font.current.status === "unloaded") {
-      await font.current.load();
-      document.fonts.add(font.current);
+      // 加载字体
+      if (fontRef.current !== null && fontRef.current.status === "unloaded") {
+        await fontRef.current.load();
+        document.fonts.add(fontRef.current);
+        setLoadingFont(false);
+      }
+
+      // 绘制背景
+      context.fillStyle = "white";
+      context.fillRect(0, 0, width, height);
+
+      // 绘制地区和时间信息
+      drawLabel(context);
+
+      // 绘制词云
+      drawText(context, keywords, {
+        fillStyle: "#59569d",
+        textAlign: "center",
+        textBaseline: "alphabet"
+      });
+
+      drawText(context, fillingWords, {
+        fillStyle: "#f25292",
+        textAlign: "start",
+        textBaseline: "middle"
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingFont(false);
     }
-
-    // 绘制背景
-    context.fillStyle = "white";
-    context.fillRect(0, 0, width, height);
-
-    // 绘制地区和时间信息
-    drawLabel(context);
-
-    // 绘制词云
-    drawText(context, keywords, {
-      fillStyle: "#59569d",
-      textAlign: "center",
-      textBaseline: "alphabet"
-    });
-    drawText(context, fillingWords, {
-      fillStyle: "#f25292",
-      textAlign: "start",
-      textBaseline: "middle"
-    });
   }
 
   const introduction = (
@@ -80,11 +93,12 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
       <p>无</p>
     </div>
   );
+
   return (
     <Canvas
       width={width}
       height={height}
-      loading={loading}
+      loading={loading || loadFont}
       nodata={data === undefined}
       dependcies={[data]}
       introduction={introduction}

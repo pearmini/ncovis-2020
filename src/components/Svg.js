@@ -47,7 +47,7 @@ export default function({
 
   return (
     <Card {...cardProps}>
-      <WhiteSvg ref={ref} {...rest}>
+      <WhiteSvg ref={ref} {...rest} fontFamily="siyuan">
         {children}
       </WhiteSvg>
     </Card>

@@ -25,19 +25,28 @@ export default function({
   toggleAnimation,
   changeValue,
   range,
-  finish
+  finish,
+  totalDuration,
+  duration
 }) {
   const dragging = useRef(false);
   const sliderRef = useRef(null);
   const dotRef = useRef(null);
   const width = 1200,
     height = 50,
-    margin = { top: 20, right: 30, bottom: 20, left: 60 };
+    margin = { top: 20, right: 40, bottom: 20, left: 90 };
 
   const x = d3
     .scaleLinear()
     .domain(range)
     .range([margin.left, width - margin.right]);
+
+  const foramtTime = t => {
+    const d = (t / 1000) | 0;
+    const m = Math.max((d / 60) | 0, 0);
+    const s = Math.max(d % 60, 0);
+    return `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+  };
 
   function handleClick(e) {
     const [mouseX] = mouse(e, sliderRef.current);
@@ -130,10 +139,15 @@ export default function({
     </svg>
   );
   return (
-    <Svg viewBox={[0, 0, width, height]}>
+    <Svg viewBox={[0, 0, width, height]} fontSize="12">
       <Button transform={`translate(${10}, ${10})`} onClick={toggleAnimation}>
         {running ? pauseButton : finish ? restartButton : startButton}
       </Button>
+      <g transform={`translate(${margin.left - 10}, ${height / 2})`}>
+        <text textAnchor="end" dy="0.5em">
+          {foramtTime(duration)}
+        </text>
+      </g>
       <Slider
         ref={sliderRef}
         x={margin.left}
@@ -151,6 +165,11 @@ export default function({
         r={7}
         onMouseDown={() => (dragging.current = true)}
       ></Dot>
+      <g transform={`translate(${width}, ${height / 2})`}>
+        <text textAnchor="end" color="black" dy="0.5em">
+          {foramtTime(totalDuration)}
+        </text>
+      </g>
     </Svg>
   );
 }

@@ -33,7 +33,9 @@ const Intro = styled.div`
   }
 `;
 
-const TalkImage = styled.img``;
+const TalkImage = styled.img`
+  border-radius: 8px;
+`;
 
 function IntroductionPanel() {
   return (

@@ -27,32 +27,59 @@ export default function({
   }
 
   const n = 10;
-  const bisect = d3.bisector(d => d[0] * 1000);
+  const bisect = d3.bisector(d => d[0]);
   const y = d3
     .scaleBand()
     .domain(d3.range(n + 1))
     .padding(0.1)
     .range([margin.top, ((height - margin.bottom) / n) * (n + 1)]);
   const barSize = y.bandwidth();
-
-  const bars = interPolateData(selectedTime);
+  const bars = interpolate(keyframes, selectedTime);
 
   const x = d3
     .scaleLinear()
-    .domain([0, d3.max(bars, d => d.heat)])
+    .domain([0, d3.max(bars, d => d.value)])
     .range([margin.left, width - margin.right]);
 
-  const titles = bars.map(d => d.title);
-  const id = d => `t-${d.heat}`;
-  const colorScale = title =>
-    selectedTopic !== null && selectedTopic !== title
-      ? "#efefef"
-      : color(title);
+  const names = bars.map(d => d.name);
+  const id = d => `t-${d.value}`;
+  const colorScale = name =>
+    selectedTopic !== null && selectedTopic !== name ? "#efefef" : color(name);
+  const introduction = (
+    <div>
+      <p>这里是一个动态的条形图。用于直观展现知乎热搜的热度随着时间的变化。</p>
+      <p>
+        你可以在任意时刻，点击任意一个条。用于高亮对应的热搜数据以及回答中的关键词。
+      </p>
+    </div>
+  );
 
-  color.cur(titles);
+  color.cur(names);
+
+
+  function interpolate(data, time) {
+    const i = bisect.left(data, time, 0, data.length - 1),
+      a = data[i];
+    if (!i || !running) return a[1].map(d => ({ ...d, y: y(d.rank) }));
+    const b = data[i - 1],
+      t = (time - a[0]) / (b[0] - a[0]);
+
+    return a[1].map(d => {
+      const { value, rank } = b[1].find(({ name }) => d.name === name) || {
+        value: d.value,
+        rank: n
+      };
+      return {
+        ...d,
+        y: y(d.rank) * (1 - t) + y(rank) * t,
+        value: d.value * (1 - t) + value * t
+      };
+    });
+  }
+
   useEffect(() => {
     // 保存上一帧的颜色
-    color.pre(titles);
+    color.pre(names);
 
     // 绘制坐标轴
     const axis = d3
@@ -67,33 +94,6 @@ export default function({
     g.select(".domain").remove();
   });
 
-  function interPolateData(time) {
-    const len = keyframes.length,
-      i = bisect.left(keyframes, time, 0, len - 1),
-      a = keyframes[i];
-    if (!i) return a[1].map(d => ({ ...d, y: y(d.rank) }));
-    const b = keyframes[i - 1],
-      t = (time / 1000 - a[0]) / (b[0] - a[0]);
-    return a[1].map(d => {
-      const { heat, rank } = b[1].find(({ title }) => d.title === title) || {
-        heat: d.heat,
-        rank: n
-      };
-      return {
-        ...d,
-        y: y(d.rank) * (1 - t) + y(rank) * t,
-        heat: d.heat * (1 - t) + heat * t
-      };
-    });
-  }
-
-  const introduction = (
-    <div>
-      <p>这里是一个动态的条形图。用于直观展现知乎热搜的热度随着时间的变化。</p>
-      <p>你可以在任意时刻，点击任意一个条。用于高亮对应的热搜数据以及回答中的关键词。</p>
-    </div>
-  );
-
   return (
     <Svg
       viewBox={[0, 0, width, height]}
@@ -105,20 +105,20 @@ export default function({
       {bars.map(d => (
         <g
           transform={`translate(${margin.left}, ${running ? d.y : y(d.rank)})`}
-          key={d.title}
+          key={d.name}
         >
           <rect
-            width={x(d.heat) - x(0)}
+            width={x(d.value) - x(0)}
             height={barSize}
-            fill={colorScale(d.title)}
+            fill={colorScale(d.name)}
             cursor="pointer"
             fillOpacity={0.7}
             onClick={e => {
-              showWordsOfTopic(d.title);
+              showWordsOfTopic(d.name);
               e.stopPropagation();
             }}
           >
-            <title>{d.title}</title>
+            <title>{d.name}</title>
           </rect>
         </g>
       ))}
@@ -126,7 +126,7 @@ export default function({
       {bars.map(d => (
         <g
           transform={`translate(${margin.left}, ${running ? d.y : y(d.rank)})`}
-          key={d.title}
+          key={d.name}
         >
           <text
             dx="8"
@@ -136,12 +136,12 @@ export default function({
             fontSize="13"
             cursor="pointer"
             onClick={e => {
-              showWordsOfTopic(d.title);
+              showWordsOfTopic(d.name);
               e.stopPropagation();
             }}
           >
-            {d.title}
-            <title>{d.title}</title>
+            {d.name}
+            <title>{d.name}</title>
           </text>
           <text
             dx="8"
@@ -151,15 +151,14 @@ export default function({
             fontSize="10"
             fill="currentColor"
           >
-            {d.heat | 0}
+            {d.value | 0}
           </text>
           <defs>
             <clipPath id={id(d)}>
               <rect
                 x="0"
                 y="0"
-                width={Math.max(x(d.heat) - x(0) - 8, 0)}
-                // width={x(d.heat) - x(0) - 8}
+                width={Math.max(x(d.value) - x(0) - 8, 0)}
                 height={barSize}
               />
             </clipPath>

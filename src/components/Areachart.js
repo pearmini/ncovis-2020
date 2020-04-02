@@ -17,7 +17,7 @@ export default function({
   const ref = useRef(null);
   const width = 1200,
     height = 300,
-    margin = { top: 30, right: 30, bottom: 25, left: 60 },
+    margin = { top: 30, right: 40, bottom: 25, left: 90 },
     formatDate = d3.timeFormat("%x"),
     bisect = d3.bisector(d => d.date).left;
 
@@ -72,7 +72,7 @@ export default function({
     [first] = data,
     keys = first ? Object.keys(first).filter(d => d !== "date") : [],
     cnt = selectedLevel === "second" ? 4 : 6,
-    legendWidth = selectedLevel === "second" ? 75 : 55,
+    legendWidth = selectedLevel === "second" ? 75 : 50,
     legendHeight = 25,
     disableColor = "#efefef",
     tw = selectedLevel === "second" ? 100 : 70,
@@ -217,7 +217,7 @@ export default function({
                   }}
                 >
                   <circle fill={color(key)} cx={0} cy={0} r={5}></circle>
-                  <text dy={5} dx={10} fill="currentColor" fontSize="12">
+                  <text dy={5} dx={10} fill="currentColor" fontSize="11">
                     {key}
                   </text>
                 </g>

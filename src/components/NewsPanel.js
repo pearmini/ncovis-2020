@@ -50,6 +50,7 @@ const Intro = styled.div`
 
 const NewsImage = styled.img`
   width: 370px;
+  border-radius: 8px;
 `;
 
 function NewsPanel({
@@ -110,8 +111,9 @@ function NewsPanel({
       return;
     }
     // 如果有日期数据且 news 数据为空的话就请求
-    if (news === undefined && selectedDate !== "")
+    if (news === undefined && selectedDate !== "" && selectedRegion !== "中国"){
       getNewsData(selectedRegion, `${selectedDate}`);
+    }
   }, [getData, selectedDate, selectedRegion, getNewsData]);
   return (
     <Container>

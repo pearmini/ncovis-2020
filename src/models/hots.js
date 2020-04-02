@@ -5,7 +5,7 @@ import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
 import cloud from "d3-cloud";
-import 'array-flat-polyfill';
+import "array-flat-polyfill";
 
 const d3 = {
   ...d3All,
@@ -22,18 +22,17 @@ const cache = new InMemoryCache({});
   }))();
 
 const client = new ApolloClient({
-  // cache,
+  cache,
   uri:
     "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS"
 });
 
-function getHots({ name = "zhihu", cursor, from, limit = 10 }) {
+function getHots({ name, from, limit = 10 }) {
   return client.query({
     query: gql`
       {
         ${name}(
           limit:${limit}, 
-          ${cursor ? `cursor:${cursor}` : ""}, 
           ${from ? `from:${from}` : ""}
         ){
           paging{
@@ -92,120 +91,7 @@ function getWordsOfTopics({ name, time }) {
   });
 }
 
-function preprocess(data, ticks) {
-  const datewords = Array.from(
-    d3.rollup(
-      data,
-      ([d]) =>
-        d3.rollup(
-          d.keywords,
-          ([{ weight }]) => weight,
-          d => d.name
-        ),
-      d => d.time
-    )
-  );
-
-  const datetopics = Array.from(
-    d3.rollup(
-      data,
-      ([d]) =>
-        d3.rollup(
-          d.topics,
-          ([{ heat }]) => heat,
-          d => d.title
-        ),
-      d => d.time
-    )
-  ).sort(([a], [b]) => a - b);
-
-  const words = new Set(data.flatMap(d => d.keywords.map(d => d.name)));
-  const topics = new Set(data.flatMap(d => d.topics.map(d => d.title)));
-  const topicsTicks = interploateTicks(ticks, 20);
-
-  // 第一个 ticks 上面一帧已经插值过了，所以就不需要再才插值了
-  // 但是需要它来获取数据
-  const wordsKeyframes = ticks
-    .slice(0, ticks.length - 1)
-    .map(tick => interpolateWordsValues(datewords, words, tick));
-  const listKeyframes = topicsTicks
-    .slice(0, topicsTicks.length - 1)
-    .map(tick => interpolateTopicsValues(datetopics, topics, tick));
-
-  return {
-    listKeyframes,
-    wordsKeyframes
-  };
-
-  function interploateTicks(ticks, k) {
-    const res = [];
-    for (let [a, b] of d3.pairs(ticks)) {
-      for (let i = 0; i < k; i++) {
-        const t = i / k;
-        res.push(a * (1 - t) + b * t);
-      }
-    }
-    res.push(ticks[ticks.length - 1]);
-    return res;
-  }
-
-  function interpolateWordsValues(data, names, time) {
-    const bisect = d3.bisector(d => d[0] * 1000).left;
-    const i = bisect(data, time, 0, data.length - 1),
-      a = data[i];
-    if (!i) return [time / 1000, interpolateWord(names, key => a[1].get(key))];
-
-    const b = data[i - 1],
-      t = (time / 1000 - a[0]) / (b[0] - a[0]);
-    return [
-      time / 1000,
-      interpolateWord(names, key => {
-        const v1 = a[1].get(key) || 0;
-        const v2 = b[1].get(key) || 0;
-        return v1 * (1 - t) + v2 * t;
-      })
-    ];
-  }
-
-  function interpolateTopicsValues(data, names, time) {
-    const bisect = d3.bisector(d => d[0] * 1000).left;
-    const i = bisect(data, time, 0, data.length - 1),
-      a = data[i];
-    if (!i) return [time / 1000, interpolateTopic(names, key => a[1].get(key))];
-
-    const b = data[i - 1],
-      t = (time / 1000 - a[0]) / (b[0] - a[0]);
-    return [
-      time / 1000,
-      interpolateTopic(names, key => {
-        const v1 = a[1].get(key) || 0;
-        const v2 = b[1].get(key) || 0;
-        return v1 * (1 - t) + v2 * t;
-      })
-    ];
-  }
-
-  function interpolateTopic(names, value) {
-    const data = Array.from(names, name => ({
-      title: name,
-      heat: value(name)
-    }));
-    data.sort((a, b) => d3.descending(a.heat, b.heat));
-    for (let i = 0; i < data.length; ++i) data[i].rank = i;
-    return data.slice(0, 10);
-  }
-
-  function interpolateWord(names, value) {
-    const data = Array.from(names, name => ({
-      name,
-      value: value(name) || 0
-    }));
-    data.sort((a, b) => d3.descending(a.value, b.value));
-    return data;
-  }
-}
-
-function words(data, n = 30) {
+function words(data, n = 20) {
   const w = new Set([
     "没有",
     "知道",
@@ -257,10 +143,92 @@ function computePreFramesWordsCloud(data) {
 
 function computeFramesWordCloud(data) {
   return Promise.all(
-    data.map(([date, d]) =>
-      computeWordCloud(words(d), words => [date * 1000, words])
+    data.map(([date, d]) => computeWordCloud(words(d), words => [date, words]))
+  );
+}
+
+function preprocess(raw, start, interval) {
+  const data = raw.map(({ time, ...rest }) => ({ time: time * 1000, ...rest }));
+  const range = d3.extent(data, d => d.time);
+  const begin = start + (((range[0] - start) / interval) | 0) * interval;
+  const end = begin + Math.ceil((range[1] - begin) / interval) * interval + 1;
+  const listTicks = d3.range(begin, end, interval);
+  const wordTicks = d3.range(begin, end, interval * 5);
+  const words = new Set(data.flatMap(d => d.keywords.map(d => d.name)));
+  const topics = new Set(data.flatMap(d => d.topics.map(d => d.title)));
+
+  const datewords = Array.from(
+    d3.rollup(
+      data,
+      ([d]) =>
+        d3.rollup(
+          d.keywords,
+          ([{ weight }]) => weight,
+          d => d.name
+        ),
+      d => d.time
     )
   );
+
+  const datetopics = Array.from(
+    d3.rollup(
+      data,
+      ([d]) =>
+        d3.rollup(
+          d.topics,
+          ([{ heat }]) => heat,
+          d => d.title
+        ),
+      d => d.time
+    )
+  ).sort(([a], [b]) => a - b);
+
+  return {
+    listKeyframes: listTicks
+      .map(tick => interploate(datetopics, topics, tick))
+      .map(([date, data]) => [
+        date,
+        data.map((d, index) => ({ ...d, rank: index })).slice(0, 10)
+      ]),
+    wordsKeyframes: wordTicks.map(tick => interploate(datewords, words, tick))
+  };
+}
+
+function interploate(data, names, time) {
+  const bisect = d3.bisector(d => d[0]).left;
+  const i = bisect(data, time, 0, data.length - 1),
+    a = data[i];
+  if (!i) return [time, interpolateValues(names, key => a[1].get(key))];
+
+  const b = data[i - 1],
+    t = (time - a[0]) / (b[0] - a[0]);
+  return [
+    time,
+    interpolateValues(names, key => {
+      const v1 = a[1].get(key) || 0;
+      const v2 = b[1].get(key) || 0;
+      return v1 * (1 - t) + v2 * t;
+    })
+  ];
+}
+
+function interpolateValues(names, value) {
+  const data = Array.from(names, name => ({
+    name,
+    value: value(name) || 0
+  }));
+  data.sort((a, b) => d3.descending(a.value, b.value));
+  return data;
+}
+
+function unique(data, key) {
+  return data
+    .map((d, index) => {
+      if (index === 0 || key(data[index - 1]) !== key(d)) return [...d, true];
+      else return [...d, false];
+    })
+    .filter(d => d[2])
+    .map(([date, data]) => [date, data]);
 }
 
 export default {
@@ -271,7 +239,8 @@ export default {
     nextCursor: "",
     selectedTime: null,
     wordsByTime: d3.map(),
-    selectedWords: []
+    selectedWords: [],
+    loading: false
   },
   reducers: {
     addWords: (state, action) => {
@@ -292,9 +261,14 @@ export default {
       return { ...state, timeByName, selectedTime: time };
     },
     updateDataByTime: (state, action) => {
-      const { name, range } = action.payload;
+      const { name, from, to } = action.payload;
       const { timeByName } = state;
-      timeByName.set(name, range);
+      const oldRange = timeByName.get(name);
+      const newRange = oldRange.map((d, i) => ({
+        ...d,
+        request: i >= from && i < to ? true : d.request
+      }));
+      timeByName.set(name, newRange);
       return { ...state, timeByName };
     },
     setSelectedTime: (state, action) => ({
@@ -305,19 +279,31 @@ export default {
       const { name, listKeyframes, cloudsKeyframes } = action.payload;
       const { dataByName } = state;
       const value = dataByName.get(name);
-      if (!value)
+      if (!value) {
         dataByName.set(name, {
           listKeyframes,
           cloudsKeyframes
         });
-      else {
-        value.listKeyframes.push(...listKeyframes);
-        value.listKeyframes.sort((a, b) => a[0] - b[0]);
+      } else {
+        const newListKeyframes = unique(
+          [...value.listKeyframes, ...listKeyframes].sort(
+            (a, b) => a[0] - b[0]
+          ),
+          d => d[0]
+        );
+        const newCloudsKeyframes = unique(
+          [...value.cloudsKeyframes, ...cloudsKeyframes].sort(
+            (a, b) => a[0] - b[0]
+          ),
+          d => d[0]
+        );
 
-        // 添加并且排序
-        value.cloudsKeyframes.push(...cloudsKeyframes);
-        value.cloudsKeyframes.sort((a, b) => a[0] - b[0]);
+        dataByName.set(name, {
+          listKeyframes: newListKeyframes,
+          cloudsKeyframes: newCloudsKeyframes
+        });
       }
+
       return { ...state, dataByName };
     }
   },
@@ -339,26 +325,37 @@ export default {
     *getTime(action, { call, put }) {
       try {
         const { name } = action.payload;
-        const data = yield call(getTimeRange, name);
-        const range = data.data[name].data
+        const timeData = yield call(getTimeRange, name);
+        const range = timeData.data[name].data
           .map(({ time }) => time * 1000)
           .map(d => ({ time: d, request: false }))
           .sort((a, b) => a.time - b.time);
+
         yield put({ type: "addTimeRange", payload: { range, name } });
       } catch (e) {
         console.error(e);
       }
     },
     *getData(action, { call, put }) {
+      const { name, interval, tick, limit, start } = action.payload;
       try {
-        const result = yield call(getHots, action.payload);
-        const { name, ticks } = action.payload,
-          data = result.data[name].data;
-        const { listKeyframes, wordsKeyframes } = preprocess(data, ticks);
+        const result = yield call(getHots, {
+          name,
+          from: ((tick.time / 1000) | 0) - 1, // 这里的 from 是大于当前时刻，所以需要减少 1
+          limit: limit + 1
+        });
+        const data = result.data[name].data;
+        const { listKeyframes, wordsKeyframes } = preprocess(
+          data,
+          start,
+          interval
+        );
         const cloudsKeyframes = yield call(
           computeFramesWordCloud,
           wordsKeyframes
         );
+
+        // 加入关键帧
         yield put({
           type: "addFrames",
           payload: { name, listKeyframes, cloudsKeyframes }

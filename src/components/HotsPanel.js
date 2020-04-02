@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import useAnimation from "../hook/useAnimation";
 import styled from "styled-components";
 import { connect } from "dva";
-import { Row, Col, Select } from "antd";
+import { Row, Col, Select, message } from "antd";
 
 import Timeline from "./Timeline";
 import BarRace from "../components/BarRace";
@@ -13,6 +13,9 @@ import rc from "../utils/randomColor";
 import * as d3 from "d3";
 
 const { Option } = Select;
+message.config({
+  maxCount: 1
+});
 
 const Container = styled.div`
   position: relative;
@@ -81,11 +84,12 @@ function HotsPanel({
   const totalTimeRange = d3.extent(
       Array.from(dataByDate).map(([date]) => new Date(date).getTime())
     ),
+    hour = 12,
     ticks = d3.timeHour
-      .every(12) // 每隔 12 小时获取一下数据
+      .every(hour) // 每隔 12 小时获取一下数据
       .range(totalTimeRange[0], totalTimeRange[1])
       .map(d => d.getTime()),
-    totalDuration = ticks.length * 3000; // 1小时 0.75秒
+    totalDuration = ticks.length * 5000; // 1小时 0.75秒
 
   const timeScale = d3
       .scaleLinear()
@@ -127,7 +131,9 @@ function HotsPanel({
     toggleAnimation,
     changeValue,
     range: totalTimeRange || [0, 0],
-    finish: duration >= totalDuration
+    finish: duration >= totalDuration,
+    totalDuration,
+    duration
   };
 
   const areaPros = {
@@ -182,10 +188,11 @@ function HotsPanel({
   }
 
   function changeValue(value) {
-    const validValue = Math.max(
-      totalTimeRange[0],
-      Math.min(value, totalTimeRange[1])
-    );
+    if (!hotTimeRange) return;
+    const start = hotTimeRange[0].time,
+      end = hotTimeRange[hotTimeRange.length - 1].time;
+    if (value < start || value > end) message.error("该时间段暂时没有数据!!!");
+    const validValue = Math.max(start, Math.min(value, end));
     setFrame(timeScale.invert(validValue));
     setSelectedTime(validValue);
   }
@@ -204,6 +211,35 @@ function HotsPanel({
     } else getWords(selectedName, time, title);
   }
 
+  function search(time) {
+    const bisect = d3.bisector(d => d.time);
+    const i = bisect.left(hotTimeRange, time);
+    return i;
+  }
+
+  function requestData(index) {
+    // 一直向后找，找到没有请求的地方
+    const limit = 10;
+    let i = 1;
+    for (i = 1; i < limit && index + i < hotTimeRange.length - 1; i++) {
+      const tick = hotTimeRange[index + i];
+      if (tick.request) break;
+    }
+
+    updateDataByTime({
+      name: selectedName,
+      from: index,
+      to: index + i
+    });
+    getData({
+      name: selectedName,
+      tick: hotTimeRange[index],
+      start: hotTimeRange[0].time,
+      limit: i,
+      interval: hour * 60 * 60 * 50
+    });
+  }
+
   useEffect(() => {
     // 获得时间范围
     if (!hotTimeRange) {
@@ -211,33 +247,11 @@ function HotsPanel({
       return;
     }
 
-    // 请求数据
-    const limit = 10;
-    const bisectStart = d3.bisector(d => d.time);
-
-    const index = bisectStart.left(hotTimeRange, selectedTime),
-      tick = hotTimeRange[index],
-      nextIndex = Math.min(hotTimeRange.length - 1, index + limit),
-      nextTick = hotTimeRange[nextIndex];
-
-    const lo = d3.bisectLeft(ticks, tick.time),
-      hi = d3.bisectLeft(ticks, nextTick.time),
-      subTicks = ticks.slice(lo, hi + 1); // 这需要 -1 让前后两个时刻有重复
-
+    const index = search(selectedTime),
+      tick = hotTimeRange[index];
     if (tick.request) return;
-
-    getData({
-      ticks: subTicks,
-      name: selectedName,
-      from: (tick.time / 1000) | 0,
-      limit
-    });
-
-    const newHotTimeRange = hotTimeRange.map((d, i) => ({
-      ...d,
-      request: i >= index && i < nextIndex ? true : false
-    }));
-    updateDataByTime(selectedName, newHotTimeRange);
+    // console.log("request", tick, index, hotTimeRange);
+    requestData(index);
   }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
 
   return (
@@ -332,9 +346,9 @@ export default connect(
       payload: time
     }),
     getTime: name => ({ type: "hots/getTime", payload: { name } }),
-    updateDataByTime: (name, range) => ({
+    updateDataByTime: options => ({
       type: "hots/updateDataByTime",
-      payload: { name, range }
+      payload: options
     })
   }
 )(HotsPanel);

@@ -43,7 +43,6 @@ export default function({
     const bisect = d3.bisector(d => d[0]).left;
     const i = bisect(keyframes, time, 0, keyframes.length - 1),
       a = keyframes[i];
-
     if (!i || !running || time > a[0]) return a[1];
     const b = keyframes[i - 1],
       t = d3.easeCircleInOut((time - a[0]) / (b[0] - a[0]));
@@ -73,7 +72,7 @@ export default function({
     context.fillStyle = "#777";
     context.textAlign = "end";
     context.textBaseline = "bottom";
-    context.font = `bold 50px 微软雅黑`;
+    context.font = `bold 50px siyuan`;
     context.fillText(selectedName, 0, 0);
 
     // date
@@ -90,7 +89,7 @@ export default function({
     for (let word of words) {
       const fill = selectedTopic === null ? colorScale(text(word)) : color;
       context.fillStyle = `${fill}`;
-      context.font = `${word.size}px 微软雅黑`;
+      context.font = `${word.size}px siyuan`;
       context.fillText(text(word), word.x, word.y);
     }
     context.restore();
