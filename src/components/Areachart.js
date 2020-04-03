@@ -99,7 +99,7 @@ export default function({
   const tipY = index => (index % cnt) * th;
 
   const lineX = () => {
-    if(running)return x(new Date(selectedTime));
+    if (running) return x(new Date(selectedTime));
     if (tip) return x(tip.time);
     return x(new Date(0));
   };
@@ -123,6 +123,24 @@ export default function({
 
   const stroke = key =>
     selectedLevel === "top" ? d3.color(color(key)).darker() : "none";
+
+  const introduction = (
+    <div>
+      <h3>说明</h3>
+      <p>如果某个地区的数据长时间没有变化，可能是因为数据缺失。</p>
+      <h3>交互</h3>
+      <ul>
+        <li>
+          <b>鼠标移动到</b>某个地区的名字上，会高亮该地区所对应的“带子”.
+          <b>鼠标移出后</b>会取消高亮。
+        </li>
+        <li>
+          <b>单击</b>某个地区的名字，进入该地区所对应的<b>普通面积图</b>。
+          <b>双击</b>空白部分返回。
+        </li>
+      </ul>
+    </div>
+  );
 
   function handleChangeSelectedTime(e) {
     const [mouseX] = mouse(e, ref.current);
@@ -168,8 +186,10 @@ export default function({
         <Svg
           viewBox={[0, 0, width, height]}
           loading={loading}
-          onClick={() => setFocus("")}
+          onDoubleClick={() => setFocus("")}
           onMouseLeave={() => setHighlight("")}
+          introduction={introduction}
+          title="堆叠面积图"
         >
           <g
             cursor="pointer"

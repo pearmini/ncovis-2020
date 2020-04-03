@@ -19,7 +19,7 @@ const Container = styled.div`
 
 const Control = styled.div`
   display: flex;
-  margin: 1em 0;
+  margin: 2em 0 1em 0;
 `;
 
 const An = styled.div`
@@ -111,7 +111,11 @@ function NewsPanel({
       return;
     }
     // 如果有日期数据且 news 数据为空的话就请求
-    if (news === undefined && selectedDate !== "" && selectedRegion !== "中国"){
+    if (
+      news === undefined &&
+      selectedDate !== "" &&
+      selectedRegion !== "中国"
+    ) {
       getNewsData(selectedRegion, `${selectedDate}`);
     }
   }, [getData, selectedDate, selectedRegion, getNewsData]);
@@ -126,7 +130,7 @@ function NewsPanel({
             首先我们从和疫情数据直接相关的可视化出发，也就下面第一张图：
             <b>树 + 热力图</b>
             ，该图其反应的是：
-            <b>各个地区每天确诊、治愈、死亡人数相对前一天的变化情况</b>。
+            <b>各个地区每天确诊、治愈或死亡人数相对前一天的变化情况</b>。
           </p>
           <p>
             下图中右边是<b>热力图</b>

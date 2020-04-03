@@ -47,15 +47,18 @@ export default function({
     selectedTopic !== null && selectedTopic !== name ? "#efefef" : color(name);
   const introduction = (
     <div>
-      <p>这里是一个动态的条形图。用于直观展现知乎热搜的热度随着时间的变化。</p>
-      <p>
-        你可以在任意时刻，点击任意一个条。用于高亮对应的热搜数据以及回答中的关键词。
-      </p>
+      <h3>说明</h3>
+      <p>目前只有 2020-02-27 之后的数据。前面的数据会尽快补上。</p>
+      <h3>交互</h3>
+      <ul>
+        <li>
+          <b>单击</b>任意一热搜话题，旁边的词云会只展示当前话题下回答中的热词。
+        </li>
+      </ul>
     </div>
   );
 
   color.cur(names);
-
 
   function interpolate(data, time) {
     const i = bisect.left(data, time, 0, data.length - 1),
@@ -63,6 +66,8 @@ export default function({
     if (!i || !running) return a[1].map(d => ({ ...d, y: y(d.rank) }));
     const b = data[i - 1],
       t = (time - a[0]) / (b[0] - a[0]);
+
+    // console.log(time, a[0], b[0], i, data);
 
     return a[1].map(d => {
       const { value, rank } = b[1].find(({ name }) => d.name === name) || {

@@ -39,6 +39,15 @@ export default function({
   const words =
     selectedTopic === null ? interpolateData(selectedTime) : selectedWords;
 
+  const introduction = (
+    <div>
+      <h3>说明</h3>
+      <p>目前只有 2020-02-27 之后的数据。前面的数据会尽快补上。</p>
+      <h3>交互</h3>
+      <p>无</p>
+    </div>
+  );
+
   function interpolateData(time) {
     const bisect = d3.bisector(d => d[0]).left;
     const i = bisect(keyframes, time, 0, keyframes.length - 1),
@@ -109,6 +118,8 @@ export default function({
       dependcies={[selectedTime, draw]}
       loading={loading}
       nodata={words.length === 0}
+      title="动态词云"
+      introduction={introduction}
     >
       {draw}
     </Canvas>
