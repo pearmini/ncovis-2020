@@ -774,7 +774,7 @@ export default function({
             />
           </clipPath>
         </defs>
-        {hover && (
+        {hover && matrixWidth < days.length * cellWidth && (
           <g
             transform={`translate(0, ${height -
               margin.bottom -
