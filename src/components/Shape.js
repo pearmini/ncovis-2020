@@ -9,13 +9,13 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     marginBottom = 60,
     { keywords, fillingWords } = data || {};
 
-  const [loadFont, setLoadingFont] = useState(true);
   // 在 edge 没有 FontFace 对象
   const font =
     typeof FontFace === "undefined"
       ? null
       : new FontFace("siyuan", `url(${fontURL})`);
   const fontRef = useRef(font);
+  const [loadFont, setLoadingFont] = useState(font === null ? false : true);
 
   function drawText(context, words, { fillStyle, textAlign, textBaseline }) {
     context.textAlign = textAlign;
@@ -80,7 +80,6 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
       });
     } catch (e) {
       console.error(e);
-    } finally {
       setLoadingFont(false);
     }
   }
@@ -98,7 +97,7 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     <Canvas
       width={width}
       height={height}
-      loading={loading || loadFont}
+      loading={loadFont || loading}
       nodata={data === undefined}
       dependcies={[data]}
       introduction={introduction}

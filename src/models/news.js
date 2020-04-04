@@ -6,7 +6,6 @@ import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
 import "array-flat-polyfill";
-import formatDate from "../utils/formatDate";
 
 const d3 = {
   ...d3All,

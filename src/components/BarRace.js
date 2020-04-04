@@ -67,8 +67,6 @@ export default function({
     const b = data[i - 1],
       t = (time - a[0]) / (b[0] - a[0]);
 
-    // console.log(time, a[0], b[0], i, data);
-
     return a[1].map(d => {
       const { value, rank } = b[1].find(({ name }) => d.name === name) || {
         value: d.value,

@@ -135,7 +135,6 @@ function HotsPanel({
     color: barColor.current,
     running,
     loading: loadingHots,
-    // loading: false,
     selectedName: "知乎",
     showWordsOfTopic,
     hideWordsOfTopic: () => setSelectedTopic(null),
@@ -252,7 +251,7 @@ function HotsPanel({
   function search(time) {
     const bisect = d3.bisector(d => d.time);
     const i = bisect.left(hotTimeRange, time);
-    return i;
+    return Math.max(0, i - 1);
   }
 
   function requestData(index) {
@@ -288,7 +287,6 @@ function HotsPanel({
     const index = search(selectedTime),
       tick = hotTimeRange[index];
     if (tick.request) return;
-    // console.log("request", tick, index, hotTimeRange);
     requestData(index);
   }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
 
