@@ -12,8 +12,7 @@ const Container = styled.div.attrs(
         left: "50%",
         top: "50%",
         transform: "translate(-50%, -50%)",
-        width: "90%",
-        maxWidth: 1200
+        width: "100%"
       }
     }
 )`

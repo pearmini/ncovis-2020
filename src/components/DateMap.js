@@ -14,7 +14,7 @@ export default function({
 }) {
   const [isTree, setIsTree] = useState(true);
   const width = 1200,
-    height = 600,
+    height = 650,
     legendWidth = 200,
     legendHeight = 10;
 

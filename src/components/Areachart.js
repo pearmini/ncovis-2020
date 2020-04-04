@@ -16,8 +16,8 @@ export default function({
 }) {
   const ref = useRef(null);
   const width = 1200,
-    height = 300,
-    margin = { top: 30, right: 40, bottom: 25, left: 90 },
+    height = 350,
+    margin = { top: 75, right: 40, bottom: 25, left: 90 },
     formatDate = d3.timeFormat("%x"),
     bisect = d3.bisector(d => d.date).left;
 
@@ -71,14 +71,15 @@ export default function({
     ),
     [first] = data,
     keys = first ? Object.keys(first).filter(d => d !== "date") : [],
-    cnt = selectedLevel === "second" ? 4 : 6,
-    legendWidth = selectedLevel === "second" ? 75 : 50,
+    cnt = 2,
+    tipCnt = selectedLevel === "second" ? 4 : 6,
+    legendWidth = selectedLevel === "second" ? 75 : 55,
     legendHeight = 25,
     disableColor = "#efefef",
     tw = selectedLevel === "second" ? 100 : 70,
     th = 20,
-    tipW = Math.max(tw * Math.ceil(keys.length / cnt), 100),
-    tipH = Math.min(keys.length, cnt) * th + 30;
+    tipW = Math.max(tw * Math.ceil(keys.length / tipCnt), 100),
+    tipH = Math.min(keys.length, tipCnt) * th + 30;
 
   const series = d3.stack().keys(keys)(data);
 
@@ -95,8 +96,8 @@ export default function({
 
   const legendX = index => ((index / cnt) | 0) * legendWidth;
   const legendY = index => (index % cnt) * legendHeight;
-  const tipX = index => ((index / cnt) | 0) * tw;
-  const tipY = index => (index % cnt) * th;
+  const tipX = index => ((index / tipCnt) | 0) * tw;
+  const tipY = index => (index % tipCnt) * th;
 
   const lineX = () => {
     if (running) return x(new Date(selectedTime));
@@ -197,7 +198,11 @@ export default function({
             transform={`translate(${margin.left}, ${margin.top})`}
             onMouseLeave={() => setTip(null)}
           >
-            <g onMouseMove={handleChangeTip} onClick={handleChangeSelectedTime}>
+            <g
+              onMouseMove={handleChangeTip}
+              onClick={handleChangeSelectedTime}
+              onMouseOver={() => highlight !== "" && setHighlight("")}
+            >
               {series.map(s => (
                 <path
                   key={s.key}
@@ -216,7 +221,7 @@ export default function({
               y2={height - margin.bottom - margin.top}
               stroke="currentColor"
             />
-            <g transform={`translate(${20},${5})`}>
+            <g transform={`translate(${10},${-legendHeight * cnt + 10})`}>
               <rect
                 onMouseLeave={() => setHighlight("")}
                 x={-10}
@@ -237,7 +242,7 @@ export default function({
                   }}
                 >
                   <circle fill={color(key)} cx={0} cy={0} r={5}></circle>
-                  <text dy={5} dx={10} fill="currentColor" fontSize="11">
+                  <text dy={5} dx={10} fill="currentColor" fontSize="12">
                     {key}
                   </text>
                 </g>

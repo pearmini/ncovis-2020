@@ -147,7 +147,7 @@ function computeFramesWordCloud(data) {
   );
 }
 
-function preprocess(raw, start, from, interval) {
+function preprocess(raw, start, interval) {
   const data = raw.map(({ time, ...rest }) => ({ time: time * 1000, ...rest }));
   const range = d3.extent(data, d => d.time);
   const begin = start + (((range[0] - start) / interval) | 0) * interval;
@@ -156,10 +156,6 @@ function preprocess(raw, start, from, interval) {
   const wordTicks = d3.range(begin, end, interval * 5);
   const words = new Set(data.flatMap(d => d.keywords.map(d => d.name)));
   const topics = new Set(data.flatMap(d => d.topics.map(d => d.title)));
-
-  //1582783319000
-  //1582781159000
-  console.log(begin, end, from, range);
 
   const datewords = Array.from(
     d3.rollup(
@@ -352,7 +348,6 @@ export default {
         const { listKeyframes, wordsKeyframes } = preprocess(
           data,
           start,
-          tick.time,
           interval
         );
         const cloudsKeyframes = yield call(

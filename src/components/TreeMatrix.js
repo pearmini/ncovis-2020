@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Svg from "./Svg";
 import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
+import mouse from "../utils/mouse";
 
 const d3 = {
   ...d3All,
@@ -42,6 +43,12 @@ export default function({
 
   const [treeData, setTreeData] = useState(d3.hierarchy(regionsData));
   const [highlight, setHighlight] = useState([]);
+  const [drag, setDrag] = useState({
+    start: null,
+    move: 0
+  });
+  const [hover, setHover] = useState(false);
+  const sliderRef = useRef(null);
   treeData.eachAfter(node => {
     node.visableH =
       node.children && !node.hideChildren
@@ -70,14 +77,14 @@ export default function({
       }))
       .filter(({ value }) => !isNaN(value) && value !== "")
       .filter(d => visableRegions.has(d.region)),
-    days = new Set(data.map(d => d.date));
+    days = Array.from(new Set(data.map(d => d.date)));
 
   const hset = new Set(highlight.map(d => d.data.title));
   const colorData = highlight.length
     ? data.filter(d => hset.has(d.region))
     : data;
 
-  const margin = { top: 50, right: 30, bottom: 30, left: 60 },
+  const margin = { top: 50, right: 30, bottom: 60, left: 60 },
     chartPadding = 75,
     nodeWidth = 75,
     buttonSize = 15,
@@ -112,6 +119,7 @@ export default function({
         (total, [a, b]) => Math.min(total, Math.abs(a.x - b.x)),
         Infinity
       ),
+    cellWidth = Math.max(matrixWidth / days.length, 12.5),
     nodeByTitle = d3.rollup(
       root.descendants(),
       ([d]) => d,
@@ -120,8 +128,8 @@ export default function({
 
   const x = d3
     .scaleBand()
-    .domain(Array.from(days))
-    .range([0, matrixWidth]);
+    .domain(days)
+    .range([0, cellWidth * days.length]);
 
   const y = title => {
     const node = nodeByTitle.get(title);
@@ -147,7 +155,10 @@ export default function({
 
   const colorScale = d3.scaleSequential(colors[selectedType]).domain(
     d3.extent(
-      colorData.filter(d => d.region !== "湖北" && d.region !== "华中地区"),
+      colorData.filter(
+        d =>
+          d.region !== "湖北" && d.region !== "华中地区" && d.region !== "中国"
+      ),
       d => d.value
     )
   );
@@ -157,14 +168,23 @@ export default function({
     .interpolate(() => colors.special)
     .domain(
       d3.extent(
-        colorData.filter(d => d.region === "湖北" || d.region === "华中地区"),
+        colorData.filter(
+          d =>
+            d.region === "湖北" ||
+            d.region === "华中地区" ||
+            d.region === "中国"
+        ),
         d => d.value
       )
     );
 
   const color = node => {
     if (highlight.length && !hset.has(node.region)) return disabledColor;
-    if (node.region === "湖北" || node.region === "华中地区")
+    if (
+      node.region === "湖北" ||
+      node.region === "华中地区" ||
+      node.region === "中国"
+    )
       return specialColorScale(node.value);
     return colorScale(node.value);
   };
@@ -266,6 +286,10 @@ export default function({
     d3.select(".tree-legend").call(legendAxis);
     d3.select(".tree-legend-special").call(specialLegendAxis);
 
+    // 监听事件
+    window.addEventListener("mouseup", handleMouseup);
+    window.addEventListener("mousemove", handleMousemove);
+
     // animation
     const t = d3.transition().duration(200);
     d3.selectAll(
@@ -274,7 +298,33 @@ export default function({
       .transition(t)
       .attr("stroke-opacity", 1)
       .attr("fill-opacity", 1);
+
+    return () => {
+      window.removeEventListener("mouseup", handleMouseup);
+      window.removeEventListener("mousemove", handleMousemove);
+    };
   });
+
+  function handleMouseup() {
+    setDrag({ ...drag, start: null });
+  }
+
+  function handleMousemove(e) {
+    if (drag.start === null) return;
+    if (sliderRef.current === null) return;
+    const [mouseX] = mouse(e, sliderRef.current);
+    const maxMove = matrixWidth * (1 - matrixWidth / (days.length * cellWidth));
+    const move = Math.max(0, Math.min(maxMove, mouseX - drag.start));
+    setDrag({ ...drag, move });
+  }
+
+  function handleMousedown(e) {
+    const [mouseX] = mouse(e, sliderRef.current);
+    setDrag({
+      start: mouseX,
+      move: 0
+    });
+  }
 
   function toggleHighlightNode(node) {
     if (!node.parent) return;
@@ -520,42 +570,19 @@ export default function({
       loading={loading && noData(data)}
       nodata={noData(data)}
       onClick={() => setHighlight([])}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onMouseOver={() => !hover && setHover(true)}
       show={show}
       title="树 + 热力图"
       introduction={introduction}
     >
-      <g
-        transform={`translate(${width -
-          margin.right -
-          legendWidth -
-          10}, ${margin.top / 2})`}
-      >
-        {d3.range(0, legendWidth).map(l => (
-          <line
-            className="tree-line"
-            key={l}
-            x1={l}
-            y1={-legendHeight / 2}
-            x2={l}
-            y2={legendHeight / 2}
-            stroke={stroke(l)}
-          />
-        ))}
-        <g
-          className="tree-legend"
-          transform={`translate(0, ${legendHeight / 2})`}
-        ></g>
-        <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
-          其他地区
-        </text>
-      </g>
       {th && (
         <g
           transform={`translate(${width -
             margin.right -
             legendWidth -
-            legendWidth -
-            100}, ${margin.top / 2})`}
+            10}, ${margin.top / 2})`}
         >
           {d3.range(0, legendWidth).map(l => (
             <line
@@ -565,19 +592,51 @@ export default function({
               y1={-legendHeight / 2}
               x2={l}
               y2={legendHeight / 2}
-              stroke={strokeSpecial(l)}
+              stroke={stroke(l)}
             />
           ))}
           <g
-            className="tree-legend-special"
+            className="tree-legend"
             transform={`translate(0, ${legendHeight / 2})`}
           ></g>
           <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
-            华中或湖北地区
+            其他地区
           </text>
         </g>
       )}
-
+      <g
+        transform={
+          th === 0
+            ? `translate(${width -
+                margin.right -
+                legendWidth -
+                10}, ${margin.top / 2})`
+            : `translate(${width -
+                margin.right -
+                legendWidth -
+                legendWidth -
+                100}, ${margin.top / 2})`
+        }
+      >
+        {d3.range(0, legendWidth).map(l => (
+          <line
+            className="tree-line"
+            key={l}
+            x1={l}
+            y1={-legendHeight / 2}
+            x2={l}
+            y2={legendHeight / 2}
+            stroke={strokeSpecial(l)}
+          />
+        ))}
+        <g
+          className="tree-legend-special"
+          transform={`translate(0, ${legendHeight / 2})`}
+        ></g>
+        <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
+          {th === 0 ? "中国" : th === 1 ? "华中地区" : "湖北"}
+        </text>
+      </g>
       {layers.map(([depth, data]) => (
         <g
           className="tree-btn"
@@ -673,36 +732,78 @@ export default function({
           margin.right -
           matrixWidth}, ${margin.top - cellHeight / 2})`}
       >
-        <g>
-          {data.map(d => (
-            <rect
-              className={`grid-${d.region} grid`}
-              key={d.region + d.date.toString()}
-              x={x(d.date) - 1}
-              y={y(d.region) - 1}
-              width={x.bandwidth() - 2}
-              height={h(d.region) - 2}
-              fill={color(d)}
-              fillOpacity={0}
-              strokeOpacity={0}
-              cursor="pointer"
-              onClick={e => {
-                handleClickRect(d);
-                e.stopPropagation();
-              }}
-              stroke={isSelect(d) ? highlightRectColor : "none"}
-              strokeWidth={isSelect(d) ? 3 : 0}
-            >
-              <title>{`${d.region}:${d.value}(${formatDate(
-                new Date(d.date)
-              )})`}</title>
-            </rect>
-          ))}
-          <g
-            className="tree-xAxis"
-            transform={`translate(0, ${height - margin.bottom - margin.top})`}
-          ></g>
+        <g clipPath="url(#maxtrix-ly)">
+          <g transform={`translate(${-drag.move}, 0)`}>
+            {data.map(d => (
+              <rect
+                className={`grid-${d.region} grid`}
+                key={d.region + d.date.toString()}
+                x={x(d.date) - 1}
+                y={y(d.region) - 1}
+                width={x.bandwidth() - 2}
+                height={h(d.region) - 2}
+                fill={color(d)}
+                fillOpacity={0}
+                strokeOpacity={0}
+                cursor="pointer"
+                onClick={e => {
+                  handleClickRect(d);
+                  e.stopPropagation();
+                }}
+                stroke={isSelect(d) ? highlightRectColor : "none"}
+                strokeWidth={isSelect(d) ? 3 : 0}
+              >
+                <title>{`${d.region}:${d.value}(${formatDate(
+                  new Date(d.date)
+                )})`}</title>
+              </rect>
+            ))}
+            <g
+              className="tree-xAxis"
+              transform={`translate(0, ${height - margin.bottom - margin.top})`}
+            ></g>
+          </g>
         </g>
+        <defs>
+          <clipPath id="maxtrix-ly">
+            <rect
+              x="0"
+              y="0"
+              width={matrixWidth}
+              height={height - margin.top - margin.bottom + 30}
+            />
+          </clipPath>
+        </defs>
+        {hover && (
+          <g
+            transform={`translate(0, ${height -
+              margin.bottom -
+              margin.top +
+              40})`}
+          >
+            <rect
+              ref={sliderRef}
+              width={matrixWidth}
+              height={8}
+              x={0}
+              y={0}
+              rx={4}
+              ry={4}
+              fill="transparent"
+            ></rect>
+            <rect
+              onMouseDown={handleMousedown}
+              width={matrixWidth * (matrixWidth / (days.length * cellWidth))}
+              height={8}
+              x={drag.move}
+              y={0}
+              rx={4}
+              ry={4}
+              fill="#bfbfbf"
+              cursor="pointer"
+            ></rect>
+          </g>
+        )}
       </g>
     </Svg>
   );
