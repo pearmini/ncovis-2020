@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 import mouse from "../utils/mouse";
+import foramtDate from "../utils/formatDate";
 import * as d3 from "d3";
 
 const Svg = styled.svg`
@@ -32,6 +33,10 @@ export default function({
   const dragging = useRef(false);
   const sliderRef = useRef(null);
   const dotRef = useRef(null);
+  const [tip, setTip] = useState({
+    time: -1,
+    duration: -1
+  });
   const width = 1200,
     height = 50,
     margin = { top: 20, right: 40, bottom: 20, left: 90 };
@@ -41,36 +46,17 @@ export default function({
     .domain(range)
     .range([margin.left, width - margin.right]);
 
+  const d = d3
+    .scaleLinear()
+    .domain([margin.left, width - margin.right])
+    .range([0, totalDuration]);
+
   const foramtTime = t => {
     const d = (t / 1000) | 0;
     const m = Math.max((d / 60) | 0, 0);
     const s = Math.max(d % 60, 0);
     return `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
   };
-
-  function handleClick(e) {
-    const [mouseX] = mouse(e, sliderRef.current);
-    const t = x.invert(mouseX + margin.left);
-    changeValue(t);
-  }
-
-  useEffect(() => {
-    const handleMouseUp = () => (dragging.current = false);
-    const handleMouseMove = e => {
-      if (!dragging.current) return;
-      const [mouseX] = mouse(e, sliderRef.current);
-      const t = x.invert(mouseX + margin.left);
-      changeValue(t);
-    };
-
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  });
 
   const startButton = (
     <svg
@@ -138,6 +124,51 @@ export default function({
       ></path>
     </svg>
   );
+
+  function handleClick(e) {
+    const [mouseX] = mouse(e, sliderRef.current);
+    const time = x.invert(mouseX + margin.left);
+    changeValue(time);
+  }
+
+  function handleMouseMove(e) {
+    const [mouseX] = mouse(e, sliderRef.current);
+    const duration = d(mouseX + margin.left);
+    const time = x.invert(mouseX + margin.left);
+    setTip({
+      time,
+      duration
+    });
+  }
+
+  function handleMouseOver(e) {
+    const [mouseX] = mouse(e, sliderRef.current);
+    const duration = d(mouseX + margin.left);
+    const time = x.invert(mouseX + margin.left);
+    setTip({
+      time,
+      duration
+    });
+  }
+
+  useEffect(() => {
+    const handleMouseUp = () => (dragging.current = false);
+    const handleMouseMove = e => {
+      if (!dragging.current) return;
+      const [mouseX] = mouse(e, sliderRef.current);
+      const t = x.invert(mouseX + margin.left);
+      changeValue(t);
+    };
+
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  });
+
   return (
     <Svg viewBox={[0, 0, width, height]} fontSize="12">
       <Button transform={`translate(${10}, ${10})`} onClick={toggleAnimation}>
@@ -157,7 +188,13 @@ export default function({
         fill="#eee"
         rx={5}
         onClick={handleClick}
-      ></Slider>
+        onMouseMove={handleMouseMove}
+        onMouseOver={handleMouseOver}
+      >
+        <title>{`[${foramtTime(tip.duration)}] ${foramtDate(
+          new Date(tip.time)
+        )}`}</title>
+      </Slider>
       <Dot
         ref={dotRef}
         cx={x(selectedTime) || margin.left}

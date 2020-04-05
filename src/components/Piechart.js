@@ -42,6 +42,8 @@ export default function({ loading, selectedRegion, selectedDate, data = [] }) {
   const arcs = pie(data);
   const introduction = (
     <div>
+      <h3>作用</h3>
+      <p>展示该地区，该日期不同种类的新闻报道数量的占比。</p>
       <h3>说明</h3>
       <p>目前只有省份和直辖市的数据，同时数据可能出现缺失的情况。</p>
       <h3>交互</h3>

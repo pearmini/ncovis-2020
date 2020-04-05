@@ -205,6 +205,8 @@ export default function({
 
   const introduction = (
     <div>
+      <h3>作用</h3>
+      <p>反映各个地区每天确诊、治愈或死亡人数相对前一天的变化情况。</p>
       <h3>说明</h3>
       <ul>
         <li>

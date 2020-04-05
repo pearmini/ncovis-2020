@@ -45,14 +45,20 @@ export default function({
   const id = d => `t-${d.value}`;
   const colorScale = name =>
     selectedTopic !== null && selectedTopic !== name ? "#efefef" : color(name);
+
   const introduction = (
     <div>
+      <h3>作用</h3>
+      <p>反映知乎热榜前10的话题的热度变化情况。</p>
       <h3>说明</h3>
       <p>目前只有 2020-02-27 之后的数据。前面的数据会尽快补上。</p>
       <h3>交互</h3>
       <ul>
         <li>
-          <b>单击</b>任意一热搜话题，旁边的词云会只展示当前话题下回答中的热词。
+          <b>单击</b>任意热搜话题，旁边的词云会只展示当前话题下回答中的热词。
+        </li>
+        <li>
+          <b>鼠标移动到</b>任意热搜话题上面，会显示完整的标题。
         </li>
       </ul>
     </div>

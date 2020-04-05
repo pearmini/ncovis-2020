@@ -127,6 +127,8 @@ export default function({
 
   const introduction = (
     <div>
+      <h3>作用</h3>
+      <p>反映各个地区每天确诊、治愈或死亡的总人数随着时间的变化。</p>
       <h3>说明</h3>
       <p>如果某个地区的数据长时间没有变化，可能是因为数据缺失。</p>
       <h3>交互</h3>

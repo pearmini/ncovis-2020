@@ -86,6 +86,8 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
 
   const introduction = (
     <div>
+      <h3>作用</h3>
+      <p>展示该地区和该日期新闻报道中的关键字。</p>
       <h3>说明</h3>
       <p>目前只有省份和直辖市的数据，同时数据可能出现缺失的情况。</p>
       <h3>交互</h3>

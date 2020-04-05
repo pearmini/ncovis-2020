@@ -41,6 +41,8 @@ export default function({
 
   const introduction = (
     <div>
+      <h3>作用</h3>
+      <p>反映当前知乎热门话题下回答中的热词变化情况。</p>
       <h3>说明</h3>
       <p>目前只有 2020-02-27 之后的数据。前面的数据会尽快补上。</p>
       <h3>交互</h3>

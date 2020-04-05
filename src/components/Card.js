@@ -12,7 +12,9 @@ const Container = styled.div.attrs(
         left: "50%",
         top: "50%",
         transform: "translate(-50%, -50%)",
-        width: "100%"
+        marginTop: 28,
+        width: "90%",
+        maxWidth: 1200
       }
     }
 )`
@@ -63,60 +65,49 @@ const MiddleEmpty = styled(Empty)`
   margin: 0;
 `;
 
-const Grid = styled.div`
-  right: 0px;
-  top: 0px;
-  position: absolute;
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-`;
-
-const More = styled.div`
-  position: absolute;
-  right: 13px;
-  top: 19px;
-  cursor: pointer;
-
-  &,
-  &::before,
-  &::after {
-    content: "";
-    width: 5px;
-    height: 5px;
-    display: block;
-    background: black;
-    border-radius: 50%;
-  }
-
-  &::before {
-    transform: translateY(-7px);
-  }
-
-  &::after {
-    transform: translateY(2px);
-  }
-`;
-
 const Content = styled.ul`
   padding: 0;
   margin: 0;
   cursor: pointer;
+
   & li {
     list-style: none;
-    padding: 0.5em 1em;
-  }
-
-  & span {
-    margin-left: 0.75em;
+    padding: 0.5em;
+    border-bottom: 1px solid transparent;
   }
 
   & li:hover {
+    border-bottom: 1px solid #efefef;
   }
 `;
 
 const StyledDrawer = styled(Drawer)`
   position: absolute;
+`;
+
+const Header = styled.div`
+  display: flex;
+  margin: 0.5em 1em 0 1em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #efefef;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const Left = styled.div`
+  & span {
+    margin-left: 8px;
+  }
+`;
+
+const Right = styled.div``;
+
+const StyledIcon = styled(Icon)`
+  cursor: pointer;
+`;
+
+const ZoomIcon = styled(StyledIcon)`
+  margin-right: 8px;
 `;
 
 function State({ type, width, height }) {
@@ -155,24 +146,14 @@ function Card({
 
   const content = (
     <Content>
-      <li onClick={() => onClickItem(() => setZoom(!zoom))}>
-        <Icon type={zoom ? "fullscreen-exit" : "fullscreen"} />
-        <span>{zoom ? "缩小" : "放大"}</span>
-      </li>
       <li onClick={() => onClickItem(onDownload ? onDownload : onDownloadPng)}>
-        <Icon type="download" />
         <span>PNG</span>
       </li>
       {onDownloadSvg && (
         <li onClick={() => onClickItem(onDownloadSvg)}>
-          <Icon type="download" />
           <span>SVG</span>
         </li>
       )}
-      <li onClick={() => onClickItem(() => setMore(true))}>
-        <Icon type="question" />
-        <span>详情</span>
-      </li>
     </Content>
   );
 
@@ -197,10 +178,22 @@ function Card({
       >
         {loading ? (
           <State width={width} height={height} type="loading" />
-        ) : nodata ? (
-          <State width={width} height={height} />
         ) : (
-          hovered && (
+          nodata && <State width={width} height={height} />
+        )}
+        <Header>
+          <Left>
+            <StyledIcon
+              type="question-circle"
+              onClick={() => onClickItem(() => setMore(true))}
+            />
+            <span>{title}</span>
+          </Left>
+          <Right>
+            <ZoomIcon
+              type={zoom ? "fullscreen-exit" : "fullscreen"}
+              onClick={() => onClickItem(() => setZoom(!zoom))}
+            />
             <Popover
               placement="bottomRight"
               content={content}
@@ -208,17 +201,16 @@ function Card({
               arrowPointAtCenter
               visible={pop}
             >
-              <Grid
+              <StyledIcon
+                type="download"
                 onClick={e => {
                   setPop(!pop);
                   e.stopPropagation();
                 }}
-              >
-                <More></More>
-              </Grid>
+              />
             </Popover>
-          )
-        )}
+          </Right>
+        </Header>
         {children}
         <StyledDrawer
           title={title}
