@@ -237,8 +237,7 @@ function HotsPanel({
   function showWordsOfTopic(title) {
     setSelectedTopic(title);
     stopAnimation();
-    const bisect = d3.bisector(d => d.time);
-    const i = bisect.left(hotTimeRange, selectedTime),
+    const i = search(selectedTime),
       time = hotTimeRange[i].time / 1000,
       words = wordsByTime.get(time);
     if (words) {
@@ -268,6 +267,7 @@ function HotsPanel({
       from: index,
       to: index + i
     });
+
     getData({
       name: selectedName,
       tick: hotTimeRange[index],
