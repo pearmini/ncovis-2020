@@ -7,10 +7,10 @@ import mouse from "../utils/mouse";
 
 const d3 = {
   ...d3All,
-  ...d3Array
+  ...d3Array,
 };
 
-export default function({
+export default function ({
   dataByRegion,
   selectedRegion,
   selectedDate,
@@ -29,7 +29,7 @@ export default function({
   highlightRectColor,
   disabledColor,
   legendWidth,
-  legendHeight
+  legendHeight,
 }) {
   if (!dataByRegion.size)
     return (
@@ -45,43 +45,43 @@ export default function({
   const [highlight, setHighlight] = useState([]);
   const [drag, setDrag] = useState({
     start: null,
-    move: 0
+    move: 0,
   });
   const [hover, setHover] = useState(false);
   const sliderRef = useRef(null);
-  treeData.eachAfter(node => {
+  treeData.eachAfter((node) => {
     node.visableH =
       node.children && !node.hideChildren
-        ? d3.max(node.children, d => d.visableH) + 1
+        ? d3.max(node.children, (d) => d.visableH) + 1
         : 0;
   });
   const descendants = treeData.descendants(),
     visableRegions = new Set(
       descendants
-        .filter(d => !d.hide && (!d.children || d.hideChildren))
-        .map(d => d.data.title)
+        .filter((d) => !d.hide && (!d.children || d.hideChildren))
+        .map((d) => d.data.title)
     ),
     layers = d3
-      .groups(descendants, d => d.depth)
+      .groups(descendants, (d) => d.depth)
       .filter(
         ([depth, data]) =>
-          depth !== treeData.height && depth !== 0 && data.every(d => !d.hide)
+          depth !== treeData.height && depth !== 0 && data.every((d) => !d.hide)
       ),
     th = treeData.visableH;
 
   const data = all
-      .map(d => ({
+      .map((d) => ({
         date: d.date,
         region: d.region,
-        value: d[selectedType]
+        value: d[selectedType],
       }))
       .filter(({ value }) => !isNaN(value) && value !== "")
-      .filter(d => visableRegions.has(d.region)),
-    days = Array.from(new Set(data.map(d => d.date)));
+      .filter((d) => visableRegions.has(d.region)),
+    days = Array.from(new Set(data.map((d) => d.date)));
 
-  const hset = new Set(highlight.map(d => d.data.title));
+  const hset = new Set(highlight.map((d) => d.data.title));
   const colorData = highlight.length
-    ? data.filter(d => hset.has(d.region))
+    ? data.filter((d) => hset.has(d.region))
     : data;
 
   const margin = { top: 50, right: 30, bottom: 60, left: 60 },
@@ -102,7 +102,7 @@ export default function({
       "Sept",
       "Oct",
       "Nov",
-      "Dec"
+      "Dec",
     ],
     treeW = nodeWidth * th,
     treeH = height - margin.top - margin.bottom - axisPadding,
@@ -123,7 +123,7 @@ export default function({
     nodeByTitle = d3.rollup(
       root.descendants(),
       ([d]) => d,
-      d => d.data.title
+      (d) => d.data.title
     );
 
   const x = d3
@@ -131,22 +131,22 @@ export default function({
     .domain(days)
     .range([0, cellWidth * days.length]);
 
-  const y = title => {
+  const y = (title) => {
     const node = nodeByTitle.get(title);
     if (!node.children) return node.x;
     let x0 = Infinity;
-    node.each(d => {
+    node.each((d) => {
       if (d.x < x0) x0 = d.x;
     });
     return x0;
   };
 
-  const h = title => {
+  const h = (title) => {
     const node = nodeByTitle.get(title);
     if (!node.children) return cellHeight;
     let x0 = Infinity;
     let x1 = -x0;
-    node.each(d => {
+    node.each((d) => {
       if (d.x > x1) x1 = d.x;
       if (d.x < x0) x0 = d.x;
     });
@@ -156,10 +156,10 @@ export default function({
   const colorScale = d3.scaleSequential(colors[selectedType]).domain(
     d3.extent(
       colorData.filter(
-        d =>
+        (d) =>
           d.region !== "湖北" && d.region !== "华中地区" && d.region !== "中国"
       ),
-      d => d.value
+      (d) => d.value
     )
   );
 
@@ -169,16 +169,16 @@ export default function({
     .domain(
       d3.extent(
         colorData.filter(
-          d =>
+          (d) =>
             d.region === "湖北" ||
             d.region === "华中地区" ||
             d.region === "中国"
         ),
-        d => d.value
+        (d) => d.value
       )
     );
 
-  const color = node => {
+  const color = (node) => {
     if (highlight.length && !hset.has(node.region)) return disabledColor;
     if (
       node.region === "湖北" ||
@@ -191,8 +191,8 @@ export default function({
 
   const pathLink = d3
     .linkHorizontal()
-    .x(d => d.y)
-    .y(d => d.x);
+    .x((d) => d.y)
+    .y((d) => d.x);
 
   const stroke = d3
     .scaleSequential(colors[selectedType])
@@ -240,294 +240,6 @@ export default function({
     </div>
   );
 
-  useEffect(() => {
-    // 绘制坐标轴
-    const scaleLegend = d3
-      .scaleLinear()
-      .domain(colorScale.domain())
-      .range([0, legendWidth]);
-
-    const specialScaleLegend = d3
-      .scaleSqrt()
-      .domain(specialColorScale.domain())
-      .range([0, legendWidth]);
-
-    const legendAxis = d3
-      .axisBottom(scaleLegend)
-      .ticks(legendWidth / 50)
-      .tickSizeOuter(0);
-
-    const specialLegendAxis = d3
-      .axisBottom(specialScaleLegend)
-      .ticks(legendWidth / 50)
-      .tickSizeOuter(0);
-
-    const xAxis = d3
-      .axisBottom(x)
-      .tickSizeOuter(0)
-      .tickFormat(time => {
-        const date = new Date(time).getDate();
-        if (date !== 1) return date;
-        const month = new Date(time).getMonth();
-        return labels[month];
-      });
-
-    d3.select(".tree-xAxis")
-      .call(xAxis)
-      .call(g =>
-        g
-          .selectAll("text")
-          .filter(function() {
-            const label = d3.select(this).text();
-            return labels.indexOf(label) !== -1;
-          })
-          .attr("font-weight", "bold")
-          .attr("dy", "2em")
-      );
-
-    d3.select(".tree-legend").call(legendAxis);
-    d3.select(".tree-legend-special").call(specialLegendAxis);
-
-    // 监听事件
-    window.addEventListener("mouseup", handleMouseup);
-    window.addEventListener("mousemove", handleMousemove);
-
-    // animation
-    const t = d3.transition().duration(200);
-    d3.selectAll(
-      ".grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn, .tree-legend-special"
-    )
-      .transition(t)
-      .attr("stroke-opacity", 1)
-      .attr("fill-opacity", 1);
-
-    return () => {
-      window.removeEventListener("mouseup", handleMouseup);
-      window.removeEventListener("mousemove", handleMousemove);
-    };
-  });
-
-  function handleMouseup() {
-    setDrag({ ...drag, start: null });
-  }
-
-  function handleMousemove(e) {
-    if (drag.start === null) return;
-    if (sliderRef.current === null) return;
-    const [mouseX] = mouse(e, sliderRef.current);
-    const maxMove = matrixWidth * (1 - matrixWidth / (days.length * cellWidth));
-    const move = Math.max(0, Math.min(maxMove, mouseX - drag.start));
-    setDrag({ ...drag, move });
-  }
-
-  function handleMousedown(e) {
-    const [mouseX] = mouse(e, sliderRef.current);
-    setDrag({
-      start: mouseX,
-      move: 0
-    });
-  }
-
-  function toggleHighlightNode(node) {
-    if (!node.parent) return;
-
-    const old = highlight.find(d => d.data.title === node.data.title);
-    const hasChildren = highlight.some(
-      d => d.parent.data.title === node.data.title
-    );
-    if (old || hasChildren) {
-      const deleteNodes = node.hideChildren ? [node] : node.leaves();
-      for (let d of deleteNodes) {
-        const index = highlight.indexOf(d);
-        highlight.splice(index, 1);
-      }
-    } else {
-      node.hideChildren
-        ? highlight.push(node)
-        : highlight.push(...node.leaves());
-    }
-    setHighlight([...highlight]);
-    setSelectedRegion(node.data.title);
-  }
-
-  async function toggleNode(node) {
-    if (!node.children) return;
-    // animation
-    const t = d3
-      .transition()
-      .duration(250)
-      .ease(d3.easeExpOut);
-    node.hideChildren
-      ? animateShowChildren(node, t)
-      : animateHideChildren(node, t);
-    !node.hideChildren && node.depth === 0 && animateHideButton(t);
-    animateHideLegend(t);
-    await t.end();
-
-    // update data
-    node.hideChildren ? showChildren(node) : hideChildren(node);
-
-    // upadte view
-    const newTreeData = copyTree();
-    setTreeData(newTreeData);
-    setHighlight([]);
-  }
-
-  async function toggleNodes(nodes) {
-    // animation
-    const t = d3
-      .transition()
-      .duration(250)
-      .ease(d3.easeExpOut);
-
-    const validNodes = nodes.filter(node => node.children);
-    const allHide = validNodes.every(d => d.hideChildren);
-    allHide
-      ? validNodes.forEach(d => animateShowChildren(d, t))
-      : validNodes
-          .filter(d => !d.hideChildren)
-          .forEach(d => animateHideChildren(d, t));
-    animateHideLegend(t);
-    animateHideAxis(t);
-    await t.end();
-
-    // update data
-    allHide
-      ? validNodes.forEach(showChildren)
-      : validNodes.filter(d => !d.hideChildren).forEach(hideChildren);
-
-    // update view
-    const newTreeData = copyTree();
-    setTreeData(newTreeData);
-    setHighlight([]);
-  }
-
-  function animateHideButton(t) {
-    d3.select(".tree-btn")
-      .transition(t)
-      .attr("fill-opacity", 0);
-  }
-
-  function animateHideLegend(t) {
-    // 坐标轴和 legend
-    d3.selectAll(".tree-legend, .tree-line, .tree-legend-special")
-      .transition(t)
-      .attr("stroke-opacity", 0)
-      .attr("fill-opacity", 0);
-  }
-
-  function animateHideAxis(t) {
-    d3.select(".tree-xAxis")
-      .transition(t)
-      .attr("stroke-opacity", 0)
-      .attr("fill-opacity", 0);
-  }
-
-  function animateHideChildren(node, t) {
-    const text = d3.select(`#node-${node.data.title} text`).node();
-    const { width } = text.getBBox();
-    d3.select(`#node-${node.data.title} text`)
-      .transition(t)
-      .attr("x", width + 8);
-
-    node.each(d => {
-      if (node.data.title === d.data.title) return;
-
-      // node
-      d3.select(`#node-${d.data.title}`)
-        .attr("fill-opacity", 1)
-        .transition(t)
-        .attr("transform", `translate(${node.y}, ${node.x})`)
-        .attr("fill-opacity", 0);
-
-      // link
-      d3.select(`#link-${d.data.title}`)
-        .transition(t)
-        .attr("d", () => {
-          const o = { x: node.x, y: node.y };
-          return pathLink({ source: o, target: o });
-        });
-
-      // rect
-      d3.selectAll(`.grid-${d.data.title}`)
-        .transition(t)
-        .attr("stroke-opacity", 0)
-        .attr("fill-opacity", 0);
-    });
-  }
-
-  function animateShowChildren(node, t) {
-    const text = d3.select(`#node-${node.data.title} text`).node();
-    const { width } = text.getBBox();
-    d3.select(`#node-${node.data.title} text`)
-      .transition(t)
-      .attr("x", -width - 8);
-
-    d3.selectAll(`.grid-${node.data.title} `)
-      .transition(t)
-      .attr("stroke-opacity", 0)
-      .attr("fill-opacity", 0);
-
-    // 移动到目的位置
-    node.each(d => {
-      if (node.data.title === d.data.title) return;
-      d3.select(`#node-${d.data.title}`)
-        .transition(t)
-        .attr("transform", `translate(${d.y}, ${d.x})`)
-        .attr("fill-opacity", 1);
-
-      d3.select(`#link-${d.data.title}`)
-        .transition(t)
-        .attr("stroke-opacity", 0.4)
-        .attr("d", () => {
-          const o = { x: d.x, y: d.y };
-          const s = { x: d.parent.x, y: d.parent.y };
-          return pathLink({ source: s, target: o });
-        });
-    });
-  }
-
-  function hideChildren(node) {
-    node.hideChildren = true;
-    node.each(child => {
-      if (child.data.title === node.data.title) return;
-      child.hide = true;
-    });
-  }
-
-  function showChildren(node) {
-    node.hideChildren = false;
-    node.eachBefore(child => {
-      if (child.data.title === node.data.title) return;
-      child.hide = false;
-      child.hideChildren = false;
-    });
-  }
-
-  function copyTree() {
-    // 这里必须要拷贝一份，否者很麻烦
-    const newTreeData = d3.hierarchy(regionsData);
-    newTreeData.each(node => {
-      const old = nodeByTitle.get(node.data.title);
-      node.hideChildren = old.hideChildren;
-      node.hide = old.hide;
-    });
-    return newTreeData;
-  }
-
-  function isSelect(d) {
-    return selectedRegion === d.region && selectedDate === d.date;
-  }
-
-  function handleClickRect({ region, date }) {
-    setSelectedRegion(region);
-    setSelectedDate(date);
-  }
-
-  function noData(data) {
-    return data.filter(({ value }) => !isNaN(value)).length === 0;
-  }
-
   const minusButton = (
     <svg
       t="1583216776327"
@@ -566,6 +278,294 @@ export default function({
     </svg>
   );
 
+  function handleMouseup() {
+    setDrag({ ...drag, start: null });
+  }
+
+  function handleMousemove(e) {
+    if (drag.start === null) return;
+    if (sliderRef.current === null) return;
+    const [mouseX] = mouse(e, sliderRef.current);
+    const maxMove = matrixWidth * (1 - matrixWidth / (days.length * cellWidth));
+    const move = Math.max(0, Math.min(maxMove, mouseX - drag.start));
+    setDrag({ ...drag, move });
+  }
+
+  function handleMousedown(e) {
+    const [mouseX] = mouse(e, sliderRef.current);
+    setDrag({
+      start: mouseX,
+      move: 0,
+    });
+  }
+
+  function toggleHighlightNode(node) {
+    if (!node.parent) return;
+
+    const old = highlight.find((d) => d.data.title === node.data.title);
+    const hasChildren = highlight.some(
+      (d) => d.parent.data.title === node.data.title
+    );
+    if (old || hasChildren) {
+      const deleteNodes = node.hideChildren ? [node] : node.leaves();
+      for (let d of deleteNodes) {
+        const index = highlight.indexOf(d);
+        highlight.splice(index, 1);
+      }
+    } else {
+      node.hideChildren
+        ? highlight.push(node)
+        : highlight.push(...node.leaves());
+    }
+    setHighlight([...highlight]);
+    setSelectedRegion(node.data.title);
+  }
+
+  async function toggleNode(node) {
+    if (!node.children) return;
+    // animation
+    const t = d3.transition().duration(250).ease(d3.easeExpOut);
+    node.hideChildren
+      ? animateShowChildren(node, t)
+      : animateHideChildren(node, t);
+    !node.hideChildren && node.depth === 0 && animateHideButton(t);
+    animateHideLegend(t);
+    await t.end();
+
+    // update data
+    node.hideChildren ? showChildren(node) : hideChildren(node);
+
+    // upadte view
+    const newTreeData = copyTree();
+    setTreeData(newTreeData);
+    setHighlight([]);
+  }
+
+  async function toggleNodes(nodes) {
+    // animation
+    const t = d3.transition().duration(250).ease(d3.easeExpOut);
+
+    const validNodes = nodes.filter((node) => node.children);
+    const allHide = validNodes.every((d) => d.hideChildren);
+    allHide
+      ? validNodes.forEach((d) => animateShowChildren(d, t))
+      : validNodes
+          .filter((d) => !d.hideChildren)
+          .forEach((d) => animateHideChildren(d, t));
+    animateHideLegend(t);
+    animateHideAxis(t);
+    await t.end();
+
+    // update data
+    allHide
+      ? validNodes.forEach(showChildren)
+      : validNodes.filter((d) => !d.hideChildren).forEach(hideChildren);
+
+    // update view
+    const newTreeData = copyTree();
+    setTreeData(newTreeData);
+    setHighlight([]);
+  }
+
+  function animateHideButton(t) {
+    d3.select(".tree-btn").transition(t).attr("fill-opacity", 0);
+  }
+
+  function animateHideLegend(t) {
+    // 坐标轴和 legend
+    d3.selectAll(".tree-legend, .tree-line, .tree-legend-special")
+      .transition(t)
+      .attr("stroke-opacity", 0)
+      .attr("fill-opacity", 0);
+  }
+
+  function animateHideAxis(t) {
+    d3.select(".tree-xAxis")
+      .transition(t)
+      .attr("stroke-opacity", 0)
+      .attr("fill-opacity", 0);
+  }
+
+  function animateHideChildren(node, t) {
+    const text = d3.select(`#node-${node.data.title} text`).node();
+    const { width } = text.getBBox();
+    d3.select(`#node-${node.data.title} text`)
+      .transition(t)
+      .attr("x", width + 8);
+
+    node.each((d) => {
+      if (node.data.title === d.data.title) return;
+
+      // node
+      d3.select(`#node-${d.data.title}`)
+        .attr("fill-opacity", 1)
+        .transition(t)
+        .attr("transform", `translate(${node.y}, ${node.x})`)
+        .attr("fill-opacity", 0);
+
+      // link
+      d3.select(`#link-${d.data.title}`)
+        .transition(t)
+        .attr("d", () => {
+          const o = { x: node.x, y: node.y };
+          return pathLink({ source: o, target: o });
+        });
+
+      // rect
+      d3.selectAll(`.grid-${d.data.title}`)
+        .transition(t)
+        .attr("stroke-opacity", 0)
+        .attr("fill-opacity", 0);
+    });
+  }
+
+  function animateShowChildren(node, t) {
+    const text = d3.select(`#node-${node.data.title} text`).node();
+    const { width } = text.getBBox();
+    d3.select(`#node-${node.data.title} text`)
+      .transition(t)
+      .attr("x", -width - 8);
+
+    d3.selectAll(`.grid-${node.data.title} `)
+      .transition(t)
+      .attr("stroke-opacity", 0)
+      .attr("fill-opacity", 0);
+
+    // 移动到目的位置
+    node.each((d) => {
+      if (node.data.title === d.data.title) return;
+      d3.select(`#node-${d.data.title}`)
+        .transition(t)
+        .attr("transform", `translate(${d.y}, ${d.x})`)
+        .attr("fill-opacity", 1);
+
+      d3.select(`#link-${d.data.title}`)
+        .transition(t)
+        .attr("stroke-opacity", 0.4)
+        .attr("d", () => {
+          const o = { x: d.x, y: d.y };
+          const s = { x: d.parent.x, y: d.parent.y };
+          return pathLink({ source: s, target: o });
+        });
+    });
+  }
+
+  function hideChildren(node) {
+    setDrag({
+      move: 0,
+      start: null,
+    });
+    node.hideChildren = true;
+    node.each((child) => {
+      if (child.data.title === node.data.title) return;
+      child.hide = true;
+    });
+  }
+
+  function showChildren(node) {
+    setDrag({
+      move: 0,
+      start: null,
+    });
+    node.hideChildren = false;
+    node.eachBefore((child) => {
+      if (child.data.title === node.data.title) return;
+      child.hide = false;
+      child.hideChildren = false;
+    });
+  }
+
+  function copyTree() {
+    // 这里必须要拷贝一份，否者很麻烦
+    const newTreeData = d3.hierarchy(regionsData);
+    newTreeData.each((node) => {
+      const old = nodeByTitle.get(node.data.title);
+      node.hideChildren = old.hideChildren;
+      node.hide = old.hide;
+    });
+    return newTreeData;
+  }
+
+  function isSelect(d) {
+    return selectedRegion === d.region && selectedDate === d.date;
+  }
+
+  function handleClickRect({ region, date }) {
+    setSelectedRegion(region);
+    setSelectedDate(date);
+  }
+
+  function noData(data) {
+    return data.filter(({ value }) => !isNaN(value)).length === 0;
+  }
+
+  useEffect(() => {
+    // 绘制坐标轴
+    const scaleLegend = d3
+      .scaleLinear()
+      .domain(colorScale.domain())
+      .range([0, legendWidth]);
+
+    const specialScaleLegend = d3
+      .scaleSqrt()
+      .domain(specialColorScale.domain())
+      .range([0, legendWidth]);
+
+    const legendAxis = d3
+      .axisBottom(scaleLegend)
+      .ticks(legendWidth / 50)
+      .tickSizeOuter(0);
+
+    const specialLegendAxis = d3
+      .axisBottom(specialScaleLegend)
+      .ticks(legendWidth / 50)
+      .tickSizeOuter(0);
+
+    const xAxis = d3
+      .axisBottom(x)
+      .tickSizeOuter(0)
+      .tickFormat((time) => {
+        const date = new Date(time).getDate();
+        if (date !== 1) return date;
+        const month = new Date(time).getMonth();
+        return labels[month];
+      });
+
+    d3.select(".tree-xAxis")
+      .call(xAxis)
+      .call((g) =>
+        g
+          .selectAll("text")
+          .filter(function () {
+            const label = d3.select(this).text();
+            return labels.indexOf(label) !== -1;
+          })
+          .attr("font-weight", "bold")
+          .attr("dy", "2em")
+      );
+
+    d3.select(".tree-legend").call(legendAxis);
+    d3.select(".tree-legend-special").call(specialLegendAxis);
+
+    // 监听事件
+    window.addEventListener("mouseup", handleMouseup);
+    window.addEventListener("mousemove", handleMousemove);
+
+    // animation
+    const t = d3.transition().duration(200);
+    d3.selectAll(
+      ".grid, .tree-legend, .tree-line, .tree-xAxis, .tree-xAxis, .tree-btn, .tree-legend-special"
+    )
+      .transition(t)
+      .attr("stroke-opacity", 1)
+      .attr("fill-opacity", 1);
+
+    return () => {
+      window.removeEventListener("mouseup", handleMouseup);
+      window.removeEventListener("mousemove", handleMousemove);
+    };
+  });
+
   return (
     <Svg
       viewBox={[0, 0, width, height]}
@@ -581,12 +581,11 @@ export default function({
     >
       {th && (
         <g
-          transform={`translate(${width -
-            margin.right -
-            legendWidth -
-            10}, ${margin.top / 2})`}
+          transform={`translate(${width - margin.right - legendWidth - 10}, ${
+            margin.top / 2
+          })`}
         >
-          {d3.range(0, legendWidth).map(l => (
+          {d3.range(0, legendWidth).map((l) => (
             <line
               className="tree-line"
               key={l}
@@ -609,18 +608,15 @@ export default function({
       <g
         transform={
           th === 0
-            ? `translate(${width -
-                margin.right -
-                legendWidth -
-                10}, ${margin.top / 2})`
-            : `translate(${width -
-                margin.right -
-                legendWidth -
-                legendWidth -
-                100}, ${margin.top / 2})`
+            ? `translate(${width - margin.right - legendWidth - 10}, ${
+                margin.top / 2
+              })`
+            : `translate(${
+                width - margin.right - legendWidth - legendWidth - 100
+              }, ${margin.top / 2})`
         }
       >
-        {d3.range(0, legendWidth).map(l => (
+        {d3.range(0, legendWidth).map((l) => (
           <line
             className="tree-line"
             key={l}
@@ -642,17 +638,17 @@ export default function({
       {layers.map(([depth, data]) => (
         <g
           className="tree-btn"
-          transform={`translate(${margin.left +
-            depth * nodeWidth -
-            buttonSize / 2}, ${height - margin.top + buttonSize / 2})`}
+          transform={`translate(${
+            margin.left + depth * nodeWidth - buttonSize / 2
+          }, ${height - margin.top + buttonSize / 2})`}
           key={depth}
-          onClick={e => {
+          onClick={(e) => {
             toggleNodes(data);
             e.stopPropagation(); // 这行代码很关键
           }}
           fillOpacity={0}
         >
-          {data.every(d => d.hideChildren) ? plusButton : minusButton}
+          {data.every((d) => d.hideChildren) ? plusButton : minusButton}
         </g>
       ))}
       <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -670,7 +666,7 @@ export default function({
         {root
           .descendants()
           .reverse()
-          .map(node => (
+          .map((node) => (
             <g
               key={node.data.title}
               id={`node-${node.data.title}`}
@@ -690,15 +686,16 @@ export default function({
                   <circle
                     r={buttonSize / 2 - 5}
                     fill="white"
-                    onClick={e => {
+                    onClick={(e) => {
                       toggleNode(node);
                       e.stopPropagation();
                     }}
                   ></circle>
                   <g
-                    transform={`translate(${-buttonSize / 2}, ${-buttonSize /
-                      2})`}
-                    onClick={e => {
+                    transform={`translate(${-buttonSize / 2}, ${
+                      -buttonSize / 2
+                    })`}
+                    onClick={(e) => {
                       toggleNode(node);
                       e.stopPropagation();
                     }}
@@ -714,11 +711,11 @@ export default function({
                   !node.children || node.hideChildren ? "start" : "end"
                 }
                 fontSize="12"
-                onClick={e => {
+                onClick={(e) => {
                   toggleHighlightNode(node);
                   e.stopPropagation();
                 }}
-                onDoubleClick={e => {
+                onDoubleClick={(e) => {
                   setSelectedRegion(node.data.title);
                   setShow(false);
                   e.stopPropagation();
@@ -730,13 +727,13 @@ export default function({
           ))}
       </g>
       <g
-        transform={`translate(${width -
-          margin.right -
-          matrixWidth}, ${margin.top - cellHeight / 2})`}
+        transform={`translate(${width - margin.right - matrixWidth}, ${
+          margin.top - cellHeight / 2
+        })`}
       >
         <g clipPath="url(#maxtrix-ly)">
           <g transform={`translate(${-drag.move}, 0)`}>
-            {data.map(d => (
+            {data.map((d) => (
               <rect
                 className={`grid-${d.region} grid`}
                 key={d.region + d.date.toString()}
@@ -748,7 +745,7 @@ export default function({
                 fillOpacity={0}
                 strokeOpacity={0}
                 cursor="pointer"
-                onClick={e => {
+                onClick={(e) => {
                   handleClickRect(d);
                   e.stopPropagation();
                 }}
@@ -778,10 +775,9 @@ export default function({
         </defs>
         {hover && matrixWidth < days.length * cellWidth && (
           <g
-            transform={`translate(0, ${height -
-              margin.bottom -
-              margin.top +
-              40})`}
+            transform={`translate(0, ${
+              height - margin.bottom - margin.top + 40
+            })`}
           >
             <rect
               ref={sliderRef}
