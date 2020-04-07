@@ -170,6 +170,7 @@ const Card = connect(null, {
   deleteComment: (id) => ({ type: "comment/deleteComment", payload: { id } }),
   setTop: (id) => ({ type: "comment/setTop", payload: { id } }),
   setShow: (id) => ({ type: "comment/setShow", payload: { id } }),
+  readMore: (id) => ({ type: "comment/readMore", payload: { id } }),
 })(
   ({
     id,
@@ -187,13 +188,19 @@ const Card = connect(null, {
     setTop,
     preview,
     setShow,
+    readMore,
   }) => {
     const [showDelete, setShowDelete] = useState(false);
     const avatarColor = () =>
       schemeTableau10[str2num(author) % schemeTableau10.length];
     return (
       <Wrapper>
-        <CardContainer onClick={() => window.open(url)}>
+        <CardContainer
+          onClick={() => {
+            window.open(url);
+            readMore(id);
+          }}
+        >
           {loading ? (
             <Skeleton avatar />
           ) : (

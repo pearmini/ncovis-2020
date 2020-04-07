@@ -61,14 +61,22 @@ function NewsPanel({
   getNewsData,
   getData,
   loading,
-  range
+  range,
+  countries,
+  selectedCountries,
+  setSelectedCountries,
 }) {
   const [selectedRegion, setSelectedRegion] = useState("湖北");
   const [selectedType, setSelectedType] = useState("confirmed");
+  const [selectedRange, setSelectedRange] = useState("china");
+  const ranges = [
+    { name: "全世界", key: "world" },
+    { name: "全中国", key: "china" },
+  ];
   const types = [
     { name: "确诊", key: "confirmed" },
     { name: "治愈", key: "cured" },
-    { name: "死亡", key: "dead" }
+    { name: "死亡", key: "dead" },
   ];
   const newsByDate = newsByRegion.get(selectedRegion);
   const news = newsByDate && newsByDate.get(selectedDate);
@@ -77,14 +85,14 @@ function NewsPanel({
     data: words,
     loading,
     selectedDate,
-    selectedRegion
+    selectedRegion,
   };
 
   const pieProps = {
     loading,
     data: tags,
     selectedDate,
-    selectedRegion
+    selectedRegion,
   };
 
   const treeProps = {
@@ -96,7 +104,7 @@ function NewsPanel({
     setSelectedRegion,
     selectedType,
     loading,
-    dataByRegion
+    dataByRegion,
   };
 
   function disabledDate(current) {
@@ -164,17 +172,53 @@ function NewsPanel({
       <Control>
         <div>
           <span>
+            <b>范围</b>
+          </span>
+          &ensp;
+          <Select
+            value={selectedRange}
+            onChange={(value) => setSelectedRange(value)}
+          >
+            {ranges.map((d) => (
+              <Option key={d.key}>{d.name}</Option>
+            ))}
+          </Select>
+        </div>
+        &emsp;
+        <div>
+          <span>
             <b>种类</b>
           </span>
           &ensp;
           <Select
             value={selectedType}
-            onChange={value => setSelectedType(value)}
+            onChange={(value) => setSelectedType(value)}
           >
-            {types.map(d => (
+            {types.map((d) => (
               <Option key={d.key}>{d.name}</Option>
             ))}
           </Select>
+          {selectedRange === "world" && (
+            <>
+              &ensp;&ensp;
+              <span>
+                <b>查看的国家</b>
+              </span>
+              &ensp;
+              <Select
+                mode="tags"
+                value={selectedCountries}
+                onChange={(keys) => setSelectedCountries(keys)}
+                style={{
+                  minWidth: 200,
+                }}
+              >
+                {countries.map((d) => (
+                  <Option key={d}>{d}</Option>
+                ))}
+              </Select>
+            </>
+          )}
         </div>
       </Control>
       <Row>
@@ -227,17 +271,21 @@ function NewsPanel({
 export default connect(
   ({ news, loading }) => ({
     ...news,
-    loading: loading.models.news
+    loading: loading.models.news,
   }),
   {
-    setSelectedDate: time => ({
+    setSelectedDate: (time) => ({
       type: "news/setSelectedDate",
-      payload: time
+      payload: time,
     }),
     getNewsData: (region, date) => ({
       type: "news/getNewsData",
-      payload: { region, date }
+      payload: { region, date },
     }),
-    getData: () => ({ type: "news/getData" })
+    getData: () => ({ type: "news/getData" }),
+    setSelectedCountries: (keys) => ({
+      type: "news/setSelectedCountries",
+      payload: keys,
+    }),
   }
 )(NewsPanel);

@@ -9,7 +9,7 @@ import "array-flat-polyfill";
 
 const d3 = {
   ...d3All,
-  ...d3Array
+  ...d3Array,
 };
 
 const cache = new InMemoryCache({});
@@ -17,13 +17,13 @@ const cache = new InMemoryCache({});
 (async () =>
   await persistCache({
     cache,
-    storage: window.localStorage
+    storage: window.localStorage,
   }))();
 
 const client = new ApolloClient({
   cache,
   uri:
-    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS"
+    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS",
 });
 
 function getNcov() {
@@ -38,7 +38,7 @@ function getNcov() {
           region
         }
       }
-    `
+    `,
   });
 }
 
@@ -76,7 +76,7 @@ function getNews(region, date) {
           }
         }
       }
-    `
+    `,
   });
 }
 
@@ -87,9 +87,15 @@ export default {
     selectedDate: "",
     range: [],
     newsByRegion: new Map(),
-    dataByDate: new Map()
+    dataByDate: new Map(),
+    countries: ["中国", "美国", "英国"],
+    selectedCountries: ["中国"],
   },
   reducers: {
+    setSelectedCountries(state, action) {
+      const keys = action.payload;
+      return { ...state, selectedCountries: keys };
+    },
     init: (state, action) => ({ ...state, ...action.payload }),
     addNews: (state, action) => {
       const { region, dataByDate } = action.payload;
@@ -99,8 +105,8 @@ export default {
     },
     setSelectedDate: (state, action) => ({
       ...state,
-      selectedDate: action.payload
-    })
+      selectedDate: action.payload,
+    }),
   },
   effects: {
     *getNewsData(action, { call, put }) {
@@ -113,13 +119,13 @@ export default {
           tags,
           words: {
             keywords,
-            fillingWords
-          }
+            fillingWords,
+          },
         };
         const dataByDate = new Map([[date, data]]);
         yield put({
           type: "addNews",
-          payload: { region, dataByDate }
+          payload: { region, dataByDate },
         });
       } catch (e) {
         console.error(e);
@@ -133,50 +139,50 @@ export default {
           dataByRegion = d3.rollup(
             data,
             ([d]) => d,
-            d => d.region,
-            d => d.date
+            (d) => d.region,
+            (d) => d.date
           ),
-          range = d3.extent(data, d => new Date(d.date)),
+          range = d3.extent(data, (d) => new Date(d.date)),
           dataByDate = d3.rollup(
             data,
-            data =>
-              data.map(d => ({
+            (data) =>
+              data.map((d) => ({
                 region: d.region,
-                data: d.data
+                data: d.data,
               })),
-            d => d.date
+            (d) => d.date
           ),
           selectedDate = "2020-03-27";
 
         yield put({
           type: "init",
-          payload: { dataByRegion, selectedDate, range, dataByDate }
+          payload: { dataByRegion, selectedDate, range, dataByDate },
         });
 
         function preprocess(data) {
-          const days = Array.from(new Set(data.map(d => d.date)));
+          const days = Array.from(new Set(data.map((d) => d.date)));
           const root = d3.hierarchy(regionTree);
           const regionvalues = d3
             .rollups(
               data,
               ([d]) => d,
-              d => d.region,
-              d => d.date
+              (d) => d.region,
+              (d) => d.date
             )
             .filter(([region]) => region !== "中国") // 这里有点奇怪
             .map(([region, data]) => [
               region,
-              data.sort((a, b) => new Date(a[0]) - new Date(b[0]))
+              data.sort((a, b) => new Date(a[0]) - new Date(b[0])),
             ])
             .map(([region, data]) => [
               region,
-              days.map(d => interpolateValues(data, d))
+              days.map((d) => interpolateValues(data, d)),
             ]);
 
-          root.eachAfter(node => {
+          root.eachAfter((node) => {
             if (!node.children) return;
             const newRegion = sum(
-              node.children.map(d => d.data.title),
+              node.children.map((d) => d.data.title),
               regionvalues,
               node.data.title,
               days
@@ -197,15 +203,15 @@ export default {
               data: {
                 confirmed: a[1].confirmed,
                 dead: a[1].dead,
-                cured: a[1].cured
-              }
+                cured: a[1].cured,
+              },
             };
           const b = values[i - 1],
             t =
               (new Date(date) - new Date(a[0])) /
               (new Date(b[0]) - new Date(a[0]));
 
-          const interpolate = key =>
+          const interpolate = (key) =>
             Math.ceil(a[1][key] * (1 - t) + b[1][key] * t);
           return {
             region: b[1].region,
@@ -213,26 +219,26 @@ export default {
             data: {
               confirmed: interpolate("confirmed"),
               dead: interpolate("dead"),
-              cured: interpolate("cured")
-            }
+              cured: interpolate("cured"),
+            },
           };
         }
 
         function sum(regions, values, title, days) {
-          const data = days.map(day => ({
+          const data = days.map((day) => ({
             region: title,
             date: day,
             data: {
               confirmed: 0,
               cured: 0,
-              dead: 0
-            }
+              dead: 0,
+            },
           }));
 
           const dataByDate = d3.rollup(
             data,
             ([d]) => d,
-            d => d.date
+            (d) => d.date
           );
           for (let r of regions) {
             const [, value] = values.find(([region]) => region === r);
@@ -248,6 +254,6 @@ export default {
       } catch (e) {
         console.error(e);
       }
-    }
-  }
+    },
+  },
 };

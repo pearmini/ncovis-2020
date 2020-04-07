@@ -140,7 +140,6 @@ function Card({
   const ref = useRef(null);
   const { width, height } = useSize(ref);
   const [zoom, setZoom] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const [more, setMore] = useState(false);
   const [pop, setPop] = useState(false);
 
@@ -169,11 +168,6 @@ function Card({
         show={show}
         {...rest}
         zoom={zoom}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => {
-          setHovered(false);
-          setPop(false);
-        }}
         onClick={() => setPop(false)}
       >
         {loading ? (

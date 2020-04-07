@@ -67,6 +67,14 @@ export default {
     setData(state, action) {
       return { ...state, ...action.payload };
     },
+    readMore(state, action) {
+      const { id } = action.payload;
+      const data = state.data.slice();
+      const c = data.find((d) => d.id === id);
+      c && c.reading++;
+      // 同步数据
+      return { ...state, data };
+    },
     addComment(state, action) {
       const { data } = state;
       const c = {
@@ -108,7 +116,7 @@ export default {
 
       // 同步数据
       return { ...state, data };
-    }
+    },
   },
   effects: {
     *getData(action, { call, put }) {
