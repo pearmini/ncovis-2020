@@ -3,7 +3,7 @@ import Svg from "./Svg";
 import * as d3 from "d3";
 import mouse from "../utils/mouse";
 import Tooltip from "./Tooltip";
-export default function({
+export default function ({
   loading,
   dataByDate,
   selectedTime,
@@ -12,14 +12,14 @@ export default function({
   setSelectedTime,
   focus,
   setFocus,
-  running
+  running,
 }) {
   const ref = useRef(null);
   const width = 1200,
     height = 350,
     margin = { top: 75, right: 40, bottom: 25, left: 90 },
     formatDate = d3.timeFormat("%x"),
-    bisect = d3.bisector(d => d.date).left;
+    bisect = d3.bisector((d) => d.date).left;
 
   const secondLevelSet = new Set([
     "华北地区",
@@ -29,7 +29,7 @@ export default function({
     "华中地区",
     "西南地区",
     "华南地区",
-    "港澳台地区"
+    "港澳台地区",
   ]);
 
   const [highlight, setHighlight] = useState(""),
@@ -49,14 +49,14 @@ export default function({
                 return region !== "中国" && !secondLevelSet.has(region);
               }
             })
-            .reduce((obj, { region, data }) => ((obj[region] = data), obj), {})
+            .reduce((obj, { region, data }) => ((obj[region] = data), obj), {}),
         })),
       [dataByDate, selectedLevel]
     ),
     data = useMemo(
       () =>
         all
-          .map(d =>
+          .map((d) =>
             Object.keys(d).reduce((obj, key) => {
               if (key === "date") {
                 obj[key] = d[key];
@@ -70,7 +70,7 @@ export default function({
       [all, selectedType, focus]
     ),
     [first] = data,
-    keys = first ? Object.keys(first).filter(d => d !== "date") : [],
+    keys = first ? Object.keys(first).filter((d) => d !== "date") : [],
     cnt = 2,
     tipCnt = selectedLevel === "second" ? 4 : 6,
     legendWidth = selectedLevel === "second" ? 75 : 55,
@@ -85,19 +85,19 @@ export default function({
 
   const x = d3
     .scaleTime()
-    .domain(d3.extent(data, d => new Date(d.date)))
+    .domain(d3.extent(data, (d) => new Date(d.date)))
     .range([0, width - margin.right - margin.left]);
 
   const y = d3
     .scaleLinear()
-    .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
+    .domain([0, d3.max(series, (d) => d3.max(d, (d) => d[1]))])
     .nice()
     .range([height - margin.bottom - margin.top, 0]);
 
-  const legendX = index => ((index / cnt) | 0) * legendWidth;
-  const legendY = index => (index % cnt) * legendHeight;
-  const tipX = index => ((index / tipCnt) | 0) * tw;
-  const tipY = index => (index % tipCnt) * th;
+  const legendX = (index) => ((index / cnt) | 0) * legendWidth;
+  const legendY = (index) => (index % cnt) * legendHeight;
+  const tipX = (index) => ((index / tipCnt) | 0) * tw;
+  const tipY = (index) => (index % tipCnt) * th;
 
   const lineX = () => {
     if (running) return x(new Date(selectedTime));
@@ -107,9 +107,9 @@ export default function({
 
   const area = d3
     .area()
-    .x(d => x(d.data.date))
-    .y0(d => y(d[0]))
-    .y1(d => y(d[1]));
+    .x((d) => x(d.data.date))
+    .y0((d) => y(d[0]))
+    .y1((d) => y(d[1]));
 
   const colorScale =
     keys.length === 1
@@ -119,10 +119,10 @@ export default function({
           .domain(keys)
           .range(d3.quantize(d3.interpolateSpectral, keys.length).reverse());
 
-  const color = key =>
+  const color = (key) =>
     highlight === "" || key === highlight ? colorScale(key) : disableColor;
 
-  const stroke = key =>
+  const stroke = (key) =>
     selectedLevel === "top" ? d3.color(color(key)).darker() : "none";
 
   const introduction = (
@@ -163,16 +163,16 @@ export default function({
     return (
       !data ||
       data.length === 0 ||
-      data.some(d =>
-        Object.keys(d).some(key => d[key] === undefined || isNaN(d[key]))
+      data.some((d) =>
+        Object.keys(d).some((key) => d[key] === undefined || isNaN(d[key]))
       )
     );
   }
 
   useEffect(() => {
     const xAxis = d3.axisBottom(x);
-    const yAxis = g =>
-      g.call(d3.axisLeft(y)).call(g => g.select(".domain").remove());
+    const yAxis = (g) =>
+      g.call(d3.axisLeft(y)).call((g) => g.select(".domain").remove());
     d3.select(".area-xAxis").call(xAxis);
     d3.select(".area-yAxis").call(yAxis);
   }, [data]);
@@ -205,7 +205,7 @@ export default function({
               onClick={handleChangeSelectedTime}
               onMouseOver={() => highlight !== "" && setHighlight("")}
             >
-              {series.map(s => (
+              {series.map((s) => (
                 <path
                   key={s.key}
                   fill={color(s.key)}
@@ -237,7 +237,7 @@ export default function({
                   key={key}
                   transform={`translate(${legendX(index)}, ${legendY(index)})`}
                   onMouseEnter={() => setHighlight(key)}
-                  onClick={e => {
+                  onClick={(e) => {
                     setFocus(key);
                     setHighlight("");
                     e.stopPropagation();
@@ -256,7 +256,7 @@ export default function({
                   0,
                   0,
                   width - margin.left - margin.right,
-                  height - margin.top - margin.bottom
+                  height - margin.top - margin.bottom,
                 ]}
                 size={[tipW, tipH]}
                 pos={[tip.x, 10]}
@@ -277,7 +277,7 @@ export default function({
                     <g transform={`translate(10, 40)`}>
                       {Object.keys(tip)
                         .filter(
-                          d =>
+                          (d) =>
                             d !== "time" &&
                             d !== "x" &&
                             d !== "y" &&

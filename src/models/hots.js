@@ -9,7 +9,7 @@ import "array-flat-polyfill";
 
 const d3 = {
   ...d3All,
-  ...d3Array
+  ...d3Array,
 };
 
 const cache = new InMemoryCache({});
@@ -18,13 +18,13 @@ const cache = new InMemoryCache({});
   await persistCache({
     cache,
     storage: window.localStorage,
-    maxSize: false
+    maxSize: false,
   }))();
 
 const client = new ApolloClient({
   cache,
   uri:
-    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS"
+    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS",
 });
 
 function getHots({ name, from, limit = 10 }) {
@@ -52,7 +52,7 @@ function getHots({ name, from, limit = 10 }) {
           }
         }
       }
-    `
+    `,
   });
 }
 
@@ -64,7 +64,7 @@ function getTimeRange(platform = "zhihu") {
           time
         }
       }
-    }`
+    }`,
   });
 }
 
@@ -87,7 +87,7 @@ function getWordsOfTopics({ name, time }) {
           }
         }
       }
-    `
+    `,
   });
 }
 
@@ -105,27 +105,27 @@ function words(data, n = 20) {
     "事情",
     "大家",
     "还有",
-    "看到"
+    "看到",
   ]);
   return data
-    .map(d => ({
+    .map((d) => ({
       text: d.name,
-      value: d.weight || d.value
+      value: d.weight || d.value,
     }))
-    .filter(d => !w.has(d.text))
+    .filter((d) => !w.has(d.text))
     .sort((a, b) => b.value - a.value)
     .slice(0, n);
 }
 
 function computeWordCloud(data, get) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     cloud()
       .size([900, 600])
       .words(data)
       .padding(5)
       .rotate(0)
-      .fontSize(d => Math.sqrt(d.value) * 80)
-      .on("end", words => resolve(get(words)))
+      .fontSize((d) => Math.sqrt(d.value) * 80)
+      .on("end", (words) => resolve(get(words)))
       .start();
   });
 }
@@ -133,9 +133,9 @@ function computeWordCloud(data, get) {
 function computePreFramesWordsCloud(data) {
   return Promise.all(
     data.map(({ keywords, title }) =>
-      computeWordCloud(words(keywords), words => ({
+      computeWordCloud(words(keywords), (words) => ({
         keywords: words,
-        title
+        title,
       }))
     )
   );
@@ -143,19 +143,21 @@ function computePreFramesWordsCloud(data) {
 
 function computeFramesWordCloud(data) {
   return Promise.all(
-    data.map(([date, d]) => computeWordCloud(words(d), words => [date, words]))
+    data.map(([date, d]) =>
+      computeWordCloud(words(d), (words) => [date, words])
+    )
   );
 }
 
 function preprocess(raw, start, interval) {
   const data = raw.map(({ time, ...rest }) => ({ time: time * 1000, ...rest }));
-  const range = d3.extent(data, d => d.time);
+  const range = d3.extent(data, (d) => d.time);
   const begin = start + (((range[0] - start) / interval) | 0) * interval;
   const end = begin + Math.ceil((range[1] - begin) / interval) * interval + 1;
   const listTicks = d3.range(begin, end, interval);
   const wordTicks = d3.range(begin, end, interval * 5);
-  const words = new Set(data.flatMap(d => d.keywords.map(d => d.name)));
-  const topics = new Set(data.flatMap(d => d.topics.map(d => d.title)));
+  const words = new Set(data.flatMap((d) => d.keywords.map((d) => d.name)));
+  const topics = new Set(data.flatMap((d) => d.topics.map((d) => d.title)));
 
   const datewords = Array.from(
     d3.rollup(
@@ -164,9 +166,9 @@ function preprocess(raw, start, interval) {
         d3.rollup(
           d.keywords,
           ([{ weight }]) => weight,
-          d => d.name
+          (d) => d.name
         ),
-      d => d.time
+      (d) => d.time
     )
   );
 
@@ -177,45 +179,47 @@ function preprocess(raw, start, interval) {
         d3.rollup(
           d.topics,
           ([{ heat }]) => heat,
-          d => d.title
+          (d) => d.title
         ),
-      d => d.time
+      (d) => d.time
     )
   ).sort(([a], [b]) => a - b);
 
   return {
     listKeyframes: listTicks
-      .map(tick => interploate(datetopics, topics, tick))
+      .map((tick) => interploate(datetopics, topics, tick))
       .map(([date, data]) => [
         date,
-        data.map((d, index) => ({ ...d, rank: index })).slice(0, 10)
+        data.map((d, index) => ({ ...d, rank: index })).slice(0, 10),
       ]),
-    wordsKeyframes: wordTicks.map(tick => interploate(datewords, words, tick))
+    wordsKeyframes: wordTicks.map((tick) =>
+      interploate(datewords, words, tick)
+    ),
   };
 }
 
 function interploate(data, names, time) {
-  const bisect = d3.bisector(d => d[0]).left;
+  const bisect = d3.bisector((d) => d[0]).left;
   const i = bisect(data, time, 0, data.length - 1),
     a = data[i];
-  if (!i) return [time, interpolateValues(names, key => a[1].get(key))];
+  if (!i) return [time, interpolateValues(names, (key) => a[1].get(key))];
 
   const b = data[i - 1],
     t = (time - a[0]) / (b[0] - a[0]);
   return [
     time,
-    interpolateValues(names, key => {
+    interpolateValues(names, (key) => {
       const v1 = a[1].get(key) || 0;
       const v2 = b[1].get(key) || 0;
       return v1 * (1 - t) + v2 * t;
-    })
+    }),
   ];
 }
 
 function interpolateValues(names, value) {
-  const data = Array.from(names, name => ({
+  const data = Array.from(names, (name) => ({
     name,
-    value: value(name) || 0
+    value: value(name) || 0,
   }));
   data.sort((a, b) => d3.descending(a.value, b.value));
   return data;
@@ -227,7 +231,7 @@ function unique(data, key) {
       if (index === 0 || key(data[index - 1]) !== key(d)) return [...d, true];
       else return [...d, false];
     })
-    .filter(d => d[2])
+    .filter((d) => d[2])
     .map(([date, data]) => [date, data]);
 }
 
@@ -240,9 +244,15 @@ export default {
     selectedTime: null,
     wordsByTime: d3.map(),
     selectedWords: [],
-    loading: false
+    loading: false,
+    countries: ["中国", "美国", "英国"],
+    selectedCountries: ["中国"],
   },
   reducers: {
+    setSelectedCountries(state, action) {
+      const keys = action.payload;
+      return { ...state, selectedCountries: keys };
+    },
     addWords: (state, action) => {
       const { words, time } = action.payload;
       const { wordsByTime } = state;
@@ -251,7 +261,7 @@ export default {
     },
     setSelectedWords: (state, action) => ({
       ...state,
-      selectedWords: action.payload
+      selectedWords: action.payload,
     }),
     addTimeRange: (state, action) => {
       const { range, name } = action.payload;
@@ -266,14 +276,14 @@ export default {
       const oldRange = timeByName.get(name);
       const newRange = oldRange.map((d, i) => ({
         ...d,
-        request: i >= from && i < to ? true : d.request
+        request: i >= from && i < to ? true : d.request,
       }));
       timeByName.set(name, newRange);
       return { ...state, timeByName };
     },
     setSelectedTime: (state, action) => ({
       ...state,
-      selectedTime: action.payload
+      selectedTime: action.payload,
     }),
     addFrames: (state, action) => {
       const { name, listKeyframes, cloudsKeyframes } = action.payload;
@@ -282,30 +292,30 @@ export default {
       if (!value) {
         dataByName.set(name, {
           listKeyframes,
-          cloudsKeyframes
+          cloudsKeyframes,
         });
       } else {
         const newListKeyframes = unique(
           [...value.listKeyframes, ...listKeyframes].sort(
             (a, b) => a[0] - b[0]
           ),
-          d => d[0]
+          (d) => d[0]
         );
         const newCloudsKeyframes = unique(
           [...value.cloudsKeyframes, ...cloudsKeyframes].sort(
             (a, b) => a[0] - b[0]
           ),
-          d => d[0]
+          (d) => d[0]
         );
 
         dataByName.set(name, {
           listKeyframes: newListKeyframes,
-          cloudsKeyframes: newCloudsKeyframes
+          cloudsKeyframes: newCloudsKeyframes,
         });
       }
 
       return { ...state, dataByName };
-    }
+    },
   },
   effects: {
     *getWords(action, { call, put }) {
@@ -314,7 +324,7 @@ export default {
         const data = yield call(getWordsOfTopics, { name, time });
         const words = data.data[name].data[0].topics;
         const wordsWithLayout = yield call(computePreFramesWordsCloud, words);
-        const selectedWords = wordsWithLayout.find(d => d.title === title);
+        const selectedWords = wordsWithLayout.find((d) => d.title === title);
         const keywords = selectedWords ? selectedWords.keywords : [];
         yield put({ type: "addWords", payload: { wordsWithLayout, time } });
         yield put({ type: "setSelectedWords", payload: keywords });
@@ -328,7 +338,7 @@ export default {
         const timeData = yield call(getTimeRange, name);
         const range = timeData.data[name].data
           .map(({ time }) => time * 1000)
-          .map(d => ({ time: d, request: false }))
+          .map((d) => ({ time: d, request: false }))
           .sort((a, b) => a.time - b.time);
 
         yield put({ type: "addTimeRange", payload: { range, name } });
@@ -342,7 +352,7 @@ export default {
         const result = yield call(getHots, {
           name,
           from: ((tick.time / 1000) | 0) - 1, // 这里的 from 是大于当前时刻，所以需要减少 1
-          limit: limit + 1
+          limit: limit + 1,
         });
         const data = result.data[name].data;
         const { listKeyframes, wordsKeyframes } = preprocess(
@@ -355,15 +365,14 @@ export default {
           wordsKeyframes
         );
 
-        // console.log(listKeyframes, wordsKeyframes);
         // 加入关键帧
         yield put({
           type: "addFrames",
-          payload: { name, listKeyframes, cloudsKeyframes }
+          payload: { name, listKeyframes, cloudsKeyframes },
         });
       } catch (e) {
         console.error(e);
       }
-    }
-  }
+    },
+  },
 };

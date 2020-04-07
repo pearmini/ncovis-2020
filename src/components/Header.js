@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Button, Dropdown, Menu } from "antd";
+import { connect } from "dva";
 
 const Container = styled.div`
   height: 56px;
   line-height: 56px;
-  background: ${props => props.theme.header};
+  background: ${(props) => props.theme.header};
   position: fixed;
   width: 100%;
   top: 0px;
@@ -26,24 +27,24 @@ const Lab = styled.a`
   font-size: 16px;
   margin-left: 10px;
   font-family: "webfont" !important;
-  color: ${props => props.theme.font};
+  color: ${(props) => props.theme.font};
   text-decoration: none;
 
   &:hover {
-    color: ${props => props.theme.font};
+    color: ${(props) => props.theme.font};
   }
 `;
 
 const HeaderWrapper = styled.header`
   margin: 0 auto;
   max-width: 1200px;
-  background: ${props => props.theme.header};
+  background: ${(props) => props.theme.header};
   width: 90%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: ${props => props.theme.font};
+  color: ${(props) => props.theme.font};
 `;
 
 const Nav = styled.nav`
@@ -56,7 +57,7 @@ const Nav = styled.nav`
     list-style-type: none;
   }
   & a {
-    color: ${props => props.theme.font};
+    color: ${(props) => props.theme.font};
     font-weight: bold;
     padding: 0.5em 0;
   }
@@ -66,7 +67,7 @@ const Nav = styled.nav`
   }
 
   @media (max-width: 700px) {
-    display: ${props => (props.show ? "block" : "none")};
+    display: ${(props) => (props.show ? "block" : "none")};
     position: absolute;
     top: 100%;
     right: 0;
@@ -84,7 +85,7 @@ const Nav = styled.nav`
 
 const ToggleButton = styled(Button)`
   display: none;
-  transform: rotate(${props => props.angle}deg);
+  transform: rotate(${(props) => props.angle}deg);
   @media (max-width: 700px) {
     display: block;
   }
@@ -100,30 +101,29 @@ const Overlayer = styled.div`
   z-index: 2;
 `;
 
-function Header() {
+function Header({ setOpenForm }) {
   const [show, setShow] = useState(false);
   const navs = [
     {
       name: "概览",
-      id: "overview"
+      id: "overview",
     },
     {
       name: "介绍",
-      id: "introduction"
+      id: "introduction",
     },
     {
       name: "舆论可视化",
-      id: "hots"
+      id: "hots",
     },
     {
       name: "新闻可视化",
-      id: "news"
-    }
-
-    // {
-    //   name: "发现",
-    //   id: "story"
-    // }
+      id: "news",
+    },
+    {
+      name: "发现",
+      id: "story",
+    },
   ];
 
   const menu = (
@@ -169,7 +169,7 @@ function Header() {
           </Left>
           <Nav show={show}>
             <ul>
-              {navs.map(nav => (
+              {navs.map((nav) => (
                 <li key={nav.name}>
                   <a onClick={() => setShow(false)} href={"#" + nav.id}>
                     {nav.name}
@@ -177,8 +177,18 @@ function Header() {
                 </li>
               ))}
               <li>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenForm(true);
+                  }}
+                >
+                  投稿
+                </a>
+              </li>
+              <li>
                 <Dropdown overlay={menu}>
-                  <a onClick={e => e.preventDefault()}>联系我们</a>
+                  <a onClick={(e) => e.preventDefault()}>联系我们</a>
                 </Dropdown>
               </li>
             </ul>
@@ -195,4 +205,9 @@ function Header() {
     </>
   );
 }
-export default Header;
+export default connect(null, {
+  setOpenForm: (value) => ({
+    type: "comment/setOpenForm",
+    payload: { value },
+  }),
+})(Header);

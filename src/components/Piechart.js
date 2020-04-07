@@ -55,7 +55,6 @@ export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
     </div>
   );
 
-  console.log(arcs);
   return (
     <Svg
       viewBox={[0, 0, width, height]}

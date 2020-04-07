@@ -8,6 +8,7 @@ import HotsPanel from "./components/HotsPanel";
 import NewsPanel from "./components/NewsPanel";
 import DiscoveryPanel from "./components/DiscoveryPanel";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 const Content = styled.div`
   margin: 0 auto;
@@ -19,7 +20,7 @@ function App() {
   const theme = {
     header: "black",
     content: "#f9f9f9",
-    font: "white"
+    font: "white",
   };
   return (
     <ThemeProvider theme={theme}>
@@ -29,8 +30,9 @@ function App() {
         <IntroductionPanel />
         <HotsPanel />
         <NewsPanel />
-        {/* <DiscoveryPanel /> */}
+        <DiscoveryPanel />
       </Content>
+      <Footer />
     </ThemeProvider>
   );
 }
