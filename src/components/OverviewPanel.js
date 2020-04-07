@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useWindowSize } from "react-use";
 import chinaURL from "../assets/images/china.png";
 import zhihuURL from "../assets/images/zhihu.png";
 import { connect } from "dva";
+import { Tabs } from "antd";
+
+const { TabPane } = Tabs;
 
 const Container = styled.div`
   padding: 56px 0;
   position: relative;
-  height: ${props => props.height}px;
+  height: ${(props) => props.height}px;
   width: 100%;
   justify-content: space-around;
   align-items: center;
@@ -78,7 +81,7 @@ const Time = styled.div`
 const Box = styled.div`
   background: white;
   border-radius: 8px;
-  padding: 0 1em;
+  padding: 0.5em 1em;
   width: 500px;
   max-width: 100%;
 `;
@@ -101,13 +104,13 @@ const Change = styled.div`
   font-size: 12px;
   & span {
     margin-left: 2px;
-    color: ${props => props.color};
+    color: ${(props) => props.color};
   }
 `;
 
 const Value = styled.div`
   font-size: 19px;
-  color: ${props => props.color};
+  color: ${(props) => props.color};
   font-weight: bold;
 `;
 
@@ -127,16 +130,17 @@ const DashBoard = styled.div`
   width: 100%;
 `;
 
-function Introduction({ total = [], getTotal, loading }) {
+function Introduction({ total = [], getTotal }) {
   const { height } = useWindowSize();
-  const formate = date =>
+  const [tab, setTab] = useState("全中国");
+  const formate = (date) =>
     `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 
   const colorByName = {
     累计确诊: "#F9345e",
     累计死亡: "#6236ff",
     累计治愈: "#1cb142",
-    现存确诊: "#fa6400"
+    现存确诊: "#fa6400",
   };
 
   useEffect(() => {
@@ -148,24 +152,52 @@ function Introduction({ total = [], getTotal, loading }) {
       <An id="overview" />
       <DashBoard>
         <Title>COVID-19 舆论新闻可视化</Title>
-        <Box>
-          <CardContainer>
-            {total.data.map(({ name, value, change }) => (
-              <Card key={name}>
-                <Change color={colorByName[name]}>
-                  {change >= 0 ? "新增" : "减少"}
-                  <span>
-                    {change >= 0 ? "+" : "-"}
-                    {Math.abs(change)}
-                  </span>
-                </Change>
-                <Value color={colorByName[name]}>{value}</Value>
-                <Name>全国{name}</Name>
-              </Card>
-            ))}
-          </CardContainer>
-          <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
-        </Box>
+        <Tabs
+          onChange={setTab}
+          activeKey={tab}
+          style={{ width: 500, maxWidth: "100%" }}
+        >
+          <TabPane tab="全世界" key="全世界">
+            <Box>
+              <CardContainer>
+                {total.data.map(({ name, value, change }) => (
+                  <Card key={name}>
+                    <Change color={colorByName[name]}>
+                      {change >= 0 ? "新增" : "减少"}
+                      <span>
+                        {change >= 0 ? "+" : "-"}
+                        {Math.abs(change)}
+                      </span>
+                    </Change>
+                    <Value color={colorByName[name]}>{value}</Value>
+                    <Name>全国{name}</Name>
+                  </Card>
+                ))}
+              </CardContainer>
+              <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
+            </Box>
+          </TabPane>
+          <TabPane tab="全中国" key="全中国">
+            <Box>
+              <CardContainer>
+                {total.data.map(({ name, value, change }) => (
+                  <Card key={name}>
+                    <Change color={colorByName[name]}>
+                      {change >= 0 ? "新增" : "减少"}
+                      <span>
+                        {change >= 0 ? "+" : "-"}
+                        {Math.abs(change)}
+                      </span>
+                    </Change>
+                    <Value color={colorByName[name]}>{value}</Value>
+                    <Name>全国{name}</Name>
+                  </Card>
+                ))}
+              </CardContainer>
+              <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
+            </Box>
+          </TabPane>
+        </Tabs>
       </DashBoard>
       <Row>
         <Zhihu src={zhihuURL} />
@@ -177,9 +209,9 @@ function Introduction({ total = [], getTotal, loading }) {
 export default connect(
   ({ total, loading }) => ({
     total,
-    loading: loading.models.total
+    loading: loading.models.total,
   }),
   {
-    getTotal: () => ({ type: "total/getData" })
+    getTotal: () => ({ type: "total/getData" }),
   }
 )(Introduction);
