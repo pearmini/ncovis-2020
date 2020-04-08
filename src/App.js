@@ -30,9 +30,9 @@ function App() {
         <IntroductionPanel />
         <HotsPanel />
         <NewsPanel />
-        <DiscoveryPanel />
+        {/* <DiscoveryPanel /> */}
       </Content>
-      <Footer />
+      {/* <Footer /> */}
     </ThemeProvider>
   );
 }

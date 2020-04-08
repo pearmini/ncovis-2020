@@ -137,7 +137,7 @@ function HotsPanel({
     selectedTime,
     color: barColor.current,
     running,
-    loading: loadingHots,
+    loading: loadingHots || loadingNews,
     selectedName: "知乎",
     showWordsOfTopic,
     hideWordsOfTopic: () => setSelectedTopic(null),
@@ -154,7 +154,7 @@ function HotsPanel({
     selectedTime,
     color: barColor.current(selectedTopic),
     colorScale: wordColor.current,
-    loading: loadingHots,
+    loading: loadingHots || loadingNews,
     running: running || pause,
     selectedName: "知乎",
   };
@@ -287,6 +287,10 @@ function HotsPanel({
       return;
     }
 
+    if (selectedTime === null && totalTimeRange && totalTimeRange[0] !== 0) {
+      setSelectedTime(totalTimeRange[0]);
+    }
+
     const index = search(selectedTime),
       tick = hotTimeRange[index];
     if (tick.request) return;
@@ -375,7 +379,7 @@ function HotsPanel({
                   <Option key={d.key}>{d.name}</Option>
                 ))}
               </Select>
-              {selectedLevel === "top" && (
+              {/* {selectedLevel === "top" && (
                 <>
                   &ensp;&ensp;
                   <span>
@@ -395,7 +399,7 @@ function HotsPanel({
                     ))}
                   </Select>
                 </>
-              )}
+              )} */}
             </div>
           </Control>
           <Areachart {...areaPros} />

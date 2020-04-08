@@ -152,31 +152,31 @@ function Introduction({ total = [], getTotal }) {
       <An id="overview" />
       <DashBoard>
         <Title>COVID-19 舆论新闻可视化</Title>
-        <Tabs
+        {/* <Tabs
           onChange={setTab}
           activeKey={tab}
           style={{ width: 500, maxWidth: "100%" }}
         >
-          <TabPane tab="全世界" key="全世界">
-            <Box>
-              <CardContainer>
-                {total.data.map(({ name, value, change }) => (
-                  <Card key={name}>
-                    <Change color={colorByName[name]}>
-                      {change >= 0 ? "新增" : "减少"}
-                      <span>
-                        {change >= 0 ? "+" : "-"}
-                        {Math.abs(change)}
-                      </span>
-                    </Change>
-                    <Value color={colorByName[name]}>{value}</Value>
-                    <Name>全国{name}</Name>
-                  </Card>
-                ))}
-              </CardContainer>
-              <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
-            </Box>
-          </TabPane>
+          <TabPane tab="全世界" key="全世界"> */}
+        <Box>
+          <CardContainer>
+            {total.data.map(({ name, value, change }) => (
+              <Card key={name}>
+                <Change color={colorByName[name]}>
+                  {change >= 0 ? "新增" : "减少"}
+                  <span>
+                    {change >= 0 ? "+" : "-"}
+                    {Math.abs(change)}
+                  </span>
+                </Change>
+                <Value color={colorByName[name]}>{value}</Value>
+                <Name>全国{name}</Name>
+              </Card>
+            ))}
+          </CardContainer>
+          <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
+        </Box>
+        {/* </TabPane>
           <TabPane tab="全中国" key="全中国">
             <Box>
               <CardContainer>
@@ -197,7 +197,7 @@ function Introduction({ total = [], getTotal }) {
               <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
             </Box>
           </TabPane>
-        </Tabs>
+        </Tabs> */}
       </DashBoard>
       <Row>
         <Zhihu src={zhihuURL} />

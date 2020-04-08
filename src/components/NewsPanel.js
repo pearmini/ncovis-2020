@@ -170,7 +170,7 @@ function NewsPanel({
         <NewsImage src={newsImage} />
       </MyRow>
       <Control>
-        <div>
+        {/* <div>
           <span>
             <b>范围</b>
           </span>
@@ -184,7 +184,7 @@ function NewsPanel({
             ))}
           </Select>
         </div>
-        &emsp;
+        &emsp; */}
         <div>
           <span>
             <b>种类</b>
@@ -198,7 +198,7 @@ function NewsPanel({
               <Option key={d.key}>{d.name}</Option>
             ))}
           </Select>
-          {selectedRange === "world" && (
+          {/* {selectedRange === "world" && (
             <>
               &ensp;&ensp;
               <span>
@@ -218,7 +218,7 @@ function NewsPanel({
                 ))}
               </Select>
             </>
-          )}
+          )} */}
         </div>
       </Control>
       <Row>

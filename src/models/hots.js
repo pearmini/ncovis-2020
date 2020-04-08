@@ -267,8 +267,8 @@ export default {
       const { range, name } = action.payload;
       const { timeByName, selectedTime } = state;
       timeByName.set(name, range);
-      const time = selectedTime === null ? range[0].time : selectedTime;
-      return { ...state, timeByName, selectedTime: time };
+      // const time = selectedTime === null ? range[0].time : selectedTime;
+      return { ...state, timeByName};
     },
     updateDataByTime: (state, action) => {
       const { name, from, to } = action.payload;

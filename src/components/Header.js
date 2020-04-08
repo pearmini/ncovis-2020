@@ -120,10 +120,10 @@ function Header({ setOpenForm }) {
       name: "新闻可视化",
       id: "news",
     },
-    {
-      name: "发现",
-      id: "story",
-    },
+    // {
+    //   name: "发现",
+    //   id: "story",
+    // },
   ];
 
   const menu = (
@@ -176,7 +176,7 @@ function Header({ setOpenForm }) {
                   </a>
                 </li>
               ))}
-              <li>
+              {/* <li>
                 <a
                   onClick={(e) => {
                     e.preventDefault();
@@ -185,7 +185,7 @@ function Header({ setOpenForm }) {
                 >
                   投稿
                 </a>
-              </li>
+              </li> */}
               <li>
                 <Dropdown overlay={menu}>
                   <a onClick={(e) => e.preventDefault()}>联系我们</a>
