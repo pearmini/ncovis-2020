@@ -240,13 +240,9 @@ export default {
   state: {
     dataByName: d3.map(),
     timeByName: d3.map(),
-    nextCursor: "",
-    selectedTime: null,
     wordsByTime: d3.map(),
     selectedWords: [],
     loading: false,
-    countries: ["中国", "美国", "英国"],
-    selectedCountries: ["中国"],
   },
   reducers: {
     setSelectedCountries(state, action) {
@@ -265,10 +261,9 @@ export default {
     }),
     addTimeRange: (state, action) => {
       const { range, name } = action.payload;
-      const { timeByName, selectedTime } = state;
+      const { timeByName } = state;
       timeByName.set(name, range);
-      // const time = selectedTime === null ? range[0].time : selectedTime;
-      return { ...state, timeByName};
+      return { ...state, timeByName };
     },
     updateDataByTime: (state, action) => {
       const { name, from, to } = action.payload;
@@ -281,10 +276,6 @@ export default {
       timeByName.set(name, newRange);
       return { ...state, timeByName };
     },
-    setSelectedTime: (state, action) => ({
-      ...state,
-      selectedTime: action.payload,
-    }),
     addFrames: (state, action) => {
       const { name, listKeyframes, cloudsKeyframes } = action.payload;
       const { dataByName } = state;
@@ -348,6 +339,7 @@ export default {
     },
     *getData(action, { call, put }) {
       const { name, interval, tick, limit, start } = action.payload;
+      console.log(tick.time);
       try {
         const result = yield call(getHots, {
           name,

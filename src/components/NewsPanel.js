@@ -8,8 +8,9 @@ import regions from "../assets/data/region_options.json";
 import Shape from "./Shape";
 import Piechart from "./Piechart";
 import DateMap from "./DateMap";
-
 import newsImage from "../assets/images/news.jpg";
+
+import * as d3 from "d3";
 
 const { Option } = Select;
 const Container = styled.div`
@@ -20,6 +21,14 @@ const Container = styled.div`
 const Control = styled.div`
   display: flex;
   margin: 2em 0 1em 0;
+
+  @media (max-width: 700px) {
+    flex-direction: column;
+
+    & .country {
+      margin-top: 1em;
+    }
+  }
 `;
 
 const An = styled.div`
@@ -53,25 +62,42 @@ const NewsImage = styled.img`
   border-radius: 8px;
 `;
 
+function formTree(nodes) {
+  return {
+    title: "全球",
+    value: "全球",
+    children: nodes.map((d) => ({
+      title: d,
+      value: d,
+    })),
+  };
+}
+
 function NewsPanel({
   selectedDate,
   setSelectedDate,
   dataByRegion,
+  dataByDate,
   newsByRegion,
   getNewsData,
   getData,
-  loading,
+  loadingNews,
+  loadingNcov,
   range,
   countries,
   selectedCountries,
   setSelectedCountries,
+  widthData,
+  getCountryData,
+  total,
 }) {
   const [selectedRegion, setSelectedRegion] = useState("湖北");
   const [selectedType, setSelectedType] = useState("confirmed");
   const [selectedRange, setSelectedRange] = useState("china");
+  const [treeData, setTreeData] = useState(d3.hierarchy(regions));
   const ranges = [
-    { name: "全世界", key: "world" },
-    { name: "全中国", key: "china" },
+    { name: "全球", key: "world" },
+    { name: "全国", key: "china" },
   ];
   const types = [
     { name: "确诊", key: "confirmed" },
@@ -83,29 +109,55 @@ function NewsPanel({
   const { words, tags } = news || {};
   const shapeProps = {
     data: words,
-    loading,
+    loading: loadingNews || loadingNcov,
     selectedDate,
     selectedRegion,
   };
 
   const pieProps = {
-    loading,
+    loading: loadingNews || loadingNcov,
     data: tags,
     selectedDate,
     selectedRegion,
   };
 
-  const treeProps = {
+  const dateProps = {
     regions,
     range,
     selectedRegion,
     selectedDate,
     setSelectedDate,
     setSelectedRegion,
+    selectedRange,
     selectedType,
-    loading,
+    loading: loadingNcov,
     dataByRegion,
+    selectedCountries,
+    treeData,
+    setTreeData,
+    handleChangeRange,
   };
+
+  function handleCountryDataChange(keys) {
+    if (keys.length >= 30) {
+      alert("不能超过 30 个国家");
+      return;
+    }
+    const newKeys = [];
+    for (let k of keys) {
+      if (widthData.has(k)) newKeys.push(k);
+      else getCountryData(k, dataByDate, dataByRegion, total, "news");
+    }
+    setSelectedCountries("news", newKeys);
+    setTreeData(d3.hierarchy(formTree(keys)));
+  }
+
+  function handleChangeRange(value) {
+    if (value === "world")
+      setTreeData(d3.hierarchy(formTree(selectedCountries)));
+    else setTreeData(d3.hierarchy(regions));
+    setSelectedRange(value);
+  }
 
   function disabledDate(current) {
     if (range.length === 0) return true;
@@ -115,7 +167,7 @@ function NewsPanel({
   useEffect(() => {
     // 请求所有的数据
     if (!dataByRegion.size) {
-      getData();
+      getData("中国");
       return;
     }
     // 如果有日期数据且 news 数据为空的话就请求
@@ -170,22 +222,17 @@ function NewsPanel({
         <NewsImage src={newsImage} />
       </MyRow>
       <Control>
-        {/* <div>
+        <div>
           <span>
             <b>范围</b>
           </span>
           &ensp;
-          <Select
-            value={selectedRange}
-            onChange={(value) => setSelectedRange(value)}
-          >
+          <Select value={selectedRange} onChange={handleChangeRange}>
             {ranges.map((d) => (
               <Option key={d.key}>{d.name}</Option>
             ))}
           </Select>
-        </div>
-        &emsp; */}
-        <div>
+          &emsp;
           <span>
             <b>种类</b>
           </span>
@@ -198,32 +245,32 @@ function NewsPanel({
               <Option key={d.key}>{d.name}</Option>
             ))}
           </Select>
-          {/* {selectedRange === "world" && (
-            <>
-              &ensp;&ensp;
-              <span>
-                <b>查看的国家</b>
-              </span>
-              &ensp;
-              <Select
-                mode="tags"
-                value={selectedCountries}
-                onChange={(keys) => setSelectedCountries(keys)}
-                style={{
-                  minWidth: 200,
-                }}
-              >
-                {countries.map((d) => (
-                  <Option key={d}>{d}</Option>
-                ))}
-              </Select>
-            </>
-          )} */}
+          &emsp;
         </div>
+        {selectedRange === "world" && (
+          <div className="country">
+            <span>
+              <b>查看的国家</b>
+            </span>
+            &ensp;
+            <Select
+              mode="tags"
+              value={selectedCountries}
+              onChange={handleCountryDataChange}
+              style={{
+                minWidth: 250,
+              }}
+            >
+              {countries.map((d) => (
+                <Option key={d}>{d}</Option>
+              ))}
+            </Select>
+          </div>
+        )}
       </Control>
       <Row>
         <Col span={24}>
-          <DateMap {...treeProps} />
+          <DateMap {...dateProps} />
         </Col>
       </Row>
       <Control>
@@ -269,23 +316,40 @@ function NewsPanel({
   );
 }
 export default connect(
-  ({ news, loading }) => ({
-    ...news,
-    loading: loading.models.news,
+  ({ news, ncov, loading }) => ({
+    newsByRegion: news.newsByRegion,
+    range: ncov.range,
+    total: ncov.total,
+    countries: ncov.countries,
+    selectedCountries: ncov.selectedCountries.news,
+    setSelectedRange: ncov.setSelectedCountries,
+    dataByRegion: ncov.dataByRegion,
+    dataByDate: ncov.dataByDate,
+    selectedDate: ncov.selectedDate,
+    widthData: ncov.widthData,
+    loadingNews: loading.models.news,
+    loadingNcov: loading.models.ncov,
   }),
   {
+    getCountryData: (country, dataByDate, dataByRegion, total, name) => ({
+      type: "ncov/getCountryData",
+      payload: { country, dataByDate, dataByRegion, total, name },
+    }),
     setSelectedDate: (time) => ({
-      type: "news/setSelectedDate",
+      type: "ncov/setSelectedDate",
       payload: time,
     }),
     getNewsData: (region, date) => ({
       type: "news/getNewsData",
       payload: { region, date },
     }),
-    getData: () => ({ type: "news/getData" }),
-    setSelectedCountries: (keys) => ({
-      type: "news/setSelectedCountries",
-      payload: keys,
+    getData: (country) => ({ type: "ncov/getData", payload: { country } }),
+    setSelectedCountries: (name, keys) => ({
+      type: "ncov/setSelectedCountries",
+      payload: {
+        keys,
+        name,
+      },
     }),
   }
 )(NewsPanel);

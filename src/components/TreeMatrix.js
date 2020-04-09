@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import Svg from "./Svg";
-import regionsData from "../assets/data/region_options.json";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
 import mouse from "../utils/mouse";
+import regionsData from "../assets/data/region_options.json";
 
 const d3 = {
   ...d3All,
@@ -30,8 +30,11 @@ export default function ({
   disabledColor,
   legendWidth,
   legendHeight,
+  treeData,
+  setTreeData,
+  handleChangeRange,
 }) {
-  if (!dataByRegion.size)
+  if (!dataByRegion.size || !treeData.children)
     return (
       <Svg
         viewBox={[0, 0, width, height]}
@@ -41,7 +44,6 @@ export default function ({
       ></Svg>
     );
 
-  const [treeData, setTreeData] = useState(d3.hierarchy(regionsData));
   const [highlight, setHighlight] = useState([]);
   const [drag, setDrag] = useState({
     start: null,
@@ -84,7 +86,7 @@ export default function ({
     ? data.filter((d) => hset.has(d.region))
     : data;
 
-  const margin = { top: 50, right: 30, bottom: 60, left: 60 },
+  const margin = { top: 55, right: 30, bottom: 60, left: 60 },
     chartPadding = 75,
     nodeWidth = 75,
     buttonSize = 15,
@@ -113,12 +115,16 @@ export default function ({
       .size([treeH, treeData.height * nodeWidth])
       .separation((a, b) => (a.parent === b.parent ? 1 : 1.5)),
     root = tree(treeData),
-    cellHeight = d3
-      .pairs(root.leaves())
-      .reduce(
-        (total, [a, b]) => Math.min(total, Math.abs(a.x - b.x)),
-        Infinity
-      ),
+    allLeaves = root.leaves(),
+    cellHeight =
+      allLeaves.length === 1
+        ? allLeaves[0].x
+        : d3
+            .pairs(allLeaves)
+            .reduce(
+              (total, [a, b]) => Math.min(total, Math.abs(a.x - b.x)),
+              Infinity
+            ),
     cellWidth = Math.max(matrixWidth / days.length, 12.5),
     nodeByTitle = d3.rollup(
       root.descendants(),
@@ -155,10 +161,7 @@ export default function ({
 
   const colorScale = d3.scaleSequential(colors[selectedType]).domain(
     d3.extent(
-      colorData.filter(
-        (d) =>
-          d.region !== "湖北" && d.region !== "华中地区" && d.region !== "中国"
-      ),
+      colorData.filter((d) => d.region !== "湖北" && d.region !== "华中地区"),
       (d) => d.value
     )
   );
@@ -168,23 +171,14 @@ export default function ({
     .interpolate(() => colors.special)
     .domain(
       d3.extent(
-        colorData.filter(
-          (d) =>
-            d.region === "湖北" ||
-            d.region === "华中地区" ||
-            d.region === "中国"
-        ),
+        colorData.filter((d) => d.region === "湖北" || d.region === "华中地区"),
         (d) => d.value
       )
     );
 
   const color = (node) => {
     if (highlight.length && !hset.has(node.region)) return disabledColor;
-    if (
-      node.region === "湖北" ||
-      node.region === "华中地区" ||
-      node.region === "中国"
-    )
+    if (node.region === "湖北" || node.region === "华中地区")
       return specialColorScale(node.value);
     return colorScale(node.value);
   };
@@ -299,6 +293,14 @@ export default function ({
     });
   }
 
+  function hasSpecialLegend() {
+    return (
+      (treeData.data.title === "中国" && highlight.length === 0) ||
+      highlight.find((d) => d.data.title === "湖北") ||
+      highlight.find((d) => d.data.title === "华中地区")
+    );
+  }
+
   function toggleHighlightNode(node) {
     if (!node.parent) return;
 
@@ -323,6 +325,11 @@ export default function ({
 
   async function toggleNode(node) {
     if (!node.children) return;
+    if (node.depth === 0) {
+      const range = node.data.title === "全球" ? "china" : "world";
+      handleChangeRange(range);
+      return;
+    }
     // animation
     const t = d3.transition().duration(250).ease(d3.easeExpOut);
     node.hideChildren
@@ -601,40 +608,42 @@ export default function ({
             transform={`translate(0, ${legendHeight / 2})`}
           ></g>
           <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
-            其他地区
+            {hasSpecialLegend() ? "其他地区" : "所有地区"}
           </text>
         </g>
       )}
-      <g
-        transform={
-          th === 0
-            ? `translate(${width - margin.right - legendWidth - 10}, ${
-                margin.top / 2
-              })`
-            : `translate(${
-                width - margin.right - legendWidth - legendWidth - 100
-              }, ${margin.top / 2})`
-        }
-      >
-        {d3.range(0, legendWidth).map((l) => (
-          <line
-            className="tree-line"
-            key={l}
-            x1={l}
-            y1={-legendHeight / 2}
-            x2={l}
-            y2={legendHeight / 2}
-            stroke={strokeSpecial(l)}
-          />
-        ))}
+      {hasSpecialLegend() && (
         <g
-          className="tree-legend-special"
-          transform={`translate(0, ${legendHeight / 2})`}
-        ></g>
-        <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
-          {th === 0 ? "中国" : th === 1 ? "华中地区" : "湖北"}
-        </text>
-      </g>
+          transform={
+            th === 0
+              ? `translate(${width - margin.right - legendWidth - 10}, ${
+                  margin.top / 2
+                })`
+              : `translate(${
+                  width - margin.right - legendWidth - legendWidth - 100
+                }, ${margin.top / 2})`
+          }
+        >
+          {d3.range(0, legendWidth).map((l) => (
+            <line
+              className="tree-line"
+              key={l}
+              x1={l}
+              y1={-legendHeight / 2}
+              x2={l}
+              y2={legendHeight / 2}
+              stroke={strokeSpecial(l)}
+            />
+          ))}
+          <g
+            className="tree-legend-special"
+            transform={`translate(0, ${legendHeight / 2})`}
+          ></g>
+          <text textAnchor="end" fill="currentColor" dy="0.31em" dx={-10}>
+            {th === 0 ? "中国" : th === 1 ? "华中地区" : "湖北"}
+          </text>
+        </g>
+      )}
       {layers.map(([depth, data]) => (
         <g
           className="tree-btn"
@@ -726,13 +735,13 @@ export default function ({
             </g>
           ))}
       </g>
-      <g
-        transform={`translate(${width - margin.right - matrixWidth}, ${
-          margin.top - cellHeight / 2
-        })`}
-      >
+      <g transform={`translate(${width - margin.right - matrixWidth}, ${0})`}>
         <g clipPath="url(#maxtrix-ly)">
-          <g transform={`translate(${-drag.move}, 0)`}>
+          <g
+            transform={`translate(${-drag.move}, ${
+              margin.top - cellHeight / 2
+            })`}
+          >
             {data.map((d) => (
               <rect
                 className={`grid-${d.region} grid`}
@@ -757,11 +766,11 @@ export default function ({
                 )})`}</title>
               </rect>
             ))}
-            <g
-              className="tree-xAxis"
-              transform={`translate(0, ${height - margin.bottom - margin.top})`}
-            ></g>
           </g>
+          <g
+            className="tree-xAxis"
+            transform={`translate(${-drag.move}, ${height - margin.bottom})`}
+          ></g>
         </g>
         <defs>
           <clipPath id="maxtrix-ly">
@@ -769,16 +778,12 @@ export default function ({
               x="0"
               y="0"
               width={matrixWidth}
-              height={height - margin.top - margin.bottom + 30}
+              height={height - margin.bottom + 30}
             />
           </clipPath>
         </defs>
         {hover && matrixWidth < days.length * cellWidth && (
-          <g
-            transform={`translate(0, ${
-              height - margin.bottom - margin.top + 40
-            })`}
-          >
+          <g transform={`translate(0, ${height - margin.bottom + 40})`}>
             <rect
               ref={sliderRef}
               width={matrixWidth}

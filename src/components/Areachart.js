@@ -13,6 +13,7 @@ export default function ({
   focus,
   setFocus,
   running,
+  selectedCountries,
 }) {
   const ref = useRef(null);
   const width = 1200,
@@ -42,16 +43,18 @@ export default function ({
           ...data
             .filter(({ region }) => {
               if (selectedLevel === "top") {
-                return region === "中国";
+                const s = new Set(selectedCountries);
+                return s.has(region);
               } else if (selectedLevel === "second") {
                 return secondLevelSet.has(region);
               } else {
-                return region !== "中国" && !secondLevelSet.has(region);
+                const s = new Set(selectedCountries);
+                return !s.has(region) && !secondLevelSet.has(region);
               }
             })
             .reduce((obj, { region, data }) => ((obj[region] = data), obj), {}),
         })),
-      [dataByDate, selectedLevel]
+      [dataByDate, selectedLevel, selectedCountries.length]
     ),
     data = useMemo(
       () =>
@@ -159,14 +162,8 @@ export default function ({
     setTip({ ...a, time, x: mouseX, y: mouseY });
   }
 
-  function noData(data) {
-    return (
-      !data ||
-      data.length === 0 ||
-      data.some((d) =>
-        Object.keys(d).some((key) => d[key] === undefined || isNaN(d[key]))
-      )
-    );
+  function noData() {
+    return series.length === 0;
   }
 
   useEffect(() => {

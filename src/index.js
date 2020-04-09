@@ -9,11 +9,13 @@ import hotsModel from "./models/hots";
 import newsModel from "./models/news";
 import totalModel from "./models/total";
 import commentModel from "./models/comment";
+import ncovModel from "./models/ncov";
 import "./index.css";
 
 const app = new dva();
 
 app.use(createLoading());
+app.model(ncovModel);
 app.model(hotsModel);
 app.model(newsModel);
 app.model(totalModel);

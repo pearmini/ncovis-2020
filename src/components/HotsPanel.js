@@ -68,9 +68,10 @@ const MyRow = styled.div`
 function HotsPanel({
   dataByName,
   dataByDate,
+  dataByRegion,
   getData,
   loadingHots,
-  loadingNews,
+  loadingNcov,
   timeByName,
   getTime,
   selectedTime,
@@ -83,6 +84,10 @@ function HotsPanel({
   countries,
   selectedCountries,
   setSelectedCountries,
+  getCountryData,
+  dateRange: totalTimeRange,
+  total,
+  widthData,
 }) {
   const levels = [
       { name: "国家", key: "top" },
@@ -98,7 +103,7 @@ function HotsPanel({
   const [focus, setFocus] = useState("");
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
-  const [selectedLevel, setSelectedLevel] = useState("third");
+  const [selectedLevel, setSelectedLevel] = useState("top");
   const [selectedType, setSelectedType] = useState("confirmed");
   const [selectedTopic, setSelectedTopic] = useState(null);
   const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
@@ -113,10 +118,7 @@ function HotsPanel({
   const { listKeyframes, cloudsKeyframes } = namevalues || {};
 
   const hotTimeRange = timeByName.get(selectedName);
-  const totalTimeRange = d3.extent(
-      Array.from(dataByDate).map(([date]) => new Date(date).getTime())
-    ),
-    hour = 12,
+  const hour = 12,
     ticks = d3.timeHour
       .every(hour) // 每隔 12 小时获取一下数据
       .range(totalTimeRange[0], totalTimeRange[1])
@@ -137,7 +139,7 @@ function HotsPanel({
     selectedTime,
     color: barColor.current,
     running,
-    loading: loadingHots || loadingNews,
+    loading: loadingHots,
     selectedName: "知乎",
     showWordsOfTopic,
     hideWordsOfTopic: () => setSelectedTopic(null),
@@ -154,7 +156,7 @@ function HotsPanel({
     selectedTime,
     color: barColor.current(selectedTopic),
     colorScale: wordColor.current,
-    loading: loadingHots || loadingNews,
+    loading: loadingHots,
     running: running || pause,
     selectedName: "知乎",
   };
@@ -171,7 +173,7 @@ function HotsPanel({
   };
 
   const areaPros = {
-    loading: loadingNews,
+    loading: loadingNcov,
     dataByDate,
     selectedTime,
     setSelectedTime,
@@ -180,6 +182,7 @@ function HotsPanel({
     focus,
     setFocus,
     running,
+    selectedCountries,
   };
 
   if (running && loadingHots && !pause) {
@@ -250,6 +253,19 @@ function HotsPanel({
     } else getWords(selectedName, time, title);
   }
 
+  function handleCountryDataChange(keys) {
+    if (keys.length >= 30) {
+      alert("不能超过 30 个国家");
+      return;
+    }
+    const newKeys = [];
+    for (let k of keys) {
+      if (widthData.has(k)) newKeys.push(k);
+      else getCountryData(k, dataByDate, dataByRegion, total, "hots");
+    }
+    setSelectedCountries("hots", newKeys);
+  }
+
   function search(time) {
     const bisect = d3.bisector((d) => d.time);
     const i = bisect.left(hotTimeRange, time);
@@ -285,10 +301,6 @@ function HotsPanel({
     if (!hotTimeRange) {
       getTime(selectedName);
       return;
-    }
-
-    if (selectedTime === null && totalTimeRange && totalTimeRange[0] !== 0) {
-      setSelectedTime(totalTimeRange[0]);
     }
 
     const index = search(selectedTime),
@@ -379,7 +391,7 @@ function HotsPanel({
                   <Option key={d.key}>{d.name}</Option>
                 ))}
               </Select>
-              {/* {selectedLevel === "top" && (
+              {selectedLevel === "top" && (
                 <>
                   &ensp;&ensp;
                   <span>
@@ -389,7 +401,7 @@ function HotsPanel({
                   <Select
                     mode="tags"
                     value={selectedCountries}
-                    onChange={(keys) => setSelectedCountries(keys)}
+                    onChange={handleCountryDataChange}
                     style={{
                       minWidth: 200,
                     }}
@@ -399,7 +411,7 @@ function HotsPanel({
                     ))}
                   </Select>
                 </>
-              )} */}
+              )}
             </div>
           </Control>
           <Areachart {...areaPros} />
@@ -410,16 +422,34 @@ function HotsPanel({
 }
 
 export default connect(
-  ({ hots, loading, news }) => ({
+  ({ hots, loading, ncov }) => ({
     ...hots,
     loadingHots: loading.models.hots,
-    loadingNews: loading.models.news,
-    dataByDate: news.dataByDate,
+    loadingNcov: loading.models.ncov,
+    dataByDate: ncov.dataByDate,
+    dataByRegion: ncov.dataByRegion,
+    dateRange: ncov.range,
+    widthData: ncov.widthData,
+    total: ncov.total,
+    selectedCountries: ncov.selectedCountries.hots,
+    selectedTime: ncov.selectedTime,
+    countries: ncov.countries,
   }),
   {
-    setSelectedCountries: (keys) => ({
-      type: "hots/setSelectedCountries",
-      payload: keys,
+    getCountryData: (country, dataByDate, dataByRegion, total, name) => ({
+      type: "ncov/getCountryData",
+      payload: { country, dataByDate, dataByRegion, total, name },
+    }),
+    setSelectedCountries: (name, keys) => ({
+      type: "ncov/setSelectedCountries",
+      payload: {
+        keys,
+        name,
+      },
+    }),
+    setSelectedTime: (time) => ({
+      type: "ncov/setSelectedTime",
+      payload: time,
     }),
     setSelectedWords: (words) => ({
       type: "hots/setSelectedWords",
@@ -440,10 +470,6 @@ export default connect(
     setSelectedName: (name) => ({
       type: "hots/setSelectedName",
       payload: name,
-    }),
-    setSelectedTime: (time) => ({
-      type: "hots/setSelectedTime",
-      payload: time,
     }),
     getTime: (name) => ({ type: "hots/getTime", payload: { name } }),
     updateDataByTime: (options) => ({

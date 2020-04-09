@@ -1,16 +1,22 @@
 import React, { useState, useMemo } from "react";
-import 'array-flat-polyfill';
+import "array-flat-polyfill";
 import TreeMatrix from "./TreeMatrix";
 import HeatMap from "./HeatMap";
 import * as d3 from "d3";
-export default function({
+export default function ({
   dataByRegion,
   selectedRegion,
   selectedDate,
   setSelectedDate,
   setSelectedRegion,
   selectedType,
-  loading
+  loading,
+  selectedRange,
+  setSelectedRange,
+  selectedCountries,
+  treeData,
+  setTreeData,
+  handleChangeRange,
 }) {
   const [isTree, setIsTree] = useState(true);
   const width = 1200,
@@ -32,7 +38,7 @@ export default function({
                 Array.from(dataByDate)
                   .map(([date, data]) => ({
                     date: date,
-                    data: data.data
+                    data: data.data,
                   }))
                   .sort((a, b) => new Date(a.date) - new Date(b.date))
               )
@@ -42,18 +48,18 @@ export default function({
                 ...Object.keys(b.data).reduce(
                   (obj, key) => ((obj[key] = b.data[key] - a.data[key]), obj),
                   {}
-                )
+                ),
               }))
           )
         : [],
-    [dataByRegion]
+    [dataByRegion, selectedCountries.length]
   );
 
   const colors = {
     dead: d3.interpolatePurples,
     confirmed: d3.interpolateReds,
     cured: d3.interpolateGreens,
-    special: d3.interpolatePuRd
+    special: d3.interpolatePuRd,
   };
 
   const treeProps = {
@@ -75,7 +81,12 @@ export default function({
     highlightRectColor,
     disabledColor,
     legendHeight,
-    legendWidth
+    legendWidth,
+    selectedRange,
+    setSelectedRange,
+    treeData,
+    setTreeData,
+    handleChangeRange,
   };
 
   const heatMapProps = {
@@ -93,7 +104,7 @@ export default function({
     disabledColor,
     setSelectedDate,
     legendWidth,
-    legendHeight
+    legendHeight,
   };
 
   return (
