@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Svg from "./Svg";
 import * as d3 from "d3";
 import formatDate from "../utils/formatDate";
-export default function({
+import { Switch } from "antd";
+export default function ({
   loading,
   keyframes,
   selectedTime,
@@ -11,11 +12,12 @@ export default function({
   selectedName,
   showWordsOfTopic,
   hideWordsOfTopic,
-  selectedTopic
+  selectedTopic,
 }) {
   const width = 600,
     height = 400,
     margin = { top: 30, right: 35, bottom: 20, left: 40 };
+
   if (keyframes === undefined) {
     return (
       <Svg
@@ -26,8 +28,15 @@ export default function({
     );
   }
 
+  const [fullTitle, setFullTitle] = useState(false);
+  const slot = (
+    <>
+      <span>标题模式</span>
+      <Switch onChange={setFullTitle} checked={fullTitle} size="small" />
+    </>
+  );
   const n = 10;
-  const bisect = d3.bisector(d => d[0]);
+  const bisect = d3.bisector((d) => d[0]);
   const y = d3
     .scaleBand()
     .domain(d3.range(n + 1))
@@ -38,12 +47,20 @@ export default function({
 
   const x = d3
     .scaleLinear()
-    .domain([0, d3.max(bars, d => d.value)])
+    .domain([0, d3.max(bars, (d) => d.value)])
     .range([margin.left, width - margin.right]);
 
-  const names = bars.map(d => d.name);
-  const id = d => `t-${d.value}`;
-  const colorScale = name =>
+  const textWidth = (d, index) => {
+    const offset = index < 8 ? 0 : 90;
+    const full = fullTitle
+      ? x.range()[1] - x(0) - offset
+      : Math.max(x(d.value) - x(0) - 8, 0);
+    return full;
+  };
+
+  const names = bars.map((d) => d.name);
+  const id = (d) => `t-${d.value}`;
+  const colorScale = (name) =>
     selectedTopic !== null && selectedTopic !== name ? "#efefef" : color(name);
 
   const introduction = (
@@ -69,19 +86,19 @@ export default function({
   function interpolate(data, time) {
     const i = bisect.left(data, time, 0, data.length - 1),
       a = data[i];
-    if (!i || !running) return a[1].map(d => ({ ...d, y: y(d.rank) }));
+    if (!i || !running) return a[1].map((d) => ({ ...d, y: y(d.rank) }));
     const b = data[i - 1],
       t = (time - a[0]) / (b[0] - a[0]);
 
-    return a[1].map(d => {
+    return a[1].map((d) => {
       const { value, rank } = b[1].find(({ name }) => d.name === name) || {
         value: d.value,
-        rank: n
+        rank: n,
       };
       return {
         ...d,
         y: y(d.rank) * (1 - t) + y(rank) * t,
-        value: d.value * (1 - t) + value * t
+        value: d.value * (1 - t) + value * t,
       };
     });
   }
@@ -110,19 +127,20 @@ export default function({
       onClick={hideWordsOfTopic}
       title="动态条形图"
       introduction={introduction}
+      slot={slot}
     >
-      {bars.map(d => (
+      {bars.map((d) => (
         <g
           transform={`translate(${margin.left}, ${running ? d.y : y(d.rank)})`}
           key={d.name}
         >
           <rect
-            width={x(d.value) - x(0)}
+            width={fullTitle ? x.range()[1] - x(0) : x(d.value) - x(0)}
             height={barSize}
             fill={colorScale(d.name)}
             cursor="pointer"
             fillOpacity={0.7}
-            onClick={e => {
+            onClick={(e) => {
               showWordsOfTopic(d.name);
               e.stopPropagation();
             }}
@@ -132,7 +150,7 @@ export default function({
         </g>
       ))}
       <g id="bar-axis" transform={`translate(${0}, ${margin.top})`}></g>
-      {bars.map(d => (
+      {bars.map((d, index) => (
         <g
           transform={`translate(${margin.left}, ${running ? d.y : y(d.rank)})`}
           key={d.name}
@@ -144,7 +162,7 @@ export default function({
             fontWeight="bold"
             fontSize="13"
             cursor="pointer"
-            onClick={e => {
+            onClick={(e) => {
               showWordsOfTopic(d.name);
               e.stopPropagation();
             }}
@@ -164,20 +182,15 @@ export default function({
           </text>
           <defs>
             <clipPath id={id(d)}>
-              <rect
-                x="0"
-                y="0"
-                width={Math.max(x(d.value) - x(0) - 8, 0)}
-                height={barSize}
-              />
+              <rect x="0" y="0" width={textWidth(d, index)} height={barSize} />
             </clipPath>
           </defs>
         </g>
       ))}
       <g
-        transform={`translate(${width - margin.right}, ${height - 40})`}
+        transform={`translate(${width - margin.right - 5}, ${height - 50})`}
         textAnchor="end"
-        fill="#777"
+        fill={fullTitle ? "black" : "#777"}
       >
         <text fontSize={35} fontWeight="bold">
           {selectedName}

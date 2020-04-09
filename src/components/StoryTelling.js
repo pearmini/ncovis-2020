@@ -2,7 +2,7 @@ import React from "react";
 import Canvas from "./Canvas";
 import formatDate from "../utils/formatDate";
 import * as d3 from "d3";
-export default function({
+export default function ({
   loading,
   selectedTime,
   keyframes,
@@ -11,7 +11,7 @@ export default function({
   colorScale,
   color,
   selectedWords,
-  selectedTopic
+  selectedTopic,
 }) {
   const width = 900,
     height = 600,
@@ -31,11 +31,11 @@ export default function({
 
   const interpolateAttrs = new Set(["x", "y", "size"]);
 
-  const initWord = word => ({
+  const initWord = (word) => ({
     ...word,
-    size: 0
+    size: 0,
   });
-  const text = d => d.text;
+  const text = (d) => d.text;
   const words =
     selectedTopic === null ? interpolateData(selectedTime) : selectedWords;
 
@@ -51,7 +51,7 @@ export default function({
   );
 
   function interpolateData(time) {
-    const bisect = d3.bisector(d => d[0]).left;
+    const bisect = d3.bisector((d) => d[0]).left;
     const i = bisect(keyframes, time, 0, keyframes.length - 1),
       a = keyframes[i];
     if (!i || !running || time > a[0]) return a[1];
@@ -60,11 +60,11 @@ export default function({
 
     // 找出消失的
     const disappear = b[1]
-      .filter(word => !a[1].find(d => text(d) === text(word)))
+      .filter((word) => !a[1].find((d) => text(d) === text(word)))
       .map(initWord);
     const all = [...disappear, ...a[1]];
-    return all.map(word => {
-      const pre = b[1].find(d => text(d) === text(word)) || initWord(word);
+    return all.map((word) => {
+      const pre = b[1].find((d) => text(d) === text(word)) || initWord(word);
       return Object.keys(word).reduce((obj, key) => {
         if (interpolateAttrs.has(key)) {
           obj[key] = word[key] * (1 - t) + pre[key] * t;
@@ -79,7 +79,7 @@ export default function({
   function drawLabel(context) {
     context.save();
     // region
-    context.translate(width - marginRight, height - marginBottom);
+    context.translate(width - marginRight - 5, height - marginBottom - 10);
     context.fillStyle = "#777";
     context.textAlign = "end";
     context.textBaseline = "bottom";

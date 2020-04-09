@@ -4,7 +4,7 @@ import useSize from "../hook/useSize";
 import { Popover, Empty, Spin, Icon, Drawer } from "antd";
 
 const Container = styled.div.attrs(
-  props =>
+  (props) =>
     props.zoom && {
       style: {
         position: "fixed",
@@ -14,11 +14,11 @@ const Container = styled.div.attrs(
         transform: "translate(-50%, -50%)",
         marginTop: 28,
         width: "90%",
-        maxWidth: 1200
-      }
+        maxWidth: 1200,
+      },
     }
 )`
-  display: ${props => (props.show ? "block" : "none")};
+  display: ${(props) => (props.show ? "block" : "none")};
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -40,11 +40,12 @@ const Layer = styled.div`
 `;
 
 const Box = styled.div`
-  width: ${props => props.width}px;
-  height: ${props => props.height}px;
-  line-height: ${props => props.height}px;
+  width: ${(props) => props.width}px;
+  height: ${(props) => props.height}px;
+  line-height: ${(props) => props.height}px;
   z-index: 10;
-  background: ${props => (props.type === "loading " ? "transparent" : "white")};
+  background: ${(props) =>
+    props.type === "loading " ? "transparent" : "white"};
   position: absolute;
   left: 0;
   top: 0;
@@ -95,12 +96,24 @@ const Header = styled.div`
 `;
 
 const Left = styled.div`
-  & span {
+  & > span {
     margin-left: 8px;
   }
 `;
 
-const Right = styled.div``;
+const Slot = styled.div`
+  margin-right: 8px;
+
+  & span {
+    font-size: 12px;
+    margin-right: 4px;
+  }
+`;
+
+const Right = styled.div`
+  display: flex;
+  align-items: center;
+`;
 
 const StyledIcon = styled(Icon)`
   cursor: pointer;
@@ -134,6 +147,7 @@ function Card({
   nodata,
   title = "title",
   introduction,
+  slot,
   show = true,
   ...rest
 }) {
@@ -184,6 +198,7 @@ function Card({
             <span>{title}</span>
           </Left>
           <Right>
+            <Slot>{slot}</Slot>
             <ZoomIcon
               type={zoom ? "fullscreen-exit" : "fullscreen"}
               onClick={() => onClickItem(() => setZoom(!zoom))}
@@ -197,7 +212,7 @@ function Card({
             >
               <StyledIcon
                 type="download"
-                onClick={e => {
+                onClick={(e) => {
                   setPop(!pop);
                   e.stopPropagation();
                 }}

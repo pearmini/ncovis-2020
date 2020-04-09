@@ -4,13 +4,13 @@ import Card from "./Card";
 import download, { serialize, rasterize } from "../utils/download";
 
 // 背景颜色必须要写成内联样式的形式
-const WhiteSvg = styled.svg.attrs(props => ({
+const WhiteSvg = styled.svg.attrs((props) => ({
   style: {
-    background: "white"
-  }
+    background: "white",
+  },
 }))``;
 
-export default function({
+export default function ({
   style,
   className,
   id,
@@ -20,6 +20,7 @@ export default function({
   children,
   introduction,
   title,
+  slot,
   ...rest
 }) {
   const ref = useRef(null);
@@ -42,7 +43,8 @@ export default function({
     nodata,
     show,
     introduction,
-    title
+    title,
+    slot,
   };
 
   return (
