@@ -82,7 +82,11 @@ function IntroductionPanel() {
             <a target="_blank" href="https://www.zhihu.com/">
               知乎
             </a>
-            的热搜数据，并提供相关的可视化。
+            的热搜数据（感谢 {" "}
+            <a href="https://github.com/mjrao/hotso" target="_blank">
+              mjrao 先生
+            </a>
+            提供的部分知乎热搜数据)，并提供相关的可视化。
           </p>
           <p>
             在可视化技术方面，因为面对的对象是大众，所以我们并没有使用比较复杂的技术。一方面我们使用了一些常见的可视化技术：面积图、条形图、饼状图等，另一方面使用了我们实验室在去年{" "}

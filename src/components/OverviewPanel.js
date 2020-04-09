@@ -130,11 +130,14 @@ const DashBoard = styled.div`
   width: 100%;
 `;
 
-function Introduction({ total = [], getTotal }) {
+function Introduction({ total, getTotal }) {
   const { height } = useWindowSize();
-  const [tab, setTab] = useState("全中国");
-  const formate = (date) =>
-    `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  const [tab, setTab] = useState("全球");
+  const { data, time } = total;
+  const formate = (time) => {
+    const date = new Date(time);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  };
 
   const colorByName = {
     累计确诊: "#F9345e",
@@ -152,52 +155,36 @@ function Introduction({ total = [], getTotal }) {
       <An id="overview" />
       <DashBoard>
         <Title>COVID-19 舆论新闻可视化</Title>
-        {/* <Tabs
+        <Tabs
           onChange={setTab}
           activeKey={tab}
           style={{ width: 500, maxWidth: "100%" }}
         >
-          <TabPane tab="全世界" key="全世界"> */}
-        <Box>
-          <CardContainer>
-            {total.data.map(({ name, value, change }) => (
-              <Card key={name}>
-                <Change color={colorByName[name]}>
-                  {change >= 0 ? "新增" : "减少"}
-                  <span>
-                    {change >= 0 ? "+" : "-"}
-                    {Math.abs(change)}
-                  </span>
-                </Change>
-                <Value color={colorByName[name]}>{value}</Value>
-                <Name>全国{name}</Name>
-              </Card>
-            ))}
-          </CardContainer>
-          <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
-        </Box>
-        {/* </TabPane>
-          <TabPane tab="全中国" key="全中国">
-            <Box>
-              <CardContainer>
-                {total.data.map(({ name, value, change }) => (
-                  <Card key={name}>
-                    <Change color={colorByName[name]}>
-                      {change >= 0 ? "新增" : "减少"}
-                      <span>
-                        {change >= 0 ? "+" : "-"}
-                        {Math.abs(change)}
-                      </span>
-                    </Change>
-                    <Value color={colorByName[name]}>{value}</Value>
-                    <Name>全国{name}</Name>
-                  </Card>
-                ))}
-              </CardContainer>
-              <Time>截至{formate(total.time)}, 全国累计（含港澳台地区）</Time>
-            </Box>
-          </TabPane>
-        </Tabs> */}
+          {data.map((d) => (
+            <TabPane tab={d.name} key={d.name}>
+              <Box>
+                <CardContainer>
+                  {d.data.map(({ name, value, change }) => (
+                    <Card key={name}>
+                      <Change color={colorByName[name]}>
+                        {change >= 0 ? "新增" : "减少"}
+                        <span>
+                          {change >= 0 ? "+" : "-"}
+                          {Math.abs(change)}
+                        </span>
+                      </Change>
+                      <Value color={colorByName[name]}>{value}</Value>
+                      <Name>{d.name + name}</Name>
+                    </Card>
+                  ))}
+                </CardContainer>
+                <Time>{`截至${formate(time)}, ${
+                  d.name === "全国" ? "全国累计（含港澳台地区）" : "全球数据"
+                }`}</Time>
+              </Box>
+            </TabPane>
+          ))}
+        </Tabs>
       </DashBoard>
       <Row>
         <Zhihu src={zhihuURL} />

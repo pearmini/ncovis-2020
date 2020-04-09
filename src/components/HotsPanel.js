@@ -207,7 +207,7 @@ function HotsPanel({
     if (selectedTopic !== null) setSelectedTopic(null);
     setRunning(true);
     if (duration >= totalDuration) {
-      const start = hotTimeRange[0].time,
+      const start = totalTimeRange[0],
         startDuartion = timeScale.invert(start);
       requestAnimation(startDuartion);
     } else {
@@ -229,7 +229,7 @@ function HotsPanel({
 
   function changeValue(value) {
     if (!hotTimeRange) return;
-    const start = hotTimeRange[0].time,
+    const start = totalTimeRange[0],
       end = hotTimeRange[hotTimeRange.length - 1].time;
     if (value < start || value > end) message.error("该时间段暂时没有数据!!!");
     const validValue = Math.max(start, Math.min(value, end));

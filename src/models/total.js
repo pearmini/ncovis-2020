@@ -8,93 +8,151 @@ const cache = new InMemoryCache({});
 (async () =>
   await persistCache({
     cache,
-    storage: window.localStorage
+    storage: window.localStorage,
   }))();
 
 const client = new ApolloClient({
   cache,
   uri:
-    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS"
+    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS",
 });
 
 function getTotal() {
   return client.query({
     query: gql`
       {
-        ncov(region: "中国") {
-          date
+        ncovOverall {
+          time
           confirmed
-          dead
+          confirmedIncr
           cured
-          region
+          curedIncr
+          deadIncr
+          dead
+          remainingConfirmed
+          remainingConfirmedIncr
+          global {
+            confirmed
+            confirmedIncr
+            cured
+            curedIncr
+            deadIncr
+            dead
+            remainingConfirmed
+            remainingConfirmedIncr
+          }
         }
       }
-    `
+    `,
   });
 }
 
 function preprocess(data) {
-  const datevalues = Array.from(
-    d3.rollup(
-      data,
-      ([d]) => d,
-      d => d.date
-    )
-  )
-    .map(([date, data]) => [new Date(date), data])
-    .sort((a, b) => b[0] - a[0]);
-  const [a, b] = datevalues;
-  const remain = d => d[1].confirmed - d[1].cured - d[1].dead;
-  return {
-    time: a[0],
+  const { global, time, ...china } = data;
+  const format = (
+    {
+      confirmed,
+      confirmedIncr,
+      cured,
+      curedIncr,
+      deadIncr,
+      dead,
+      remainingConfirmed,
+      remainingConfirmedIncr,
+    },
+    name
+  ) => ({
+    name,
     data: [
       {
         name: "累计确诊",
-        value: a[1].confirmed,
-        change: a[1].confirmed - b[1].confirmed
+        value: confirmed,
+        change: confirmedIncr,
       },
       {
         name: "现存确诊",
-        value: remain(a),
-        change: remain(a) - remain(b)
+        value: remainingConfirmed,
+        change: remainingConfirmedIncr,
       },
-      { name: "累计治愈", value: a[1].cured, change: a[1].cured - b[1].cured },
-      { name: "累计死亡", value: a[1].dead, change: a[1].dead - b[1].dead }
-    ]
+      {
+        name: "累计治愈",
+        value: cured,
+        change: curedIncr,
+      },
+      { name: "累计死亡", value: dead, change: deadIncr },
+    ],
+  });
+  return {
+    time: time * 1000,
+    data: [format(global, "全球"), format(china, "全国")],
   };
 }
+
 export default {
   namespace: "total",
   state: {
-    time: new Date(),
+    time: new Date().getTime(),
     data: [
       {
-        name: "累计确诊",
-        value: 0,
-        change: 0
+        name: "全球",
+        data: [
+          {
+            name: "累计确诊",
+            value: 0,
+            change: 0,
+          },
+          {
+            name: "现存确诊",
+            value: 0,
+            change: 0,
+          },
+          {
+            name: "累计治愈",
+            value: 0,
+            change: 0,
+          },
+          { name: "累计死亡", value: 0, change: 0 },
+        ],
       },
       {
-        name: "现存确诊",
-        value: 0,
-        change: 0
+        name: "全国",
+        data: [
+          {
+            name: "累计确诊",
+            value: 0,
+            change: 0,
+          },
+          {
+            name: "现存确诊",
+            value: 0,
+            change: 0,
+          },
+          {
+            name: "累计治愈",
+            value: 0,
+            change: 0,
+          },
+          { name: "累计死亡", value: 0, change: 0 },
+        ],
       },
-      { name: "累计治愈", value: 0, change: 0 },
-      { name: "累计死亡", value: 0, change: 0 }
-    ]
+    ],
   },
   reducers: {
-    setData: (state, action) => ({ ...state, ...action.payload })
+    setData: (state, action) => ({ ...state, ...action.payload }),
   },
   effects: {
     *getData(action, { call, put }) {
       try {
         const result = yield call(getTotal);
-        const news = result.data.ncov;
-        const data = preprocess(news);
-        yield put({ type: "setData", payload: data });
+        const ncovOverall = result.data.ncovOverall;
+        const data = preprocess(ncovOverall);
+        yield put({
+          type: "setData",
+          payload: data,
+        });
       } catch (e) {
         console.error(e);
       }
-    }
-  }
+    },
+  },
 };
