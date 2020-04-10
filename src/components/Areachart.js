@@ -14,6 +14,7 @@ export default function ({
   setFocus,
   running,
   selectedCountries,
+  countries,
 }) {
   const ref = useRef(null);
   const width = 1200,
@@ -33,6 +34,8 @@ export default function ({
     "港澳台地区",
   ]);
 
+  const countriesSet = new Set(countries);
+
   const [highlight, setHighlight] = useState(""),
     [tip, setTip] = useState(null);
 
@@ -48,8 +51,7 @@ export default function ({
               } else if (selectedLevel === "second") {
                 return secondLevelSet.has(region);
               } else {
-                const s = new Set(selectedCountries);
-                return !s.has(region) && !secondLevelSet.has(region);
+                return !countriesSet.has(region) && !secondLevelSet.has(region);
               }
             })
             .reduce((obj, { region, data }) => ((obj[region] = data), obj), {}),
@@ -76,7 +78,7 @@ export default function ({
     keys = first ? Object.keys(first).filter((d) => d !== "date") : [],
     cnt = 2,
     tipCnt = selectedLevel === "second" ? 4 : 6,
-    legendWidth = selectedLevel === "second" ? 75 : 55,
+    legendWidth = selectedLevel === "third" ? 55 : 75,
     legendHeight = 25,
     disableColor = "#efefef",
     tw = selectedLevel === "second" ? 100 : 70,
@@ -127,6 +129,8 @@ export default function ({
 
   const stroke = (key) =>
     selectedLevel === "top" ? d3.color(color(key)).darker() : "none";
+
+  const id = (key) => `a-${key}`;
 
   const introduction = (
     <div>
@@ -241,9 +245,26 @@ export default function ({
                   }}
                 >
                   <circle fill={color(key)} cx={0} cy={0} r={5}></circle>
-                  <text dy={5} dx={10} fill="currentColor" fontSize="12">
+                  <text
+                    dy={5}
+                    dx={10}
+                    fill="currentColor"
+                    fontSize="12"
+                    clipPath={`url(#${id(key)})`}
+                  >
                     {key}
+                    <title>{key}</title>
                   </text>
+                  <defs>
+                    <clipPath id={id(key)}>
+                      <rect
+                        x={0}
+                        y={-legendHeight / 2}
+                        width={legendWidth - 5}
+                        height={legendHeight}
+                      />
+                    </clipPath>
+                  </defs>
                 </g>
               ))}
             </g>

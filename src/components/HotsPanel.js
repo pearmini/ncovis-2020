@@ -183,6 +183,7 @@ function HotsPanel({
     setFocus,
     running,
     selectedCountries,
+    countries
   };
 
   if (running && loadingHots && !pause) {
