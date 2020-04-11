@@ -1,0 +1,32 @@
+{
+  "files": {
+    "main.css": "./static/css/main.93ebdebe.chunk.css",
+    "main.js": "./static/js/main.58460fb0.chunk.js",
+    "main.js.map": "./static/js/main.58460fb0.chunk.js.map",
+    "runtime-main.js": "./static/js/runtime-main.c6378516.js",
+    "runtime-main.js.map": "./static/js/runtime-main.c6378516.js.map",
+    "static/css/2.9ddb28ea.chunk.css": "./static/css/2.9ddb28ea.chunk.css",
+    "static/js/2.8d48608e.chunk.js": "./static/js/2.8d48608e.chunk.js",
+    "static/js/2.8d48608e.chunk.js.map": "./static/js/2.8d48608e.chunk.js.map",
+    "index.html": "./index.html",
+    "precache-manifest.6625bc651f7a50f78fdc68093e2bef05.js": "./precache-manifest.6625bc651f7a50f78fdc68093e2bef05.js",
+    "service-worker.js": "./service-worker.js",
+    "static/css/2.9ddb28ea.chunk.css.map": "./static/css/2.9ddb28ea.chunk.css.map",
+    "static/css/main.93ebdebe.chunk.css.map": "./static/css/main.93ebdebe.chunk.css.map",
+    "static/js/2.8d48608e.chunk.js.LICENSE.txt": "./static/js/2.8d48608e.chunk.js.LICENSE.txt",
+    "static/media/china.png": "./static/media/china.6d888cb3.png",
+    "static/media/hots.jpg": "./static/media/hots.a9e67241.jpg",
+    "static/media/index.css": "./static/media/logo2.3d4cbdbb.woff2",
+    "static/media/news.jpg": "./static/media/news.0f6ed5a1.jpg",
+    "static/media/talk.jpg": "./static/media/talk.1ad6cd23.jpg",
+    "static/media/zhihu.png": "./static/media/zhihu.9e85bbdf.png",
+    "static/media/思源柔黑.ttf": "./static/media/思源柔黑.d0355c20.ttf"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c6378516.js",
+    "static/css/2.9ddb28ea.chunk.css",
+    "static/js/2.8d48608e.chunk.js",
+    "static/css/main.93ebdebe.chunk.css",
+    "static/js/main.58460fb0.chunk.js"
+  ]
+}

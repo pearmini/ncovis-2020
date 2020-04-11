@@ -11,7 +11,6 @@ import {
   Select,
   Modal,
   Switch,
-  Pagination,
 } from "antd";
 import { connect } from "dva";
 import { schemeTableau10, range } from "d3";
@@ -21,7 +20,7 @@ const { Option } = Select;
 
 const Container = styled.div`
   position: relative;
-  margin: 1em 0 0 0;
+  margin: 1em 0 2em 0;
 `;
 
 const An = styled.div`
@@ -160,12 +159,6 @@ const CardButton = styled(Button)`
   margin: 0 0.5em;
 `;
 
-const Footer = styled.div`
-  display: flex;
-  flex-direction: row-reverse;
-  margin-bottom: 2em;
-`;
-
 const Card = connect(null, {
   deleteComment: (id) => ({ type: "comment/deleteComment", payload: { id } }),
   setTop: (id) => ({ type: "comment/setTop", payload: { id } }),
@@ -283,15 +276,18 @@ function CommentPanel({
   data,
   loading,
   addComment,
-  pages,
 }) {
   const { getFieldDecorator } = form;
   const [selectedType, setSelectedType] = useState("reading");
-  const [pageIndex, setPageIndex] = useState(1);
+  const [selectedRange, setSelectedRange] = useState("all");
   const [preview, setPreview] = useState(false);
   const types = [
     { name: "最热", key: "reading" },
     { name: "最新", key: "time" },
+  ];
+  const ranges = [
+    { name: "所有", key: "all" },
+    { name: "自己", key: "self" },
   ];
 
   function handleSubmit(e) {
@@ -305,8 +301,8 @@ function CommentPanel({
   }
 
   useEffect(() => {
-    getData(pageIndex, selectedType);
-  }, [selectedType, pageIndex]);
+    getData(selectedType);
+  }, [selectedType, selectedRange]);
 
   return (
     <Container>
@@ -323,13 +319,22 @@ function CommentPanel({
       <Control>
         <div>
           <span>
+            <b>范围</b>
+          </span>
+          &ensp;
+          <Select value={selectedRange} onChange={setSelectedRange}>
+            {ranges.map((d) => (
+              <Option key={d.key}>{d.name}</Option>
+            ))}
+          </Select>
+        </div>
+        &emsp;
+        <div>
+          <span>
             <b>排序方式</b>
           </span>
           &ensp;
-          <Select
-            value={selectedType}
-            onChange={(value) => setSelectedType(value)}
-          >
+          <Select value={selectedType} onChange={setSelectedType}>
             {types.map((d) => (
               <Option key={d.key}>{d.name}</Option>
             ))}
@@ -345,32 +350,26 @@ function CommentPanel({
           </Preview>
         )}
       </Control>
-      {loading
-        ? range(1).map((d) => <Card key={d} loading={true} />)
-        : data &&
-          data
-            .filter((d) => !preview || d.isShow)
-            .sort((a, b) => {
-              if (selectedType === "reading")
-                return (
-                  a.isShow - b.isShow ||
-                  b.isTop - a.isTop ||
-                  b.reading - a.reading
-                );
-              else return a.createTime - b.createTime;
-            })
-            .map((d) => (
-              <Card {...d} key={d.id} isAdmin={isAdmin} preview={preview} />
-            ))}
-      <Footer>
-        <Pagination
-          current={pageIndex}
-          total={pages}
-          pageSize={10}
-          hideOnSinglePage={true}
-          onChange={(page) => setPageIndex(page)}
-        />
-      </Footer>
+      {loading ? (
+        range(1).map((d) => <Card key={d} loading={true} />)
+      ) : !data || data.length === 0 ? (
+        <h1>没有数据</h1>
+      ) : (
+        data
+          .filter((d) => !preview || d.isShow)
+          .sort((a, b) => {
+            if (selectedType === "reading")
+              return (
+                a.isShow - b.isShow ||
+                b.isTop - a.isTop ||
+                b.reading - a.reading
+              );
+            else return b.createTime - a.createTime;
+          })
+          .map((d) => (
+            <Card {...d} key={d.id} isAdmin={isAdmin} preview={preview} />
+          ))
+      )}
       <Drawer
         title="投稿"
         width={360}

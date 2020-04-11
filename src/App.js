@@ -28,11 +28,11 @@ function App() {
       <Content>
         <OverviewPanel />
         <IntroductionPanel />
-        <HotsPanel />
+        {/* <HotsPanel /> */}
         <NewsPanel />
-        {/* <DiscoveryPanel /> */}
+        <DiscoveryPanel />
       </Content>
-      {/* <Footer /> */}
+      <Footer />
     </ThemeProvider>
   );
 }

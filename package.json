@@ -65,9 +65,9 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "node scripts/build.js", 
+    "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "pro":"npm run build && cp -r ./build/*  ./gitee"
+    "pro": "npm run build && cp -r ./build/*  ./gitee"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -94,6 +94,7 @@
     "d3-cloud": "^1.2.5",
     "dva": "^2.4.1",
     "dva-loading": "^3.0.20",
+    "fingerprintjs2": "^2.1.0",
     "moment": "^2.24.0",
     "react-use": "^13.26.0",
     "resize-observer-polyfill": "^1.5.1",

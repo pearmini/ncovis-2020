@@ -352,15 +352,15 @@ export default {
           start,
           interval
         );
-        const cloudsKeyframes = yield call(
-          computeFramesWordCloud,
-          wordsKeyframes
-        );
+        // const cloudsKeyframes = yield call(
+        //   computeFramesWordCloud,
+        //   wordsKeyframes
+        // );
 
         // 加入关键帧
         yield put({
           type: "addFrames",
-          payload: { name, listKeyframes, cloudsKeyframes },
+          payload: { name, listKeyframes, cloudsKeyframes: wordsKeyframes },
         });
       } catch (e) {
         console.error(e);
