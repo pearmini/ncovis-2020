@@ -2,7 +2,7 @@
 // import { createHttpLink } from "apollo-link-http";
 // import { setContext } from "apollo-link-context";
 // import { InMemoryCache } from "apollo-cache-inmemory";
-import Fingerprint2 from "fingerprintjs2";
+// import Fingerprint2 from "fingerprintjs2";
 
 const mockData = {
   isAdmin: false,
@@ -65,36 +65,36 @@ const mockData = {
 //   }, 500);
 // }
 
-const httpLink = createHttpLink({
-  uri:
-    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS",
-});
+// const httpLink = createHttpLink({
+//   uri:
+//     "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS",
+// });
 
-let fingerPrint = localStorage.getItem("device-id");
+// let fingerPrint = localStorage.getItem("device-id");
 
-(async () => {
-  if (!fingerPrint) fingerPrint = await getFingerPrint();
-})();
+// (async () => {
+//   if (!fingerPrint) fingerPrint = await getFingerPrint();
+// })();
 
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem("ncovis");
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-      DeviceID: fingerPrint,
-    },
-  };
-});
+// const authLink = setContext((_, { headers }) => {
+//   const token = localStorage.getItem("ncovis");
+//   return {
+//     headers: {
+//       ...headers,
+//       authorization: token ? `Bearer ${token}` : "",
+//       DeviceID: fingerPrint,
+//     },
+//   };
+// });
 
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-});
+// const client = new ApolloClient({
+//   link: authLink.concat(httpLink),
+//   cache: new InMemoryCache(),
+// });
 
-function getFingerPrint() {
+// function getFingerPrint() {
   
-}
+// }
 
 function requestData({ code, type, index }) {
   return new Promise((resolve) => {

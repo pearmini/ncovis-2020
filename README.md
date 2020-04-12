@@ -1,6 +1,6 @@
 # ncovis-2020
 
-ncovis-2020 是一个跨三端的网站。在这里是山东大学 [VisLab](https://vislab.wang/) 成员在 COVID-19 病毒传播期间，对舆论和新闻可视化的结果。
+ncovis-2020 是一个面向大众的可视化分析平台。该平台是山东大学 [VisLab](https://vislab.wang/) 成员在 COVID-19 病毒传播期间开发，用于分析疫情对舆论和新闻的影响。
 
 ![WX20200411-183353@2x.png](https://i.loli.net/2020/04/11/mlZt6UMSCYc8LdN.png)
 
