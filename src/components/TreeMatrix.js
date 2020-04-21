@@ -281,15 +281,18 @@ export default function ({
     if (sliderRef.current === null) return;
     const [mouseX] = mouse(e, sliderRef.current);
     const maxMove = matrixWidth * (1 - matrixWidth / (days.length * cellWidth));
-    const move = Math.max(0, Math.min(maxMove, mouseX - drag.start));
+    const move = Math.max(
+      0,
+      Math.min(maxMove, mouseX - drag.start + drag.move)
+    );
     setDrag({ ...drag, move });
   }
 
   function handleMousedown(e) {
     const [mouseX] = mouse(e, sliderRef.current);
     setDrag({
+      ...drag,
       start: mouseX,
-      move: 0,
     });
   }
 

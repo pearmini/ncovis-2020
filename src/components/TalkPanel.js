@@ -2,12 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import useAnimation from "../hook/useAnimation";
 import styled from "styled-components";
 import { connect } from "dva";
-import { Row, Col, Select, message } from "antd";
+import moment from "moment";
+import { Row, Col, Select, message, TreeSelect, DatePicker } from "antd";
+import regions from "../assets/data/region_options.json";
 
 import Timeline from "./Timeline";
-import BarRace from "../components/BarRace";
-import StoryTelling from "../components/StoryTelling";
-import Areachart from "../components/Areachart";
+import BarRace from "./BarRace";
+import StoryTelling from "./StoryTelling";
+import Shape from "./Shape";
+import Piechart from "./Piechart";
 import mc from "../utils/memorizedColor";
 import rc from "../utils/randomColor";
 import * as d3 from "d3";
@@ -22,6 +25,7 @@ message.config({
 const Container = styled.div`
   position: relative;
   margin-bottom: 4em;
+  padding: 0 10px;
 `;
 
 const An = styled.div`
@@ -65,7 +69,7 @@ const MyRow = styled.div`
   }
 `;
 
-function HotsPanel({
+function TalkPanel({
   dataByName,
   dataByDate,
   dataByRegion,
@@ -81,32 +85,22 @@ function HotsPanel({
   selectedWords,
   setSelectedWords,
   wordsByTime,
-  countries,
-  selectedCountries,
   setSelectedCountries,
   getCountryData,
   dateRange: totalTimeRange,
   total,
   widthData,
+  selectedDate,
+  setSelectedDate,
+  getNewsData,
+  newsByRegion,
 }) {
-  const levels = [
-      { name: "国家", key: "top" },
-      { name: "分区", key: "second" },
-      { name: "省份", key: "third" },
-    ],
-    types = [
-      { name: "确诊", key: "confirmed" },
-      { name: "治愈", key: "cured" },
-      { name: "死亡", key: "dead" },
-    ];
 
-  const [focus, setFocus] = useState("");
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
-  const [selectedLevel, setSelectedLevel] = useState("top");
-  const [selectedType, setSelectedType] = useState("confirmed");
   const [selectedTopic, setSelectedTopic] = useState(null);
   const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
+  const [selectedRegion, setSelectedRegion] = useState("湖北");
 
   const barColor = useRef(
     mc([...d3.schemeTableau10, "#634294", "#d54087"], 10)
@@ -131,6 +125,16 @@ function HotsPanel({
       .domain([0, totalDuration])
       .range(totalTimeRange || [0, 0]),
     duration = timeScale.invert(selectedTime);
+
+  const newsByDate = newsByRegion.get(selectedRegion);
+  const news = newsByDate && newsByDate.get(selectedDate);
+  const { words, tags } = news || {};
+  const shapeProps = {
+    data: words,
+    // loading: loadingNews || loadingNcov,
+    selectedDate,
+    selectedRegion,
+  };
 
   const barsProps = {
     width: 600,
@@ -172,19 +176,13 @@ function HotsPanel({
     duration,
   };
 
-  const areaPros = {
-    loading: loadingNcov,
-    dataByDate,
-    selectedTime,
-    setSelectedTime,
-    selectedType,
-    selectedLevel,
-    focus,
-    setFocus,
-    running,
-    selectedCountries,
-    countries
+  const pieProps = {
+    // loading: loadingNews || loadingNcov,
+    data: tags,
+    selectedDate,
+    selectedRegion,
   };
+
 
   if (running && loadingHots && !pause) {
     stopAnimation();
@@ -195,6 +193,11 @@ function HotsPanel({
     startAnimation();
     setPause(false);
   }
+
+  // function disabledDate(current) {
+  //   if (range.length === 0) return true;
+  //   return current < moment(range[0]) || current > moment(range[1]);
+  // }
 
   function step(duration) {
     // 不能超过最大的时间
@@ -298,6 +301,15 @@ function HotsPanel({
   }
 
   useEffect(() => {
+    // 如果有日期数据且 news 数据为空的话就请求
+    if (
+      news === undefined &&
+      selectedDate !== "" &&
+      selectedRegion !== "中国"
+    ) {
+      getNewsData(selectedRegion, `${selectedDate}`);
+    }
+
     // 获得时间范围
     if (!hotTimeRange) {
       getTime(selectedName);
@@ -308,13 +320,13 @@ function HotsPanel({
       tick = hotTimeRange[index];
     if (tick.request) return;
     requestData(index);
-  }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
+  }, [getData, getTime, selectedName, hotTimeRange, selectedTime, getNewsData]);
 
   return (
     <Container>
       <An id="hots" />
-      <h1>人们都在讨论些什么？</h1>
-      <MyRow>
+      {/* <h1>人们都在讨论些什么？</h1> */}
+      {/* <MyRow>
         <Intro>
           <p>这里是和舆论相关的可视化，用来探索全国人们在讨论什么？</p>
           <p>
@@ -346,7 +358,7 @@ function HotsPanel({
           </p>
         </Intro>
         <NewsImage src={newsImage} />
-      </MyRow>
+      </MyRow> */}
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <BarRace {...barsProps} />
@@ -360,9 +372,43 @@ function HotsPanel({
           <Timeline {...timeProps} />
         </Col>
       </Row>
+      <Control>
+        <div>
+          <span>
+            <b>地区</b>
+          </span>
+          &ensp;
+          <TreeSelect
+            showSearch
+            value={selectedRegion}
+            treeData={regions}
+            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+            treeDefaultExpandAll
+            onChange={setSelectedRegion}
+          />
+        </div>
+        &emsp;
+        <div>
+          <span>
+            <b>日期</b>
+          </span>
+          &ensp;
+          <DatePicker
+            value={selectedDate === "" ? null : moment(selectedDate)}
+            onChange={(date, string) => {
+              setSelectedDate(string);
+            }}
+            // disabledDate={disabledDate}
+            showTody={false}
+          />
+        </div>
+      </Control>
       <Row gutter={[16, 16]}>
-        <Col span={24}>
-          <Control>
+        <Col span={12} md={12}>
+          <Piechart {...pieProps} />
+        </Col>
+        <Col span={12}>
+          {/* <Control>
             <div>
               <span>
                 <b>级别</b>
@@ -414,8 +460,10 @@ function HotsPanel({
                 </>
               )}
             </div>
-          </Control>
-          <Areachart {...areaPros} />
+          </Control> */}
+          {/* <Areachart {...areaPros} /> */}
+
+          <Shape {...shapeProps} />
         </Col>
       </Row>
     </Container>
@@ -423,8 +471,10 @@ function HotsPanel({
 }
 
 export default connect(
-  ({ hots, loading, ncov }) => ({
+  ({ hots, loading, ncov, news }) => ({
     ...hots,
+    selectedDate: ncov.selectedDate,
+    newsByRegion: news.newsByRegion,
     loadingHots: loading.models.hots,
     loadingNcov: loading.models.ncov,
     dataByDate: ncov.dataByDate,
@@ -437,6 +487,10 @@ export default connect(
     countries: ncov.countries,
   }),
   {
+    getNewsData: (region, date) => ({
+      type: "news/getNewsData",
+      payload: { region, date },
+    }),
     getCountryData: (country, dataByDate, dataByRegion, total, name) => ({
       type: "ncov/getCountryData",
       payload: { country, dataByDate, dataByRegion, total, name },
@@ -464,6 +518,10 @@ export default connect(
         title,
       },
     }),
+    setSelectedDate: (time) => ({
+      type: "ncov/setSelectedDate",
+      payload: time,
+    }),
     getData: (options) => ({
       type: "hots/getData",
       payload: options,
@@ -478,4 +536,4 @@ export default connect(
       payload: options,
     }),
   }
-)(HotsPanel);
+)(TalkPanel);

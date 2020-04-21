@@ -151,29 +151,24 @@ export default {
   state: {
     dataByRegion: new Map(),
     dataByDate: new Map(),
-    selectedDate: "",
+    selectedDate: "2020-02-10",
     range: [],
     countries: [],
     widthData: new Set(),
     total: [],
-    selectedCountries: {
-      hots: [],
-      news: [],
-    },
+    selectedCountries: [],
   },
   reducers: {
     addCountryData(state, action) {
       const { dataByDate, dataByRegion, country, name } = action.payload;
       const { selectedCountries, widthData } = state;
-      selectedCountries[name].push(country);
+      selectedCountries.push(country);
       widthData.add(country);
       return { ...state, dataByDate, dataByRegion, selectedCountries };
     },
     setSelectedCountries(state, action) {
-      const { keys, name } = action.payload;
-      const { selectedCountries } = state;
-      selectedCountries[name] = keys;
-      return { ...state, selectedCountries };
+      const { keys } = action.payload;
+      return { ...state, selectedCountries: keys };
     },
     init(state, action) {
       return { ...state, ...action.payload };
@@ -189,7 +184,7 @@ export default {
   },
   effects: {
     *getCountryData(action, { call, put }) {
-      const { country, total, dataByDate, dataByRegion, name } = action.payload;
+      const { country, total, dataByDate, dataByRegion } = action.payload;
       const result = yield call(getNcov, country);
       const news = result.data.ncov;
       const data = preprocess(news, total, country);
@@ -219,7 +214,6 @@ export default {
           dataByDate,
           dataByRegion,
           country,
-          name,
         },
       });
     },
@@ -255,10 +249,7 @@ export default {
             (d) => d.date
           ),
           selectedTime = new Date(range[0]).getTime(),
-          selectedCountries = {
-            hots: ["中国"],
-            news: ["中国"],
-          },
+          selectedCountries = ["中国"],
           widthData = new Set(["中国"]),
           selectedDate = "2020-03-27";
 

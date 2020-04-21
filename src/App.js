@@ -4,9 +4,8 @@ import styled, { ThemeProvider } from "styled-components";
 
 import OverviewPanel from "./components/OverviewPanel";
 import IntroductionPanel from "./components/IntroductionPanel";
-import HotsPanel from "./components/HotsPanel";
-import NewsPanel from "./components/NewsPanel";
 import DiscoveryPanel from "./components/DiscoveryPanel";
+import VisPanel from "./components/VisPanel"
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -28,9 +27,10 @@ function App() {
       <Content>
         <OverviewPanel />
         <IntroductionPanel />
+        <VisPanel />
         {/* <HotsPanel /> */}
-        <NewsPanel />
-        <DiscoveryPanel />
+        {/* <NewsPanel /> */}
+        {/* <DiscoveryPanel /> */}
       </Content>
       <Footer />
     </ThemeProvider>

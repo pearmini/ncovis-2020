@@ -339,7 +339,6 @@ export default {
     },
     *getData(action, { call, put }) {
       const { name, interval, tick, limit, start } = action.payload;
-      console.log(tick.time);
       try {
         const result = yield call(getHots, {
           name,

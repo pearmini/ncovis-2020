@@ -53,11 +53,11 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
       if (!keywords || !fillingWords) return;
 
       // 加载字体
-      if (fontRef.current !== null && fontRef.current.status === "unloaded") {
-        await fontRef.current.load();
-        document.fonts.add(fontRef.current);
-        setLoadingFont(false);
-      }
+      // if (fontRef.current !== null && fontRef.current.status === "unloaded") {
+      //   await fontRef.current.load();
+      //   document.fonts.add(fontRef.current);
+      //   setLoadingFont(false);
+      // }
 
       // 绘制背景
       context.fillStyle = "white";
@@ -70,13 +70,13 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
       drawText(context, keywords, {
         fillStyle: "#59569d",
         textAlign: "center",
-        textBaseline: "alphabet"
+        textBaseline: "alphabet",
       });
 
       drawText(context, fillingWords, {
         fillStyle: "#f25292",
         textAlign: "start",
-        textBaseline: "middle"
+        textBaseline: "middle",
       });
     } catch (e) {
       console.error(e);
@@ -99,7 +99,7 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     <Canvas
       width={width}
       height={height}
-      loading={loadFont || loading}
+      loading={false}
       nodata={data === undefined}
       dependcies={[data]}
       introduction={introduction}

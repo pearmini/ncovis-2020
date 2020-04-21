@@ -7,14 +7,15 @@ export default function ({
   loading,
   dataByDate,
   selectedTime,
-  selectedType = "confirm",
-  selectedLevel = "top",
+  selectedType,
+  selectedLevel,
   setSelectedTime,
   focus,
   setFocus,
-  running,
   selectedCountries,
   countries,
+  highlightRegions,
+  setHighlightRegions,
 }) {
   const ref = useRef(null);
   const width = 1200,
@@ -36,8 +37,8 @@ export default function ({
 
   const countriesSet = new Set(countries);
 
-  const [highlight, setHighlight] = useState(""),
-    [tip, setTip] = useState(null);
+  const [tip, setTip] = useState(null),
+    [hovered, setHovered] = useState(false);
 
   const all = useMemo(
       () =>
@@ -105,9 +106,8 @@ export default function ({
   const tipY = (index) => (index % tipCnt) * th;
 
   const lineX = () => {
-    if (running) return x(new Date(selectedTime));
+    if (!hovered) return x(new Date(selectedTime));
     if (tip) return x(tip.time);
-    return x(new Date(0));
   };
 
   const area = d3
@@ -124,8 +124,11 @@ export default function ({
           .domain(keys)
           .range(d3.quantize(d3.interpolateSpectral, keys.length).reverse());
 
-  const color = (key) =>
-    highlight === "" || key === highlight ? colorScale(key) : disableColor;
+  const color = (key) => {
+    const set = new Set(highlightRegions);
+    if (highlightRegions.length === 0) return colorScale(key);
+    return set.has(key) ? colorScale(key) : disableColor;
+  };
 
   const stroke = (key) =>
     selectedLevel === "top" ? d3.color(color(key)).darker() : "none";
@@ -166,10 +169,6 @@ export default function ({
     setTip({ ...a, time, x: mouseX, y: mouseY });
   }
 
-  function noData() {
-    return series.length === 0;
-  }
-
   useEffect(() => {
     const xAxis = d3.axisBottom(x);
     const yAxis = (g) =>
@@ -180,7 +179,7 @@ export default function ({
 
   return (
     <>
-      {noData(data) ? (
+      {series.length === 0 ? (
         <Svg
           viewBox={[0, 0, width, height]}
           loading={loading}
@@ -191,9 +190,15 @@ export default function ({
           viewBox={[0, 0, width, height]}
           loading={loading}
           onDoubleClick={() => setFocus("")}
-          onMouseLeave={() => setHighlight("")}
+          onClick={(e) => {
+            setHighlightRegions([]);
+            e.stopPropagation();
+          }}
           introduction={introduction}
           title="堆叠面积图"
+          onMouseEnter={(e) => setHovered(true)}
+          onMouseLeave={(e) => setHovered(false)}
+          onMouseOver={(e) => !hovered && setHovered(true)}
         >
           <g
             cursor="pointer"
@@ -201,11 +206,7 @@ export default function ({
             transform={`translate(${margin.left}, ${margin.top})`}
             onMouseLeave={() => setTip(null)}
           >
-            <g
-              onMouseMove={handleChangeTip}
-              onClick={handleChangeSelectedTime}
-              onMouseOver={() => highlight !== "" && setHighlight("")}
-            >
+            <g onMouseMove={handleChangeTip} onClick={handleChangeSelectedTime}>
               {series.map((s) => (
                 <path
                   key={s.key}
@@ -226,7 +227,6 @@ export default function ({
             />
             <g transform={`translate(${10},${-legendHeight * cnt + 10})`}>
               <rect
-                onMouseLeave={() => setHighlight("")}
                 x={-10}
                 y={-10}
                 fill="transparent"
@@ -237,10 +237,21 @@ export default function ({
                 <g
                   key={key}
                   transform={`translate(${legendX(index)}, ${legendY(index)})`}
-                  onMouseEnter={() => setHighlight(key)}
-                  onClick={(e) => {
+                  onDoubleClick={(e) => {
                     setFocus(key);
-                    setHighlight("");
+                    setHighlightRegions([]);
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    const newHighlightRegions = highlightRegions.slice();
+                    const old = highlightRegions.find((d) => d === key);
+                    if (old) {
+                      const index = highlightRegions.indexOf(old);
+                      newHighlightRegions.splice(index, 1);
+                    } else {
+                      newHighlightRegions.push(key);
+                    }
+                    setHighlightRegions(newHighlightRegions);
                     e.stopPropagation();
                   }}
                 >
