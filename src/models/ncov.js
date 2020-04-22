@@ -6,6 +6,7 @@ import { gql } from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
 import "array-flat-polyfill";
+import { formTree } from "../utils/tree";
 
 const d3 = {
   ...d3All,
@@ -157,6 +158,10 @@ export default {
     widthData: new Set(),
     total: [],
     selectedCountries: [],
+    treeData: d3.hierarchy({
+      name: "empty",
+      children: [],
+    }),
   },
   reducers: {
     addCountryData(state, action) {
@@ -180,6 +185,10 @@ export default {
     setSelectedDate: (state, action) => ({
       ...state,
       selectedDate: action.payload,
+    }),
+    setTreeData: (state, action) => ({
+      ...state,
+      treeData: action.payload,
     }),
   },
   effects: {
@@ -251,7 +260,8 @@ export default {
           selectedTime = new Date(range[0]).getTime(),
           selectedCountries = ["中国"],
           widthData = new Set(["中国"]),
-          selectedDate = "2020-03-27";
+          selectedDate = "2020-03-27",
+          treeData = d3.hierarchy(formTree([country]));
 
         yield put({
           type: "init",
@@ -266,6 +276,7 @@ export default {
             total,
             widthData,
             countries,
+            treeData,
           },
         });
       } catch (e) {

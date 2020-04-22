@@ -7,6 +7,7 @@ import regions from "../assets/data/region_options.json";
 import DateMap from "./DateMap";
 import Areachart from "./Areachart";
 import * as d3 from "d3";
+import { formTree } from "../utils/tree";
 
 const { Option } = Select;
 
@@ -25,17 +26,6 @@ const Control = styled.div`
   }
 `;
 
-function formTree(nodes) {
-  return {
-    title: "全球",
-    value: "全球",
-    children: nodes.map((d) => ({
-      title: d,
-      value: d,
-    })),
-  };
-}
-
 function NcovPanel({
   selectedDate,
   setSelectedDate,
@@ -52,13 +42,14 @@ function NcovPanel({
   selectedTime,
   setSelectedTime,
   loading,
+  treeData,
+  setTreeData,
 }) {
-  const [focus, setFocus] = useState("");
+  const [focusRegion, setFocusRegion] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("湖北");
   const [selectedType, setSelectedType] = useState("confirmed");
   const [selectedLevel, setSelectedLevel] = useState("top");
   const [highlightRegions, setHighlightRegions] = useState([]);
-  const [treeData, setTreeData] = useState(d3.hierarchy(regions));
 
   const levels = [
     { name: "国家", key: "top" },
@@ -79,8 +70,8 @@ function NcovPanel({
     setSelectedTime,
     selectedType,
     selectedLevel,
-    focus,
-    setFocus,
+    focusRegion,
+    setFocusRegion,
     selectedCountries,
     countries,
     highlightRegions,
@@ -91,17 +82,18 @@ function NcovPanel({
     regions,
     range,
     selectedRegion,
+    setSelectedRegion,
     selectedDate,
     setSelectedDate,
-    setSelectedRegion,
-    selectedRange: selectedLevel,
+    setSelectedLevel,
+    selectedLevel,
     selectedType,
     loading,
     dataByRegion,
     selectedCountries,
     treeData,
     setTreeData,
-    handleChangeRange,
+    handleChangeLevel,
   };
 
   function handleCountryDataChange(keys) {
@@ -118,9 +110,23 @@ function NcovPanel({
     setTreeData(d3.hierarchy(formTree(keys)));
   }
 
-  function handleChangeRange(value) {
-    if (value === "top") setTreeData(d3.hierarchy(formTree(selectedCountries)));
-    else setTreeData(d3.hierarchy(regions));
+  function handleChangeLevel(value, tree) {
+    if (value === "top") {
+      setTreeData(d3.hierarchy(formTree(selectedCountries)));
+    } else if (value === "second") {
+      const root =
+        tree !== undefined
+          ? tree
+          : d3.hierarchy(regions).each((d) => {
+              d.depth === 1
+                ? (d.hideChildren = true)
+                : d.depth === 2 && (d.hide = true);
+            });
+      setTreeData(root);
+    } else {
+      const root = tree !== undefined ? tree : d3.hierarchy(regions);
+      setTreeData(root);
+    }
     setSelectedLevel(value);
   }
 
@@ -136,7 +142,10 @@ function NcovPanel({
             <b>级别</b>
           </span>
           &ensp;
-          <Select value={selectedLevel} onChange={handleChangeRange}>
+          <Select
+            value={selectedLevel}
+            onChange={(value) => handleChangeLevel(value)}
+          >
             {levels.map((d) => (
               <Option key={d.key}>{d.name}</Option>
             ))}
@@ -189,22 +198,12 @@ function NcovPanel({
   );
 }
 export default connect(
-  ({ news, ncov, loading }) => ({
-    newsByRegion: news.newsByRegion,
-    range: ncov.range,
-    total: ncov.total,
-    countries: ncov.countries,
-    selectedCountries: ncov.selectedCountries,
-    setSelectedRange: ncov.setSelectedCountries,
-    dataByRegion: ncov.dataByRegion,
-    dataByDate: ncov.dataByDate,
-    selectedDate: ncov.selectedDate,
-    widthData: ncov.widthData,
+  ({ ncov, loading }) => ({
     loading: loading.models.ncov,
-    selectedTime: ncov.selectedTime,
-    countries: ncov.countries,
+    ...ncov,
   }),
   {
+    setTreeData: (data) => ({ type: "ncov/setTreeData", payload: data }),
     getCountryData: (country, dataByDate, dataByRegion, total) => ({
       type: "ncov/getCountryData",
       payload: { country, dataByDate, dataByRegion, total },

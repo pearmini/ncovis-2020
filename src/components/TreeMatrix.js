@@ -32,7 +32,7 @@ export default function ({
   legendHeight,
   treeData,
   setTreeData,
-  handleChangeRange,
+  handleChangeLevel,
 }) {
   if (!dataByRegion.size || !treeData.children)
     return (
@@ -329,8 +329,8 @@ export default function ({
   async function toggleNode(node) {
     if (!node.children) return;
     if (node.depth === 0) {
-      const range = node.data.title === "全球" ? "china" : "world";
-      handleChangeRange(range);
+      const level = node.data.title === "全球" ? "second" : "top";
+      handleChangeLevel(level);
       return;
     }
     // animation
@@ -373,7 +373,9 @@ export default function ({
 
     // update view
     const newTreeData = copyTree();
-    setTreeData(newTreeData);
+    allHide
+      ? handleChangeLevel("third", newTreeData)
+      : handleChangeLevel("second", newTreeData);
     setHighlight([]);
   }
 

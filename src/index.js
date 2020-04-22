@@ -10,6 +10,7 @@ import newsModel from "./models/news";
 import totalModel from "./models/total";
 import commentModel from "./models/comment";
 import ncovModel from "./models/ncov";
+import globalModel from "./models/global";
 import "./index.css";
 
 const app = new dva();
@@ -20,12 +21,10 @@ app.model(hotsModel);
 app.model(newsModel);
 app.model(totalModel);
 app.model(commentModel);
+app.model(globalModel);
 
 app.router(() => <App />);
 
 app.start("#root");
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();

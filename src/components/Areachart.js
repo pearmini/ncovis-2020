@@ -10,8 +10,8 @@ export default function ({
   selectedType,
   selectedLevel,
   setSelectedTime,
-  focus,
-  setFocus,
+  focusRegion,
+  setFocusRegion,
   selectedCountries,
   countries,
   highlightRegions,
@@ -66,14 +66,14 @@ export default function ({
             Object.keys(d).reduce((obj, key) => {
               if (key === "date") {
                 obj[key] = d[key];
-              } else if (focus === "" || focus === key) {
+              } else if (focusRegion === "" || focusRegion === key) {
                 obj[key] = d[key][selectedType];
               }
               return obj;
             }, {})
           )
           .sort((a, b) => a.date - b.date),
-      [all, selectedType, focus]
+      [all, selectedType, focusRegion]
     ),
     [first] = data,
     keys = first ? Object.keys(first).filter((d) => d !== "date") : [],
@@ -189,7 +189,7 @@ export default function ({
         <Svg
           viewBox={[0, 0, width, height]}
           loading={loading}
-          onDoubleClick={() => setFocus("")}
+          onDoubleClick={() => setFocusRegion("")}
           onClick={(e) => {
             setHighlightRegions([]);
             e.stopPropagation();
@@ -238,7 +238,7 @@ export default function ({
                   key={key}
                   transform={`translate(${legendX(index)}, ${legendY(index)})`}
                   onDoubleClick={(e) => {
-                    setFocus(key);
+                    setFocusRegion(key);
                     setHighlightRegions([]);
                     e.stopPropagation();
                   }}

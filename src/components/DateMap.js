@@ -3,6 +3,7 @@ import "array-flat-polyfill";
 import TreeMatrix from "./TreeMatrix";
 import HeatMap from "./HeatMap";
 import * as d3 from "d3";
+
 export default function ({
   dataByRegion,
   selectedRegion,
@@ -11,12 +12,10 @@ export default function ({
   setSelectedRegion,
   selectedType,
   loading,
-  selectedRange,
-  setSelectedRange,
   selectedCountries,
   treeData,
   setTreeData,
-  handleChangeRange,
+  handleChangeLevel,
 }) {
   const [isTree, setIsTree] = useState(true);
   const width = 1200,
@@ -82,11 +81,9 @@ export default function ({
     disabledColor,
     legendHeight,
     legendWidth,
-    selectedRange,
-    setSelectedRange,
     treeData,
     setTreeData,
-    handleChangeRange,
+    handleChangeLevel,
   };
 
   const heatMapProps = {
