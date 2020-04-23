@@ -8,7 +8,7 @@ const Container = styled.div`
   cursor: pointer;
 `;
 
-export default function({
+export default function ({
   selectedDate,
   setSelectedDate,
   selectedType,
@@ -16,50 +16,50 @@ export default function({
   width,
   height,
   show,
-  setShow,
+  setFocusRegion,
+  focusRegion,
   colors,
   all,
-  selectedRegion,
   highlightRectColor,
   disabledColor,
   legendWidth,
-  legendHeight
+  legendHeight,
 }) {
   const margin = { top: 30, right: 30, bottom: 30, left: 30 };
   const data = all
-    .filter(d => d.region === selectedRegion)
-    .map(d => ({
+    .filter((d) => d.region === focusRegion)
+    .map((d) => ({
       value: d[selectedType],
-      date: new Date(d.date)
+      date: new Date(d.date),
     }))
     .filter(({ value }) => !isNaN(value) && value !== "");
 
-  const countDay = d => d.getDay(),
-    formatDay = d => "SMTWTFS"[countDay(d)],
+  const countDay = (d) => d.getDay(),
+    formatDay = (d) => "SMTWTFS"[countDay(d)],
     formatMonth = d3.timeFormat("%b");
 
   const timeWeek = d3.timeSunday,
     timeMonth = d3.timeMonth,
     timeDay = d3.timeDay,
-    [startDate, endDate] = d3.extent(data, d => d.date),
-    valueExtent = d3.extent(data, d => d.value),
+    [startDate, endDate] = d3.extent(data, (d) => d.date),
+    valueExtent = d3.extent(data, (d) => d.value),
     startMonth = timeMonth(startDate),
     endMonth = timeMonth.ceil(endDate),
     totalWeek = timeWeek.count(startMonth, endMonth),
-    days = d3.range(7).map(i => new Date(1995, 0, i)),
+    days = d3.range(7).map((i) => new Date(1995, 0, i)),
     months = d3.timeMonths(startMonth, endMonth),
     padding = 4,
     sw = 8,
     sc = "white";
 
-  const valueByDate = d3.map(data, d => formatDate(d.date));
-  const dates = timeDay.range(startMonth, endMonth).map(d => {
+  const valueByDate = d3.map(data, (d) => formatDate(d.date));
+  const dates = timeDay.range(startMonth, endMonth).map((d) => {
     const key = formatDate(d);
     const value = valueByDate.get(key);
     if (value) return value;
     return {
       date: d,
-      value: null
+      value: null,
     };
   });
 
@@ -71,16 +71,16 @@ export default function({
   const chartWidth = (cellSize * totalWeek) | 0,
     chartHeight = (cellSize * 7) | 0;
 
-  const special = selectedRegion === "湖北" || selectedRegion === "华中地区";
-  const x = date => timeWeek.count(startMonth, date) * cellSize + 0.5,
-    y = date => countDay(date) * cellSize + 0.5,
+  const special = focusRegion === "湖北" || focusRegion === "华中地区";
+  const x = (date) => timeWeek.count(startMonth, date) * cellSize + 0.5,
+    y = (date) => countDay(date) * cellSize + 0.5,
     colorScale = special
       ? d3
           .scaleSqrt()
           .interpolate(() => colors.special)
           .domain(valueExtent)
       : d3.scaleSequential(colors[selectedType]).domain(valueExtent),
-    color = value => {
+    color = (value) => {
       if (value === null) return disabledColor;
       return colorScale(value);
     },
@@ -90,10 +90,10 @@ export default function({
           .interpolate(() => colors.special)
           .domain([0, legendWidth])
       : d3.scaleSequential(colors[selectedType]).domain([0, legendWidth]),
-    yDay = d => (countDay(d) + 0.5) * cellSize,
-    isSelect = date => formatDate(date) === selectedDate;
+    yDay = (d) => (countDay(d) + 0.5) * cellSize,
+    isSelect = (date) => formatDate(date) === selectedDate;
 
-  const pathMonth = t => {
+  const pathMonth = (t) => {
     const n = 7;
     const d = countDay(t);
     const w = timeWeek.count(startMonth, t);
@@ -133,14 +133,8 @@ export default function({
   useEffect(() => {
     // 绘制坐标轴
     const scaleLegend = special
-      ? d3
-          .scaleSqrt()
-          .domain(colorScale.domain())
-          .range([0, legendWidth])
-      : d3
-          .scaleLinear()
-          .domain(colorScale.domain())
-          .range([0, legendWidth]);
+      ? d3.scaleSqrt().domain(colorScale.domain()).range([0, legendWidth])
+      : d3.scaleLinear().domain(colorScale.domain()).range([0, legendWidth]);
 
     const legendAxis = d3
       .axisBottom(scaleLegend)
@@ -151,7 +145,7 @@ export default function({
   });
 
   return (
-    <Container onDoubleClick={() => setShow(true)}>
+    <Container onDoubleClick={() => setFocusRegion("")}>
       <Svg
         viewBox={[0, 0, width, height]}
         loading={loading}
@@ -165,7 +159,7 @@ export default function({
             margin.top
           })`}
         >
-          {d3.range(0, legendWidth).map(l => (
+          {d3.range(0, legendWidth).map((l) => (
             <line
               className="tree-line"
               key={l}
@@ -182,12 +176,12 @@ export default function({
           ></g>
         </g>
         <g
-          transform={`translate(${(width - chartWidth) / 2}, ${(height -
-            chartHeight) /
-            2})`}
+          transform={`translate(${(width - chartWidth) / 2}, ${
+            (height - chartHeight) / 2
+          })`}
         >
           {data.length !== 0 &&
-            months.map(d => (
+            months.map((d) => (
               <text fill="currentColor" x={x(d)} dy="-1em" key={d}>
                 {formatMonth(d)}
               </text>
@@ -195,7 +189,7 @@ export default function({
           {data.length !== 0 &&
             months
               .slice(1, months.length)
-              .map(d => (
+              .map((d) => (
                 <path
                   d={pathMonth(d)}
                   stroke={sc}
@@ -214,7 +208,7 @@ export default function({
               fill={color(value)}
               stroke={isSelect(date) ? highlightRectColor : "none"}
               strokeWidth={padding}
-              onClick={e => {
+              onClick={(e) => {
                 if (value !== null) setSelectedDate(formatDate(date));
                 e.stopPropagation();
               }}
@@ -225,7 +219,7 @@ export default function({
             </rect>
           ))}
           {data.length !== 0 &&
-            days.map(d => (
+            days.map((d) => (
               <text
                 key={d}
                 fill="currentColor"
@@ -244,7 +238,7 @@ export default function({
             fill="#777"
           >
             <text fontSize={35} fontWeight="bold">
-              {selectedRegion}
+              {focusRegion}
             </text>
             <text fontSize={15} dy="1.5em">
               {selectedDate}

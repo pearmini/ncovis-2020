@@ -94,7 +94,32 @@ function NcovPanel({
     treeData,
     setTreeData,
     handleChangeLevel,
+    focusRegion,
+    setFocusRegion: handleFocusChange,
   };
+
+  function handleFocusChange(value) {
+    const level = findLevel(value);
+    if (level !== selectedLevel) handleChangeLevel(level);
+    setFocusRegion(value);
+  }
+
+  function findLevel(value) {
+    const secondLevelSet = new Set([
+      "华北地区",
+      "西北地区",
+      "东北地区",
+      "华东地区",
+      "华中地区",
+      "西南地区",
+      "华南地区",
+      "港澳台地区",
+    ]);
+    const topLevelSet = new Set(selectedCountries);
+    if (secondLevelSet.has(value)) return "second";
+    if (topLevelSet.has(value)) return "top";
+    return "third";
+  }
 
   function handleCountryDataChange(keys) {
     if (keys.length >= 30) {
@@ -128,6 +153,7 @@ function NcovPanel({
       setTreeData(root);
     }
     setSelectedLevel(value);
+    setFocusRegion("");
   }
 
   useEffect(() => {

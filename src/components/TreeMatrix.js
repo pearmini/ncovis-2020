@@ -19,7 +19,7 @@ export default function ({
   selectedType,
   loading,
   show,
-  setShow,
+  setFocusRegion,
   width,
   height,
   colors,
@@ -731,7 +731,7 @@ export default function ({
                 }}
                 onDoubleClick={(e) => {
                   setSelectedRegion(node.data.title);
-                  setShow(false);
+                  setFocusRegion(node.data.title);
                   e.stopPropagation();
                 }}
               >
