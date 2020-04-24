@@ -195,8 +195,8 @@ export default {
     *getCountryData(action, { call, put }) {
       const { country, total, dataByDate, dataByRegion } = action.payload;
       const result = yield call(getNcov, country);
-      const news = result.data.ncov;
-      const data = preprocess(news, total, country);
+      const ncov = result.data.ncov;
+      const data = preprocess(ncov, total, country);
       const countryByDate = d3.rollup(
         data,
         ([d]) => d.data,
@@ -228,10 +228,8 @@ export default {
     },
     *getData(action, { call, put }) {
       try {
-        const country = "中国";
-        const ncovResult = yield call(getNcov, country);
+        // 获得所有的城市列表
         const countryResult = yield call(getAllCountry);
-        const news = ncovResult.data.ncov;
         const countries = Array.from(
           new Set(
             countryResult.data.ncov
@@ -239,8 +237,16 @@ export default {
               .filter((d) => d !== "")
           )
         );
-        const total = Array.from(new Set(news.map((d) => d.date)));
-        const data = preprocess(news, total, country),
+
+        // 获得选中城市的数据
+        // const selectedCountries = action.payload;
+        const country = "中国";
+        const ncovResult = yield call(getNcov, country);
+
+        const ncov = ncovResult.data.ncov;
+
+        const total = Array.from(new Set(ncov.map((d) => d.date)));
+        const data = preprocess(ncov, total, country),
           dataByRegion = d3.rollup(
             data,
             ([d]) => d,
@@ -263,6 +269,7 @@ export default {
           selectedDate = "2020-03-27",
           treeData = d3.hierarchy(formTree([country]));
 
+        console.log(dataByRegion, dataByDate)
         yield put({
           type: "init",
           payload: {

@@ -157,7 +157,7 @@ function NcovPanel({
   }
 
   useEffect(() => {
-    getData("中国");
+    getData(["中国", "美国", "英国", "西班牙", "意大利"]);
   }, [getData]);
 
   return (
@@ -246,7 +246,10 @@ export default connect(
       type: "ncov/setSelectedTime",
       payload: time,
     }),
-    getData: (country) => ({ type: "ncov/getData", payload: { country } }),
+    getData: (selectedCountries) => ({
+      type: "ncov/getData",
+      payload: selectedCountries,
+    }),
     setSelectedCountries: (keys) => ({
       type: "ncov/setSelectedCountries",
       payload: {

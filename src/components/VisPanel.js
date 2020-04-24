@@ -8,12 +8,17 @@ import { Tabs } from "antd";
 const { TabPane } = Tabs;
 const Container = styled.div``;
 
-function VisPanel({}) {
-
+function VisPanel({
+  getTime,
+  timeTicks,
+  timeRange,
+  selectedTime,
+  selectedRegion,
+}) {
+  console.log(timeTicks, timeRange, selectedTime, selectedRegion);
   useEffect(() => {
-    // 获得时间范围
-    // 获得选择的时间
-  });
+    getTime();
+  },[]);
   return (
     <Container>
       <h1>可视化</h1>
@@ -29,4 +34,6 @@ function VisPanel({}) {
   );
 }
 
-export default connect()(VisPanel);
+export default connect(({ global }) => ({ ...global }), {
+  getTime: () => ({ type: "global/getTime" }),
+})(VisPanel);

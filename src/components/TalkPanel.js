@@ -95,7 +95,6 @@ function TalkPanel({
   getNewsData,
   newsByRegion,
 }) {
-
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -182,7 +181,6 @@ function TalkPanel({
     selectedDate,
     selectedRegion,
   };
-
 
   if (running && loadingHots && !pause) {
     stopAnimation();
@@ -325,40 +323,6 @@ function TalkPanel({
   return (
     <Container>
       <An id="hots" />
-      {/* <h1>人们都在讨论些什么？</h1> */}
-      {/* <MyRow>
-        <Intro>
-          <p>这里是和舆论相关的可视化，用来探索全国人们在讨论什么？</p>
-          <p>
-            首先上面是一个动态的<b>条形图</b>和<b>词云</b>，分别反映的是：
-            <b>知乎热榜前10的话题的热度变化情况</b>和
-            <b>当前热门话题下回答中的热词变化情况</b>
-            。点击播放按钮动画开始播放动画，在
-            <b>条形图中</b>
-            将鼠标移动到任意一条热门话题上会显示完整的话题；点击任意一条热门话题，在
-            <b>词云</b>
-            显示这一条热门话题对应回答的热词。
-          </p>
-          <p>
-            当你发现了一些有趣的话题，并且想找寻它们和疫情的关系的时候，就可以使用下面的
-            <b>堆叠面积图</b>
-            ，该图反映的是：
-            <b>各个地区每天确诊、治愈或死亡的总人数随着时间的变化</b>。
-          </p>
-          <p>
-            <b>堆叠面积图中</b>
-            ，其中每一种颜色的“带子”代表一个地区，该“带子”越宽，表示该地区当天相应类别（确诊、治愈或者死亡）总人数越大。在这里你不仅能看各个省份（湖北省、山东省等）和各个直辖市（北京市、上海市）的相应类别总人数的变化情况，还可以通过
-            <b>级别下拉框</b>
-            来选择不同的级别，从而查看各个分区（华中地区、华南地区等），甚至全国相应类别总人数的变化情况。
-          </p>
-          <p>
-            在<b>堆叠面积图</b>中，如果你对某个地区特别感兴趣，可以<b>单击</b>
-            该地区的名字，进入只显示该地区情况的<b>普通面积图</b>。并且可以通过
-            <b>双击空白</b>部分返回。
-          </p>
-        </Intro>
-        <NewsImage src={newsImage} />
-      </MyRow> */}
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <BarRace {...barsProps} />
@@ -408,61 +372,6 @@ function TalkPanel({
           <Piechart {...pieProps} />
         </Col>
         <Col span={12}>
-          {/* <Control>
-            <div>
-              <span>
-                <b>级别</b>
-              </span>
-              &ensp;
-              <Select
-                value={selectedLevel}
-                onChange={(value) => {
-                  setSelectedLevel(value);
-                  setFocus("");
-                }}
-              >
-                {levels.map((d) => (
-                  <Option key={d.key}>{d.name}</Option>
-                ))}
-              </Select>
-              &ensp;&ensp;
-              <span>
-                <b>种类</b>
-              </span>
-              &ensp;
-              <Select
-                value={selectedType}
-                onChange={(value) => setSelectedType(value)}
-              >
-                {types.map((d) => (
-                  <Option key={d.key}>{d.name}</Option>
-                ))}
-              </Select>
-              {selectedLevel === "top" && (
-                <>
-                  &ensp;&ensp;
-                  <span>
-                    <b>查看的国家</b>
-                  </span>
-                  &ensp;
-                  <Select
-                    mode="tags"
-                    value={selectedCountries}
-                    onChange={handleCountryDataChange}
-                    style={{
-                      minWidth: 200,
-                    }}
-                  >
-                    {countries.map((d) => (
-                      <Option key={d}>{d}</Option>
-                    ))}
-                  </Select>
-                </>
-              )}
-            </div>
-          </Control> */}
-          {/* <Areachart {...areaPros} /> */}
-
           <Shape {...shapeProps} />
         </Col>
       </Row>
