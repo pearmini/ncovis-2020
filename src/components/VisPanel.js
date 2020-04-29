@@ -6,7 +6,14 @@ import NcovPanel from "./NcovPanel";
 import { Tabs } from "antd";
 
 const { TabPane } = Tabs;
-const Container = styled.div``;
+const Container = styled.div`
+  position: relative;
+`;
+
+const An = styled.div`
+  position: absolute;
+  top: -56px;
+`;
 
 function VisPanel({
   getTime,
@@ -18,9 +25,10 @@ function VisPanel({
   console.log(timeTicks, timeRange, selectedTime, selectedRegion);
   useEffect(() => {
     getTime();
-  },[]);
+  }, []);
   return (
     <Container>
+      <An id="vis" />
       <h1>可视化</h1>
       <Tabs defaultActiveKey="1">
         <TabPane tab="疫情数据" key="1">

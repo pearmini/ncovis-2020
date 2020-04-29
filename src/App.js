@@ -28,9 +28,7 @@ function App() {
         <OverviewPanel />
         <IntroductionPanel />
         <VisPanel />
-        {/* <HotsPanel /> */}
-        {/* <NewsPanel /> */}
-        {/* <DiscoveryPanel /> */}
+        <DiscoveryPanel />
       </Content>
       <Footer />
     </ThemeProvider>
