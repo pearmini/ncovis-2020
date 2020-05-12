@@ -46,7 +46,11 @@ function IntroductionPanel() {
         <Intro>
           <p>
             <b>nCoVIS</b> 是山东大学{" "}
-            <a href="https://vislab.wang/" target="_blank">
+            <a
+              href="https://vislab.wang/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               VisLab
             </a>{" "}
             实验室为大众提供的一个在线可视化分析平台，旨在探索从 COVID-19
@@ -70,20 +74,33 @@ function IntroductionPanel() {
             所以我们除了提供和疫情直接相关的数据（来自
             <a
               target="_blank"
+              rel="noopener noreferrer"
               href="https://github.com/BlankerL/DXY-COVID-19-Crawler?spm=5176.12282029.0.0.480b56f5rDZFu0"
             >
               丁香园
             </a>
             ）可视化以外，还爬取了
-            <a target="_blank" href="https://www.chinanews.com/">
+            <a
+              target="_blank"
+              href="https://www.chinanews.com/"
+              rel="noopener noreferrer"
+            >
               中国新闻网
             </a>
             各地区的新闻数据和
-            <a target="_blank" href="https://www.zhihu.com/">
+            <a
+              target="_blank"
+              href="https://www.zhihu.com/"
+              rel="noopener noreferrer"
+            >
               知乎
             </a>
-            的热搜数据（感谢 {" "}
-            <a href="https://github.com/mjrao/hotso" target="_blank">
+            的热搜数据（感谢{" "}
+            <a
+              href="https://github.com/mjrao/hotso"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               mjrao 先生
             </a>
             提供的部分知乎热搜数据)，并提供相关的可视化。
