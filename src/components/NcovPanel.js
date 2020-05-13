@@ -96,6 +96,8 @@ function NcovPanel({
     handleChangeLevel,
     focusRegion,
     setFocusRegion: handleFocusChange,
+    highlightRegions,
+    setHighlightRegions,
   };
 
   function handleFocusChange(value) {

@@ -18,6 +18,8 @@ export default function ({
   handleChangeLevel,
   focusRegion,
   setFocusRegion,
+  highlightRegions,
+  setHighlightRegions,
 }) {
   const width = 1200,
     height = 650,
@@ -85,6 +87,8 @@ export default function ({
     treeData,
     setTreeData,
     handleChangeLevel,
+    highlight: highlightRegions,
+    setHighlight: setHighlightRegions,
   };
 
   const heatMapProps = {

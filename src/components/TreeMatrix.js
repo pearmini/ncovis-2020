@@ -33,6 +33,8 @@ export default function ({
   treeData,
   setTreeData,
   handleChangeLevel,
+  highlight,
+  setHighlight,
 }) {
   if (!dataByRegion.size || !treeData.children)
     return (
@@ -44,7 +46,7 @@ export default function ({
       ></Svg>
     );
 
-  const [highlight, setHighlight] = useState([]);
+  // const [highlight, setHighlight] = useState([]);
   const [drag, setDrag] = useState({
     start: null,
     move: 0,
@@ -81,7 +83,8 @@ export default function ({
       .filter((d) => visableRegions.has(d.region)),
     days = Array.from(new Set(data.map((d) => d.date)));
 
-  const hset = new Set(highlight.map((d) => d.data.title));
+  const title = (d) => (typeof d === "object" ? d.data.title : d);
+  const hset = new Set(highlight.map((d) => title(d)));
   const colorData = highlight.length
     ? data.filter((d) => hset.has(d.region))
     : data;
@@ -299,8 +302,8 @@ export default function ({
   function hasSpecialLegend() {
     return (
       (treeData.data.title === "中国" && highlight.length === 0) ||
-      highlight.find((d) => d.data.title === "湖北") ||
-      highlight.find((d) => d.data.title === "华中地区")
+      highlight.find((d) => title(d) === "湖北") ||
+      highlight.find((d) => title(d) === "华中地区")
     );
   }
 

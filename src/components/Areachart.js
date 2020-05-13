@@ -124,8 +124,9 @@ export default function ({
           .domain(keys)
           .range(d3.quantize(d3.interpolateSpectral, keys.length).reverse());
 
+  const title = (d) => (typeof d === "object" ? d.data.title : d);
   const color = (key) => {
-    const set = new Set(highlightRegions);
+    const set = new Set(highlightRegions.map((d) => title(d)));
     if (highlightRegions.length === 0) return colorScale(key);
     return set.has(key) ? colorScale(key) : disableColor;
   };
@@ -244,7 +245,7 @@ export default function ({
                   }}
                   onClick={(e) => {
                     const newHighlightRegions = highlightRegions.slice();
-                    const old = highlightRegions.find((d) => d === key);
+                    const old = highlightRegions.find((d) => title(d) === key);
                     if (old) {
                       const index = highlightRegions.indexOf(old);
                       newHighlightRegions.splice(index, 1);
