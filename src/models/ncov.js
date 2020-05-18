@@ -147,6 +147,40 @@ function sum(regions, values, title, days) {
   return [title, data];
 }
 
+function* getCountryData(action, { call, put }) {
+  const { country, total, dataByDate, dataByRegion } = action.payload;
+  const result = yield call(getNcov, country);
+  const ncov = result.data.ncov;
+  const data = preprocess(ncov, total, country);
+  const countryByDate = d3.rollup(
+    data,
+    ([d]) => d.data,
+    (d) => d.date
+  );
+  const countryByRegion = d3.rollup(
+    data,
+    ([d]) => d,
+    (d) => d.region,
+    (d) => d.date
+  );
+
+  for (let [key, value] of dataByDate.entries()) {
+    const d = countryByDate.get(key);
+    value.push({ region: country, data: d });
+    dataByDate.set(key, value);
+  }
+
+  dataByRegion.set(country, countryByRegion.get(country));
+
+  yield put({
+    type: "addCountryData",
+    payload: {
+      dataByDate,
+      dataByRegion,
+      country,
+    },
+  });
+}
 export default {
   namespace: "ncov",
   state: {
@@ -165,11 +199,17 @@ export default {
   },
   reducers: {
     addCountryData(state, action) {
-      const { dataByDate, dataByRegion, country, name } = action.payload;
+      const { dataByDate, dataByRegion, country } = action.payload;
       const { selectedCountries, widthData } = state;
       selectedCountries.push(country);
       widthData.add(country);
-      return { ...state, dataByDate, dataByRegion, selectedCountries };
+      return {
+        ...state,
+        dataByDate,
+        dataByRegion,
+        selectedCountries,
+        treeData: d3.hierarchy(formTree(selectedCountries)),
+      };
     },
     setSelectedCountries(state, action) {
       const { keys } = action.payload;
@@ -192,40 +232,7 @@ export default {
     }),
   },
   effects: {
-    *getCountryData(action, { call, put }) {
-      const { country, total, dataByDate, dataByRegion } = action.payload;
-      const result = yield call(getNcov, country);
-      const ncov = result.data.ncov;
-      const data = preprocess(ncov, total, country);
-      const countryByDate = d3.rollup(
-        data,
-        ([d]) => d.data,
-        (d) => d.date
-      );
-      const countryByRegion = d3.rollup(
-        data,
-        ([d]) => d,
-        (d) => d.region,
-        (d) => d.date
-      );
-
-      for (let [key, value] of dataByDate.entries()) {
-        const d = countryByDate.get(key);
-        value.push({ region: country, data: d });
-        dataByDate.set(key, value);
-      }
-
-      dataByRegion.set(country, countryByRegion.get(country));
-
-      yield put({
-        type: "addCountryData",
-        payload: {
-          dataByDate,
-          dataByRegion,
-          country,
-        },
-      });
-    },
+    getCountryData,
     *getData(action, { call, put }) {
       try {
         // 获得所有的城市列表
@@ -238,13 +245,10 @@ export default {
           )
         );
 
-        // 获得选中城市的数据
-        // const selectedCountries = action.payload;
+        // 获得中国的数据
         const country = "中国";
         const ncovResult = yield call(getNcov, country);
-
         const ncov = ncovResult.data.ncov;
-
         const total = Array.from(new Set(ncov.map((d) => d.date)));
         const data = preprocess(ncov, total, country),
           dataByRegion = d3.rollup(
@@ -269,7 +273,6 @@ export default {
           selectedDate = "2020-03-27",
           treeData = d3.hierarchy(formTree([country]));
 
-        console.log(dataByRegion, dataByDate)
         yield put({
           type: "init",
           payload: {
@@ -286,6 +289,23 @@ export default {
             treeData,
           },
         });
+
+        // 获得其他城市的数据
+        const restCountries = action.payload;
+        for (let country of restCountries) {
+          yield call(
+            getCountryData,
+            {
+              payload: {
+                country,
+                total,
+                dataByDate,
+                dataByRegion,
+              },
+            },
+            { call, put }
+          );
+        }
       } catch (e) {
         console.error(e);
       }

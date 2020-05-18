@@ -159,7 +159,7 @@ function NcovPanel({
   }
 
   useEffect(() => {
-    getData(["中国", "美国", "英国", "西班牙", "意大利"]);
+    getData(["美国", "英国", "西班牙", "意大利"]);
   }, [getData]);
 
   return (
