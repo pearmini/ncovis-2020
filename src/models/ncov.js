@@ -147,40 +147,6 @@ function sum(regions, values, title, days) {
   return [title, data];
 }
 
-function* getCountryData(action, { call, put }) {
-  const { country, total, dataByDate, dataByRegion } = action.payload;
-  const result = yield call(getNcov, country);
-  const ncov = result.data.ncov;
-  const data = preprocess(ncov, total, country);
-  const countryByDate = d3.rollup(
-    data,
-    ([d]) => d.data,
-    (d) => d.date
-  );
-  const countryByRegion = d3.rollup(
-    data,
-    ([d]) => d,
-    (d) => d.region,
-    (d) => d.date
-  );
-
-  for (let [key, value] of dataByDate.entries()) {
-    const d = countryByDate.get(key);
-    value.push({ region: country, data: d });
-    dataByDate.set(key, value);
-  }
-
-  dataByRegion.set(country, countryByRegion.get(country));
-
-  yield put({
-    type: "addCountryData",
-    payload: {
-      dataByDate,
-      dataByRegion,
-      country,
-    },
-  });
-}
 export default {
   namespace: "ncov",
   state: {
@@ -232,7 +198,40 @@ export default {
     }),
   },
   effects: {
-    getCountryData,
+    *getCountryData(action, { call, put }) {
+      const { country, total, dataByDate, dataByRegion } = action.payload;
+      const result = yield call(getNcov, country);
+      const ncov = result.data.ncov;
+      const data = preprocess(ncov, total, country);
+      const countryByDate = d3.rollup(
+        data,
+        ([d]) => d.data,
+        (d) => d.date
+      );
+      const countryByRegion = d3.rollup(
+        data,
+        ([d]) => d,
+        (d) => d.region,
+        (d) => d.date
+      );
+
+      for (let [key, value] of dataByDate.entries()) {
+        const d = countryByDate.get(key);
+        value.push({ region: country, data: d });
+        dataByDate.set(key, value);
+      }
+
+      dataByRegion.set(country, countryByRegion.get(country));
+
+      yield put({
+        type: "addCountryData",
+        payload: {
+          dataByDate,
+          dataByRegion,
+          country,
+        },
+      });
+    },
     *getData(action, { call, put }) {
       try {
         // 获得所有的城市列表
@@ -293,18 +292,10 @@ export default {
         // 获得其他城市的数据
         const restCountries = action.payload;
         for (let country of restCountries) {
-          yield call(
-            getCountryData,
-            {
-              payload: {
-                country,
-                total,
-                dataByDate,
-                dataByRegion,
-              },
-            },
-            { call, put }
-          );
+          yield put.resolve({
+            type: "getCountryData",
+            payload: { country, total, dataByDate, dataByRegion },
+          });
         }
       } catch (e) {
         console.error(e);

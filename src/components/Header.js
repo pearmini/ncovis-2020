@@ -56,13 +56,17 @@ const Nav = styled.nav`
     margin-left: 1em;
     list-style-type: none;
   }
-  & a {
+  & a,
+  & span {
     color: ${(props) => props.theme.font};
     font-weight: bold;
     padding: 0.5em 0;
+    cursor: pointer;
   }
 
-  & a:hover {
+  & a:hover,
+  & span:hover {
+    cursor: pointer;
     border-bottom: 1px solid white;
   }
 
@@ -101,7 +105,7 @@ const Overlayer = styled.div`
   z-index: 2;
 `;
 
-function Header({ setOpenForm }) {
+function Header({ setOpen }) {
   const [show, setShow] = useState(false);
   const navs = [
     {
@@ -173,18 +177,19 @@ function Header({ setOpenForm }) {
                 </li>
               ))}
               <li>
-                <a
+                <span
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenForm(true);
+                    setOpen(true);
                   }}
+                  href="#"
                 >
                   投稿
-                </a>
+                </span>
               </li>
               <li>
                 <Dropdown overlay={menu}>
-                  <a onClick={(e) => e.preventDefault()}>联系我们</a>
+                  <span onClick={(e) => e.preventDefault()}>联系我们</span>
                 </Dropdown>
               </li>
             </ul>
@@ -202,8 +207,8 @@ function Header({ setOpenForm }) {
   );
 }
 export default connect(null, {
-  setOpenForm: (value) => ({
-    type: "comment/setOpenForm",
+  setOpen: (value) => ({
+    type: "comment/setOpen",
     payload: { value },
   }),
 })(Header);

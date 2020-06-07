@@ -52,7 +52,7 @@ function VisPanel({
   // console.log(timeTicks, timeRange, selectedTime, selectedRegion);
   useEffect(() => {
     getTime();
-  }, []);
+  }, [getTime]);
   return (
     <Container>
       <An id="vis" />

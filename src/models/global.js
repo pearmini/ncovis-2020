@@ -28,7 +28,7 @@ export default {
     timeTicks: [],
   },
   effects: {
-    *getTime(action, { call, put }) {
+    *getTime(_, { call, put }) {
       const res = yield call(getTimeRange);
       const ncov = res.data.ncov;
       const timeTicks = Array.from(new Set(ncov.map((d) => d.date))),

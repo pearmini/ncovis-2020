@@ -3,7 +3,7 @@ import useAnimation from "../hook/useAnimation";
 import styled from "styled-components";
 import { connect } from "dva";
 import moment from "moment";
-import { Row, Col, Select, message, TreeSelect, DatePicker } from "antd";
+import { Row, Col, message, TreeSelect, DatePicker } from "antd";
 import regions from "../assets/data/region_options.json";
 
 import Timeline from "./Timeline";
@@ -15,9 +15,7 @@ import mc from "../utils/memorizedColor";
 import rc from "../utils/randomColor";
 import * as d3 from "d3";
 
-import newsImage from "../assets/images/hots.jpg";
 
-const { Option } = Select;
 message.config({
   maxCount: 1,
 });
@@ -42,40 +40,10 @@ const Control = styled.div`
   }
 `;
 
-const NewsImage = styled.img`
-  width: 370px;
-  border-radius: 8px;
-`;
-
-const Intro = styled.div`
-  width: 60%;
-  & ul {
-    padding-left: 2em;
-  }
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-`;
-
-const MyRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 2em;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
-
 function TalkPanel({
   dataByName,
-  dataByDate,
-  dataByRegion,
   getData,
   loadingHots,
-  loadingNcov,
   timeByName,
   getTime,
   selectedTime,
@@ -85,11 +53,7 @@ function TalkPanel({
   selectedWords,
   setSelectedWords,
   wordsByTime,
-  setSelectedCountries,
-  getCountryData,
   dateRange: totalTimeRange,
-  total,
-  widthData,
   selectedDate,
   setSelectedDate,
   getNewsData,
@@ -255,19 +219,6 @@ function TalkPanel({
     } else getWords(selectedName, time, title);
   }
 
-  function handleCountryDataChange(keys) {
-    if (keys.length >= 30) {
-      alert("不能超过 30 个国家");
-      return;
-    }
-    const newKeys = [];
-    for (let k of keys) {
-      if (widthData.has(k)) newKeys.push(k);
-      else getCountryData(k, dataByDate, dataByRegion, total, "hots");
-    }
-    setSelectedCountries("hots", newKeys);
-  }
-
   function search(time) {
     const bisect = d3.bisector((d) => d.time);
     const i = bisect.left(hotTimeRange, time);
@@ -403,13 +354,6 @@ export default connect(
     getCountryData: (country, dataByDate, dataByRegion, total, name) => ({
       type: "ncov/getCountryData",
       payload: { country, dataByDate, dataByRegion, total, name },
-    }),
-    setSelectedCountries: (name, keys) => ({
-      type: "ncov/setSelectedCountries",
-      payload: {
-        keys,
-        name,
-      },
     }),
     setSelectedTime: (time) => ({
       type: "ncov/setSelectedTime",
