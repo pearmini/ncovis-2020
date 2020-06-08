@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import Svg from "./Svg";
 import * as d3All from "d3";
 import * as d3Array from "d3-array";
-import mouse from "../utils/mouse";
-import regionsData from "../assets/data/region_options.json";
+
+import mouse from "../../../utils/mouse";
+import Svg from "../../../components/Svg";
+import regionsData from "../../../assets/data/region_options.json";
 
 const d3 = {
   ...d3All,
@@ -46,7 +47,7 @@ export default function ({
       ></Svg>
     );
 
-  // const [highlight, setHighlight] = useState([]);
+
   const [drag, setDrag] = useState({
     start: null,
     move: 0,

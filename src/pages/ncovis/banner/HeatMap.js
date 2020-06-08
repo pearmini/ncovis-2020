@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
-import Svg from "./Svg";
 import styled from "styled-components";
 import * as d3 from "d3";
-import formatDate from "../utils/formatDate";
+
+import Svg from "../../../components/Svg";
+import formatDate from "../../../utils/formatDate";
 
 const Container = styled.div`
   cursor: pointer;

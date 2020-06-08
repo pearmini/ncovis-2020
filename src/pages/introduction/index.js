@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import talkImage from "../assets/images/talk.jpg";
+import talkImage from "../../assets/images/talk.jpg";
 
 const Container = styled.div`
   position: relative;

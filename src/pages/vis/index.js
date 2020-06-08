@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { connect } from "dva";
 import styled from "styled-components";
-import TalkPanel from "./TalkPanel";
-import NcovPanel from "./NcovPanel";
-import visImage from "../assets/images/hots.jpg";
 import { Tabs } from "antd";
+
+import Ncov from "../ncovis";
+import visImage from "../../assets/images/hots.jpg";
 
 const { TabPane } = Tabs;
 const Container = styled.div`
@@ -48,8 +48,19 @@ function VisPanel({
   timeRange,
   selectedTime,
   selectedRegion,
+  setSelectedRegion,
+  setSelectedTime,
 }) {
   // console.log(timeTicks, timeRange, selectedTime, selectedRegion);
+
+//   console.log(selectedRegion, setSelectedRegion);
+  const ncovProps = {
+    selectedRegion,
+    setSelectedRegion,
+    selectedTime,
+    setSelectedTime,
+  };
+
   useEffect(() => {
     getTime();
   }, [getTime]);
@@ -80,16 +91,24 @@ function VisPanel({
       </Row>
       <Tabs defaultActiveKey="1">
         <TabPane tab="疫情数据" key="1">
-          <NcovPanel />
+          <Ncov {...ncovProps} />
         </TabPane>
         <TabPane tab="舆论新闻" key="2">
-          <TalkPanel />
+          {/* <TalkPanel /> */}
         </TabPane>
       </Tabs>
     </Container>
   );
 }
 
-export default connect(({ global }) => ({ ...global }), {
-  getTime: () => ({ type: "global/getTime" }),
+export default connect(({ common }) => ({ ...common }), {
+  getTime: () => ({ type: "common/getTime" }),
+  setSelectedRegion: (region) => ({
+    type: "common/setSelectedRegion",
+    payload: region,
+  }),
+  setSelectedTime: (time) => ({
+    type: "common/setSelectedTime",
+    payload: time,
+  }),
 })(VisPanel);

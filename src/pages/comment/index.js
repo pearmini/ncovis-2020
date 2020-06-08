@@ -2,8 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import { Drawer, Button } from "antd";
 import { connect } from "dva";
-import { schemeTableau10, range } from "d3";
-import str2num from "../utils/str2num";
+import { schemeTableau10 } from "d3";
+import str2num from "../../utils/str2num";
 
 const Container = styled.div`
   position: relative;
@@ -113,7 +113,7 @@ const Left = styled.div`
   }
 `;
 
-function Card ({ title, des, url, createTime, author, isTop, reading }){
+function Card({ title, des, url, createTime, author, isTop, reading }) {
   const avatarColor = () =>
     schemeTableau10[str2num(author) % schemeTableau10.length];
   return (
@@ -142,7 +142,7 @@ function Card ({ title, des, url, createTime, author, isTop, reading }){
       </CardContainer>
     </Wrapper>
   );
-};
+}
 
 function CommentPanel({ list, isOpen, setOpen }) {
   console.log(list);

@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
+import * as d3 from "d3";
 import "array-flat-polyfill";
+
 import TreeMatrix from "./TreeMatrix";
 import HeatMap from "./HeatMap";
-import * as d3 from "d3";
+
 
 export default function ({
   dataByRegion,

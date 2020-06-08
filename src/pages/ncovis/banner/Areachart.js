@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Svg from "./Svg";
 import * as d3 from "d3";
-import mouse from "../utils/mouse";
-import Tooltip from "./Tooltip";
+
+import Svg from "../../../components/Svg";
+import mouse from "../../../utils/mouse";
+import Tooltip from "../../../components/Tooltip";
+
 export default function ({
   loading,
   dataByDate,
@@ -16,6 +18,8 @@ export default function ({
   countries,
   highlightRegions,
   setHighlightRegions,
+  selectedRegion,
+  setSelectedRegion,
 }) {
   const ref = useRef(null);
   const width = 1200,
@@ -57,7 +61,13 @@ export default function ({
             })
             .reduce((obj, { region, data }) => ((obj[region] = data), obj), {}),
         })),
-      [dataByDate, selectedLevel, selectedCountries.length]
+      [
+        dataByDate,
+        selectedLevel,
+        countriesSet,
+        secondLevelSet,
+        selectedCountries,
+      ]
     ),
     data = useMemo(
       () =>
@@ -176,7 +186,7 @@ export default function ({
       g.call(d3.axisLeft(y)).call((g) => g.select(".domain").remove());
     d3.select(".area-xAxis").call(xAxis);
     d3.select(".area-yAxis").call(yAxis);
-  }, [data]);
+  }, [data, x, y]);
 
   return (
     <>
@@ -253,6 +263,7 @@ export default function ({
                       newHighlightRegions.push(key);
                     }
                     setHighlightRegions(newHighlightRegions);
+                    setSelectedRegion(key);
                     e.stopPropagation();
                   }}
                 >
@@ -260,7 +271,7 @@ export default function ({
                   <text
                     dy={5}
                     dx={10}
-                    fill="currentColor"
+                    fill={key === selectedRegion ? "red" : "currentColor"}
                     fontSize="12"
                     clipPath={`url(#${id(key)})`}
                   >

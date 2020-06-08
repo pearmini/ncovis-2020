@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useWindowSize } from "react-use";
-import chinaURL from "../assets/images/china.png";
-import zhihuURL from "../assets/images/zhihu.png";
 import { connect } from "dva";
 import { Tabs } from "antd";
+
+import chinaURL from "../../assets/images/china.png";
+import zhihuURL from "../../assets/images/zhihu.png";
 
 const { TabPane } = Tabs;
 
@@ -130,10 +131,10 @@ const DashBoard = styled.div`
   width: 100%;
 `;
 
-function Introduction({ total, getTotal }) {
+function Overview({ overview, getOverview }) {
   const { height } = useWindowSize();
   const [tab, setTab] = useState("全球");
-  const { data, time } = total;
+  const { data, time } = overview;
   const formate = (time) => {
     const date = new Date(time);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -147,8 +148,8 @@ function Introduction({ total, getTotal }) {
   };
 
   useEffect(() => {
-    getTotal();
-  }, [getTotal]);
+    getOverview();
+  }, [getOverview]);
 
   return (
     <Container height={height}>
@@ -193,12 +194,13 @@ function Introduction({ total, getTotal }) {
     </Container>
   );
 }
+
 export default connect(
-  ({ total, loading }) => ({
-    total,
-    loading: loading.models.total,
+  ({ overview, loading }) => ({
+    overview,
+    loading: loading.models.overview,
   }),
   {
-    getTotal: () => ({ type: "total/getData" }),
+    getOverview: () => ({ type: "overview/getData" }),
   }
-)(Introduction);
+)(Overview);

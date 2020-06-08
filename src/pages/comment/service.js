@@ -1,4 +1,4 @@
-const list = [
+export const get = () => [
   {
     id: 1,
     title: "Vue",
@@ -34,17 +34,3 @@ const list = [
     author: "不晓得",
   },
 ];
-
-export default {
-  namespace: "comment",
-  state: {
-    list,
-    isOpen: false,
-  },
-  reducers: {
-    setOpen(state, action) {
-      const { value } = action.payload;
-      return { ...state, isOpen: value };
-    },
-  },
-};

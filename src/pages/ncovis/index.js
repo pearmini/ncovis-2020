@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "dva";
 import { Row, Col, Select } from "antd";
-import styled from "styled-components";
-import regions from "../assets/data/region_options.json";
-
-import DateMap from "./DateMap";
-import Areachart from "./Areachart";
 import * as d3 from "d3";
-import { formTree } from "../utils/tree";
+import styled from "styled-components";
+
+import DateMap from "./banner/DateMap";
+import Areachart from "./banner/Areachart";
+import regions from "../../assets/data/region_options.json";
+import { formTree } from "../../utils/tree";
+import formatDate from "../../utils/formatDate";
 
 const { Option } = Select;
 
@@ -27,12 +28,9 @@ const Control = styled.div`
 `;
 
 function NcovPanel({
-  selectedDate,
-  setSelectedDate,
   dataByRegion,
   dataByDate,
   getData,
-  range,
   countries,
   selectedCountries,
   setSelectedCountries,
@@ -44,12 +42,15 @@ function NcovPanel({
   loading,
   treeData,
   setTreeData,
+  selectedRegion,
+  setSelectedRegion,
 }) {
   const [focusRegion, setFocusRegion] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("湖北");
   const [selectedType, setSelectedType] = useState("confirmed");
   const [selectedLevel, setSelectedLevel] = useState("top");
   const [highlightRegions, setHighlightRegions] = useState([]);
+  const selectedDate = formatDate(new Date(selectedTime));
+  const setSelectedDate = (date) => setSelectedTime(new Date(date).getTime());
 
   const levels = [
     { name: "国家", key: "top" },
@@ -76,11 +77,12 @@ function NcovPanel({
     countries,
     highlightRegions,
     setHighlightRegions,
+    selectedRegion,
+    setSelectedRegion,
   };
 
   const dateProps = {
     regions,
-    range,
     selectedRegion,
     setSelectedRegion,
     selectedDate,
@@ -236,17 +238,9 @@ export default connect(
       type: "ncov/getCountryData",
       payload: { country, dataByDate, dataByRegion, total },
     }),
-    setSelectedDate: (time) => ({
-      type: "ncov/setSelectedDate",
-      payload: time,
-    }),
     getNewsData: (region, date) => ({
       type: "news/getNewsData",
       payload: { region, date },
-    }),
-    setSelectedTime: (time) => ({
-      type: "ncov/setSelectedTime",
-      payload: time,
     }),
     getData: (selectedCountries) => ({
       type: "ncov/getData",
