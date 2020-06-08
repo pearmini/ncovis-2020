@@ -17,7 +17,6 @@ message.config({
 
 const Container = styled.div`
   position: relative;
-  margin-bottom: 4em;
   padding: 0 10px;
 `;
 

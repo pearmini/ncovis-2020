@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import { connect } from "dva";
-import moment from "moment";
-import { Row, Col, TreeSelect, DatePicker } from "antd";
+import { Row, Col, Select } from "antd";
 
 import Shape from "./banner/Shape";
 import Piechart from "./banner/Piechart";
-import formatDate from "../../utils/formatDate";
-import regions from "../../assets/data/region_options.json";
+import regionTree from "../../assets/data/region_options.json";
+import { filter } from "../../utils/tree";
+
+const { Option } = Select;
 
 const Container = styled.div`
   position: relative;
@@ -18,23 +19,21 @@ const Container = styled.div`
 const Control = styled.div`
   display: flex;
   margin: 0.5em 0 1em 0;
-
-  @media (max-width: 700px) {
-    flex-direction: column;
-  }
 `;
 
 function News({
-  selectedTime,
-  setSelectedTime,
   getNewsData,
   newsByRegion,
-  selectedRegion,
+  selectedRegion: defaultRegion,
   setSelectedRegion,
   loadingNews,
+  selectedDate,
 }) {
-  const selectedDate = formatDate(new Date(selectedTime));
-  const setSelectedDate = (date) => setSelectedTime(new Date(date).getTime());
+  const regionList = filter(regionTree, (d) => d.depth === 2).map(
+    (d) => d.title
+  );
+  const regionSet = new Set(regionList);
+  const selectedRegion = regionSet.has(defaultRegion) ? defaultRegion : "湖北";
   const newsByDate = newsByRegion.get(selectedRegion);
   const news = newsByDate && newsByDate.get(selectedDate);
   const { words, tags } = news || {};
@@ -53,10 +52,6 @@ function News({
     selectedRegion,
   };
 
-  // function disabledDate(current) {
-  //   if (range.length === 0) return true;
-  //   return current < moment(range[0]) || current > moment(range[1]);
-  // }
   useEffect(() => {
     // 如果有日期数据且 news 数据为空的话就请求
     if (
@@ -76,29 +71,17 @@ function News({
             <b>地区</b>
           </span>
           &ensp;
-          <TreeSelect
-            showSearch
-            value={selectedRegion}
-            treeData={regions}
-            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-            treeDefaultExpandAll
+          <Select
+            style={{ width: 120 }}
             onChange={setSelectedRegion}
-          />
-        </div>
-        &emsp;
-        <div>
-          <span>
-            <b>日期</b>
-          </span>
-          &ensp;
-          <DatePicker
-            value={selectedDate === "" ? null : moment(selectedDate)}
-            onChange={(date, string) => {
-              setSelectedDate(string);
-            }}
-            // disabledDate={disabledDate}
-            showTody={false}
-          />
+            value={selectedRegion}
+          >
+            {regionList.map((d) => (
+              <Option key={d} value={d}>
+                {d}
+              </Option>
+            ))}
+          </Select>
         </div>
       </Control>
       <Row gutter={[16, 16]}>

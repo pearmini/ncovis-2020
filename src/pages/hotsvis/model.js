@@ -120,14 +120,12 @@ export default {
           from: ((tick.time / 1000) | 0) - 1, // 这里的 from 是大于当前时刻，所以需要减少 1
           limit: limit + 1,
         });
-        const data = result.data[name].data;
-        console.log(data);
+        const data = combine(result.data[name].data);
         const { listKeyframes, wordsKeyframes } = preprocess(
           data,
           start,
           interval
         );
-        
         const cloudsKeyframes = yield call(
           computeFramesWordCloud,
           wordsKeyframes
@@ -144,6 +142,19 @@ export default {
     },
   },
 };
+
+function combine(data) {
+  return data.map(({ time, topics }) => {
+    const keywords = topics.flatMap((t, index) =>
+      t.keywords.map((k) => ({
+        title: t.title,
+        weight: k.weight * (1 - index * 0.05),
+        name: k.name,
+      }))
+    );
+    return { time, keywords: Array.from(new Set(keywords)), topics };
+  });
+}
 
 function words(data, n = 20) {
   const w = new Set([

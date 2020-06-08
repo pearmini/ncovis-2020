@@ -3,10 +3,9 @@ import * as commonApi from "./service";
 export default {
   namespace: "common",
   state: {
-    selectedTime: new Date().getTime(),
-    selectedRegion: "湖北",
+    selectedTime: 1579564800000,
+    selectedRegion: "中国",
     timeRange: [],
-    timeTicks: [],
   },
   effects: {
     *getTime(_, { call, put }) {
@@ -17,7 +16,7 @@ export default {
         selectedTime = new Date(timeRange[0]).getTime();
       yield put({
         type: "save",
-        payload: { timeTicks, timeRange, selectedTime },
+        payload: { timeRange, selectedTime },
       });
     },
   },

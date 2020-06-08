@@ -1,10 +1,11 @@
 import { client, gql } from "../../utils/request";
 
-export const getHots = ({ name, from, limit = 10 }) =>
-  client.query({
+export const getHots = ({ name, from, limit = 10 }) => {
+  return client.query({
     query: gql`
       {
         ${name}(
+          numWords:4
           limit:${limit}, 
           ${from ? `from:${from}` : ""}
         ){
@@ -14,19 +15,20 @@ export const getHots = ({ name, from, limit = 10 }) =>
           }
           data {
             time
-            keywords {
-              name
-              weight
-            }
             topics {
               heat
               title
+              keywords{
+                name
+                weight
+              }
             }
           }
         }
       }
     `,
   });
+};
 
 export const getTimeRange = (platform = "zhihu") =>
   client.query({

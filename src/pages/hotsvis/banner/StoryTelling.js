@@ -96,11 +96,13 @@ export default function ({
   }
 
   function drawText(context) {
+    console.log(words);
     context.save();
     context.translate(width / 2, height / 2);
     context.textAlign = "center";
     for (let word of words) {
       const fill = selectedTopic === null ? colorScale(text(word)) : color;
+      // const fill = color(word.title);
       context.fillStyle = `${fill}`;
       context.font = `${word.size}px siyuan`;
       context.fillText(text(word), word.x, word.y);

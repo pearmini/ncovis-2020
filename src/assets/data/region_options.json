@@ -2,36 +2,43 @@
   "title": "中国",
   "value": "中国",
   "key": 1,
+  "depth": 0,
   "children": [
     {
       "title": "华北地区",
       "value": "华北地区",
       "key": 2,
+      "depth": 1,
       "children": [
         {
           "title": "北京",
           "value": "北京",
-          "key": 10
+          "key": 10,
+          "depth": 2
         },
         {
           "title": "天津",
           "value": "天津",
-          "key": 11
+          "key": 11,
+          "depth": 2
         },
         {
           "title": "河北",
           "value": "河北",
-          "key": 12
+          "key": 12,
+          "depth": 2
         },
         {
           "title": "山西",
           "value": "山西",
-          "key": 13
+          "key": 13,
+          "depth": 2
         },
         {
           "title": "内蒙古",
           "value": "内蒙古",
-          "key": 14
+          "key": 14,
+          "depth": 2
         }
       ]
     },
@@ -39,31 +46,37 @@
       "title": "西北地区",
       "value": "西北地区",
       "key": 3,
+      "depth": 1,
       "children": [
         {
           "title": "宁夏",
           "value": "宁夏",
-          "key": 15
+          "key": 15,
+          "depth": 2
         },
         {
           "title": "青海",
           "value": "青海",
-          "key": 16
+          "key": 16,
+          "depth": 2
         },
         {
           "title": "陕西",
           "value": "陕西",
-          "key": 17
+          "key": 17,
+          "depth": 2
         },
         {
           "title": "甘肃",
           "value": "甘肃",
-          "key": 18
+          "key": 18,
+          "depth": 2
         },
         {
           "title": "新疆",
           "value": "新疆",
-          "key": 19
+          "key": 19,
+          "depth": 2
         }
       ]
     },
@@ -71,21 +84,25 @@
       "title": "东北地区",
       "value": "东北地区",
       "key": 4,
+      "depth": 1,
       "children": [
         {
           "title": "辽宁",
           "value": "辽宁",
-          "key": 20
+          "key": 20,
+          "depth": 2
         },
         {
           "title": "吉林",
           "value": "吉林",
-          "key": 21
+          "key": 21,
+          "depth": 2
         },
         {
           "title": "黑龙江",
           "value": "黑龙江",
-          "key": 22
+          "key": 22,
+          "depth": 2
         }
       ]
     },
@@ -93,41 +110,49 @@
       "title": "华东地区",
       "value": "华东地区",
       "key": 5,
+      "depth": 1,
       "children": [
         {
           "title": "山东",
           "value": "山东",
-          "key": 23
+          "key": 23,
+          "depth": 2
         },
         {
           "title": "江苏",
           "value": "江苏",
-          "key": 24
+          "key": 24,
+          "depth": 2
         },
         {
           "title": "上海",
           "value": "上海",
-          "key": 25
+          "key": 25,
+          "depth": 2
         },
         {
           "title": "浙江",
           "value": "浙江",
-          "key": 26
+          "key": 26,
+          "depth": 2
         },
         {
           "title": "安徽",
           "value": "安徽",
-          "key": 27
+          "key": 27,
+          "depth": 2
         },
         {
           "title": "福建",
           "value": "福建",
-          "key": 28
+          "key": 28,
+          "depth": 2
         },
         {
           "title": "江西",
           "value": "江西",
-          "key": 29
+          "key": 29,
+          "depth": 2
         }
       ]
     },
@@ -135,21 +160,25 @@
       "title": "华中地区",
       "value": "华中地区",
       "key": 6,
+      "depth": 1,
       "children": [
         {
           "title": "河南",
           "value": "河南",
-          "key": 30
+          "key": 30,
+          "depth": 2
         },
         {
           "title": "湖南",
           "value": "湖南",
-          "key": 31
+          "key": 31,
+          "depth": 2
         },
         {
           "title": "湖北",
           "value": "湖北",
-          "key": 32
+          "key": 32,
+          "depth": 2
         }
       ]
     },
@@ -157,31 +186,37 @@
       "title": "西南地区",
       "value": "西南地区",
       "key": 7,
+      "depth": 1,
       "children": [
         {
           "title": "四川",
           "value": "四川",
-          "key": 33
+          "key": 33,
+          "depth": 2
         },
         {
           "title": "贵州",
           "value": "贵州",
-          "key": 34
+          "key": 34,
+          "depth": 2
         },
         {
           "title": "云南",
           "value": "云南",
-          "key": 35
+          "key": 35,
+          "depth": 2
         },
         {
           "title": "重庆",
           "value": "重庆",
-          "key": 36
+          "key": 36,
+          "depth": 2
         },
         {
           "title": "西藏",
           "value": "西藏",
-          "key": 37
+          "key": 37,
+          "depth": 2
         }
       ]
     },
@@ -189,21 +224,25 @@
       "title": "华南地区",
       "value": "华南地区",
       "key": 8,
+      "depth": 1,
       "children": [
         {
           "title": "广东",
           "value": "广东",
-          "key": 38
+          "key": 38,
+          "depth": 2
         },
         {
           "title": "广西",
           "value": "广西",
-          "key": 39
+          "key": 39,
+          "depth": 2
         },
         {
           "title": "海南",
           "value": "海南",
-          "key": 40
+          "key": 40,
+          "depth": 2
         }
       ]
     },
@@ -211,21 +250,25 @@
       "title": "港澳台地区",
       "value": "港澳台地区",
       "key": 9,
+      "depth": 1,
       "children": [
         {
           "title": "香港",
           "value": "香港",
-          "key": 41
+          "key": 41,
+          "depth": 2
         },
         {
           "title": "澳门",
           "value": "澳门",
-          "key": 42
+          "key": 42,
+          "depth": 2
         },
         {
           "title": "台湾",
           "value": "台湾",
-          "key": 43
+          "key": 43,
+          "depth": 2
         }
       ]
     }

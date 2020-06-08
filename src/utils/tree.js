@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+
 export function find(source, cb) {
   let target;
   eachBefore(source, (d) => {
@@ -36,6 +37,12 @@ export function treeHeight(root) {
 
 export function hasChildren(node, cb = () => true) {
   return node.children && node.children.every((d) => cb(d));
+}
+
+export function descendant(root) {
+  let nodes = [];
+  eachBefore(root, (node) => nodes.push(node));
+  return nodes;
 }
 
 export function formTree(nodes) {

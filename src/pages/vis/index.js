@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import { connect } from "dva";
 import styled from "styled-components";
 import { Tabs } from "antd";
+import moment from "moment";
+import { DatePicker } from "antd";
 
+import formatDate from "../../utils/formatDate";
 import Ncov from "../ncovis";
 import Hot from "../hotsvis";
 import News from "../newsvis";
@@ -44,16 +47,21 @@ const VisImage = styled.img`
   border-radius: 8px;
 `;
 
+const Control = styled.div`
+  display: flex;
+  margin: 0.5em 0 1em 1em;
+`;
+
 function VisPanel({
   getTime,
-  timeTicks,
   timeRange,
   selectedTime,
   selectedRegion,
   setSelectedRegion,
   setSelectedTime,
 }) {
-  // console.log(timeTicks, timeRange, selectedTime, selectedRegion);
+  const selectedDate = formatDate(new Date(selectedTime));
+  const setSelectedDate = (date) => setSelectedTime(new Date(date).getTime());
 
   const ncovProps = {
     selectedRegion,
@@ -69,11 +77,16 @@ function VisPanel({
   };
 
   const newsPros = {
-    selectedTime,
-    setSelectedTime,
     selectedRegion,
     setSelectedRegion,
+    selectedDate,
   };
+
+  function disabledDate(current) {
+    if (timeRange.length === 0) return true;
+    const [start, end] = timeRange;
+    return current < moment(start) || current > moment(end);
+  }
 
   useEffect(() => {
     getTime();
@@ -103,11 +116,27 @@ function VisPanel({
         </Intro>
         <VisImage src={visImage} />
       </Row>
-      <Tabs defaultActiveKey="2">
+      <Tabs defaultActiveKey="1">
         <TabPane tab="疫情数据" key="1">
           <Ncov {...ncovProps} />
         </TabPane>
         <TabPane tab="舆论新闻" key="2">
+          <Control>
+            <div>
+              <span>
+                <b>日期</b>
+              </span>
+              &ensp;
+              <DatePicker
+                value={selectedDate === "" ? null : moment(selectedDate)}
+                onChange={(_, string) => {
+                  setSelectedDate(string);
+                }}
+                disabledDate={disabledDate}
+                showTody={false}
+              />
+            </div>
+          </Control>
           <Hot {...hotProps} />
           <News {...newsPros} />
         </TabPane>

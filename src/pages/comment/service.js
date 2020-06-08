@@ -1,36 +1,48 @@
+import p1 from "../../assets/images/article/1.png";
+import p2 from "../../assets/images/article/2.png";
+import p3 from "../../assets/images/article/3.png";
+import p4 from "../../assets/images/article/4.png";
+
 export const get = () => [
   {
     id: 1,
-    title: "Vue",
-    url: "https://www.baidu.com",
+    title: "疫情期间，有哪些和网课相关的有趣话题？",
+    url: "https://zhuanlan.zhihu.com/p/129089330",
     des:
-      "下图中右边是热力图，其中每一个格子代表一个地区，该格子颜色越深，表示该地区当天相对前一天的变化越剧烈。在这里你不仅能看各个省份（湖北省、山东省等）和各个直辖市（北京市、上海市）的变化情况，还可以通过点击下图中右边的树，来对区域进行合并，从而查看各个分区（华中地区、华南地区等），甚至全国的变化。",
-    createTime: new Date("2020-03-16"),
-    author: "尤小溪",
-    isTop: 1,
+      "通过山东大学VisLab的疫情可视化工具中的动态条形图，我发现了一些与网课有关的有趣话题，综合时间线分析话题的产生原因和印象。",
+    createTime: new Date("2020-04-12"),
+    author: "wxw",
+    imageUrl: p1,
   },
   {
     id: 2,
-    title: "React",
-    url: "https://www.baidu.com",
+    title: "nCoVIS: 一个新冠疫情可视化分析平台",
+    url:
+      "https://medium.com/@zcy201420752/ncovis-visualization-platform-for-covid-19-d3f255d5ce79",
     des:
-      "下图中右边是热力图，其中每一个格子代表一个地区，该格子颜色越深，表示该地区当天相对前一天的变化越剧烈。在这里你不仅能看各个省份（湖北省、山东省等）和各个直辖市（北京市、上海市）的变化情况，还可以通过点击下图中右边的树，来对区域进行合并，从而查看各个分区（华中地区、华南地区等），甚至全国的变化。",
-    createTime: new Date("2020-03-11"),
-    reading: 10,
-    isTop: 0,
-    isShow: 1,
-    author: "Facebook",
+      "本篇博客旨在使用nCoVIS提供的种种功能对疫情的期间的文本和数值数据作出分析，并对于分析结果给出我一些见解。",
+    createTime: new Date("2020-04-12"),
+    author: "Chuyang",
+    imageUrl: p2,
   },
   {
     id: 3,
-    title: "Angular",
-    url: "https://www.baidu.com",
+    title: "疫情期间福建省舆论变化",
+    url: "https://www.jianshu.com/p/27b71bfa92c2",
+    des: "分析1月底至4月初，福建省新闻报道关键词的变化情况。",
+    createTime: new Date("2020-04-12"),
+    author: "N7wings",
+    imageUrl: p3,
+  },
+  {
+    id: 4,
+    title: "分析疫情期间有哪些热度特别高的超级话题",
+    url:
+      "https://www.yuque.com/docs/share/22dbc894-176e-40c1-b44d-f8032b094d6e?#",
     des:
-      "下图中右边是热力图，其中每一个格子代表一个地区，该格子颜色越深，表示该地区当天相对前一天的变化越剧烈。在这里你不仅能看各个省份（湖北省、山东省等）和各个直辖市（北京市、上海市）的变化情况，还可以通过点击下图中右边的树，来对区域进行合并，从而查看各个分区（华中地区、华南地区等），甚至全国的变化。",
-    createTime: new Date("2020-03-13"),
-    reading: 5,
-    isTop: 0,
-    isShow: 0,
-    author: "不晓得",
+      "具有突发性、小概率事件，对多数用户而言是非常有吸引力的一些话题，无论是什么时间，这样的新闻也会是热点。",
+    createTime: new Date("2020-04-12"),
+    author: "yjq",
+    imageUrl: p4,
   },
 ];
