@@ -145,7 +145,6 @@ function Card({ title, des, url, createTime, author, isTop, reading }) {
 }
 
 function CommentPanel({ list, isOpen, setOpen }) {
-  console.log(list);
   return (
     <Container>
       <An id="story" />

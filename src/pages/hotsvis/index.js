@@ -1,20 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import useAnimation from "../hook/useAnimation";
 import styled from "styled-components";
 import { connect } from "dva";
-import moment from "moment";
-import { Row, Col, message, TreeSelect, DatePicker } from "antd";
-import regions from "../assets/data/region_options.json";
+import { Row, Col, message } from "antd";
 
-import Timeline from "./Timeline";
-import BarRace from "./BarRace";
-import StoryTelling from "./StoryTelling";
-import Shape from "./Shape";
-import Piechart from "./Piechart";
-import mc from "../utils/memorizedColor";
-import rc from "../utils/randomColor";
+import useAnimation from "../../hook/useAnimation";
+import Timeline from "./banner/Timeline";
+import BarRace from "./banner/BarRace";
+import StoryTelling from "./banner/StoryTelling";
+import mc from "../../utils/memorizedColor";
+import rc from "../../utils/randomColor";
 import * as d3 from "d3";
-
 
 message.config({
   maxCount: 1,
@@ -26,24 +21,11 @@ const Container = styled.div`
   padding: 0 10px;
 `;
 
-const An = styled.div`
-  position: absolute;
-  top: -56px;
-`;
-
-const Control = styled.div`
-  display: flex;
-  margin: 0.5em 0 1em 0;
-
-  @media (max-width: 700px) {
-    flex-direction: column;
-  }
-`;
-
-function TalkPanel({
+function Hot({
   dataByName,
   getData,
   loadingHots,
+  loadingCommon,
   timeByName,
   getTime,
   selectedTime,
@@ -53,17 +35,12 @@ function TalkPanel({
   selectedWords,
   setSelectedWords,
   wordsByTime,
-  dateRange: totalTimeRange,
-  selectedDate,
-  setSelectedDate,
-  getNewsData,
-  newsByRegion,
+  totalTimeRange,
 }) {
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
-  const [selectedTopic, setSelectedTopic] = useState(null);
   const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
-  const [selectedRegion, setSelectedRegion] = useState("湖北");
+  const [selectedTopic, setSelectedTopic] = useState(null);
 
   const barColor = useRef(
     mc([...d3.schemeTableau10, "#634294", "#d54087"], 10)
@@ -89,16 +66,6 @@ function TalkPanel({
       .range(totalTimeRange || [0, 0]),
     duration = timeScale.invert(selectedTime);
 
-  const newsByDate = newsByRegion.get(selectedRegion);
-  const news = newsByDate && newsByDate.get(selectedDate);
-  const { words, tags } = news || {};
-  const shapeProps = {
-    data: words,
-    // loading: loadingNews || loadingNcov,
-    selectedDate,
-    selectedRegion,
-  };
-
   const barsProps = {
     width: 600,
     height: 400,
@@ -106,7 +73,7 @@ function TalkPanel({
     selectedTime,
     color: barColor.current,
     running,
-    loading: loadingHots,
+    loading: loadingHots || loadingCommon,
     selectedName: "知乎",
     showWordsOfTopic,
     hideWordsOfTopic: () => setSelectedTopic(null),
@@ -123,7 +90,7 @@ function TalkPanel({
     selectedTime,
     color: barColor.current(selectedTopic),
     colorScale: wordColor.current,
-    loading: loadingHots,
+    loading: loadingHots || loadingCommon,
     running: running || pause,
     selectedName: "知乎",
   };
@@ -139,13 +106,6 @@ function TalkPanel({
     duration,
   };
 
-  const pieProps = {
-    // loading: loadingNews || loadingNcov,
-    data: tags,
-    selectedDate,
-    selectedRegion,
-  };
-
   if (running && loadingHots && !pause) {
     stopAnimation();
     setPause(true);
@@ -155,11 +115,6 @@ function TalkPanel({
     startAnimation();
     setPause(false);
   }
-
-  // function disabledDate(current) {
-  //   if (range.length === 0) return true;
-  //   return current < moment(range[0]) || current > moment(range[1]);
-  // }
 
   function step(duration) {
     // 不能超过最大的时间
@@ -250,15 +205,6 @@ function TalkPanel({
   }
 
   useEffect(() => {
-    // 如果有日期数据且 news 数据为空的话就请求
-    if (
-      news === undefined &&
-      selectedDate !== "" &&
-      selectedRegion !== "中国"
-    ) {
-      getNewsData(selectedRegion, `${selectedDate}`);
-    }
-
     // 获得时间范围
     if (!hotTimeRange) {
       getTime(selectedName);
@@ -269,11 +215,10 @@ function TalkPanel({
       tick = hotTimeRange[index];
     if (tick.request) return;
     requestData(index);
-  }, [getData, getTime, selectedName, hotTimeRange, selectedTime, getNewsData]);
+  }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
 
   return (
     <Container>
-      <An id="hots" />
       <Row gutter={[16, 16]}>
         <Col span={24} md={12}>
           <BarRace {...barsProps} />
@@ -287,76 +232,19 @@ function TalkPanel({
           <Timeline {...timeProps} />
         </Col>
       </Row>
-      <Control>
-        <div>
-          <span>
-            <b>地区</b>
-          </span>
-          &ensp;
-          <TreeSelect
-            showSearch
-            value={selectedRegion}
-            treeData={regions}
-            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-            treeDefaultExpandAll
-            onChange={setSelectedRegion}
-          />
-        </div>
-        &emsp;
-        <div>
-          <span>
-            <b>日期</b>
-          </span>
-          &ensp;
-          <DatePicker
-            value={selectedDate === "" ? null : moment(selectedDate)}
-            onChange={(date, string) => {
-              setSelectedDate(string);
-            }}
-            // disabledDate={disabledDate}
-            showTody={false}
-          />
-        </div>
-      </Control>
-      <Row gutter={[16, 16]}>
-        <Col span={12} md={12}>
-          <Piechart {...pieProps} />
-        </Col>
-        <Col span={12}>
-          <Shape {...shapeProps} />
-        </Col>
-      </Row>
     </Container>
   );
 }
 
 export default connect(
-  ({ hots, loading, ncov, news }) => ({
+  ({ hots, loading }) => ({
     ...hots,
-    selectedDate: ncov.selectedDate,
-    newsByRegion: news.newsByRegion,
     loadingHots: loading.models.hots,
-    loadingNcov: loading.models.ncov,
-    dataByDate: ncov.dataByDate,
-    dataByRegion: ncov.dataByRegion,
-    dateRange: ncov.range,
-    widthData: ncov.widthData,
-    total: ncov.total,
-    selectedCountries: ncov.selectedCountries.hots,
-    selectedTime: ncov.selectedTime,
-    countries: ncov.countries,
+    loadingCommon: loading.models.common,
   }),
   {
-    getNewsData: (region, date) => ({
-      type: "news/getNewsData",
-      payload: { region, date },
-    }),
-    getCountryData: (country, dataByDate, dataByRegion, total, name) => ({
-      type: "ncov/getCountryData",
-      payload: { country, dataByDate, dataByRegion, total, name },
-    }),
     setSelectedTime: (time) => ({
-      type: "ncov/setSelectedTime",
+      type: "common/setSelectedTime",
       payload: time,
     }),
     setSelectedWords: (words) => ({
@@ -370,10 +258,6 @@ export default connect(
         time,
         title,
       },
-    }),
-    setSelectedDate: (time) => ({
-      type: "ncov/setSelectedDate",
-      payload: time,
     }),
     getData: (options) => ({
       type: "hots/getData",
@@ -389,4 +273,4 @@ export default connect(
       payload: options,
     }),
   }
-)(TalkPanel);
+)(Hot);

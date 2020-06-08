@@ -1,7 +1,9 @@
 import React from "react";
-import Canvas from "./Canvas";
-import formatDate from "../utils/formatDate";
 import * as d3 from "d3";
+
+import Canvas from "../../../components/Canvas";
+import formatDate from "../../../utils/formatDate";
+
 export default function ({
   loading,
   selectedTime,

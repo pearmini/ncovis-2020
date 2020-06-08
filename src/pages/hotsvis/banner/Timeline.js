@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
-import mouse from "../utils/mouse";
-import foramtDate from "../utils/formatDate";
 import * as d3 from "d3";
+
+import mouse from "../../../utils/mouse";
+import formatDate from "../../../utils/formatDate";
+
 
 const Svg = styled.svg`
   background: #f9f9f9;
@@ -191,7 +193,7 @@ export default function({
         onMouseMove={handleMouseMove}
         onMouseOver={handleMouseOver}
       >
-        <title>{`[${foramtTime(tip.duration)}] ${foramtDate(
+        <title>{`[${foramtTime(tip.duration)}] ${formatDate(
           new Date(tip.time)
         )}`}</title>
       </Slider>

@@ -4,7 +4,7 @@ export default {
   namespace: "common",
   state: {
     selectedTime: new Date().getTime(),
-    selectedRegion: "中国",
+    selectedRegion: "湖北",
     timeRange: [],
     timeTicks: [],
   },

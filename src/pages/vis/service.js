@@ -1,10 +1,4 @@
-import ApolloClient from "apollo-boost";
-import { gql } from "apollo-boost";
-
-const client = new ApolloClient({
-  uri:
-    "https://api.ncovis.mllab.cn/graphql?token=fuBwv4pYedUUaHycszp21pMmloRf1TQS",
-});
+import { client, gql } from "../../utils/request";
 
 export const get = () =>
   client.query({

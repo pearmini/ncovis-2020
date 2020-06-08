@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Svg from "./Svg";
-import * as d3 from "d3";
-import formatDate from "../utils/formatDate";
 import { Switch } from "antd";
+import * as d3 from "d3";
+
+import Svg from "../../../components/Svg";
+import formatDate from "../../../utils/formatDate";
+
 export default function ({
   loading,
   keyframes,

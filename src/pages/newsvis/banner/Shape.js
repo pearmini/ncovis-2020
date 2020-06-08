@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
-import Canvas from "./Canvas";
-import fontURL from "../assets/fonts/思源柔黑.ttf";
+import Canvas from "../../../components/Canvas";
+import fontURL from "../../../assets/fonts/思源柔黑.ttf";
 
 function Shape({ data, loading, selectedDate, selectedRegion }) {
   const width = 900,

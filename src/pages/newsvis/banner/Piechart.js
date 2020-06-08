@@ -1,5 +1,5 @@
 import React from "react";
-import Svg from "./Svg";
+import Svg from "../../../components/Svg";
 import * as d3 from "d3";
 export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
   const width = 600,

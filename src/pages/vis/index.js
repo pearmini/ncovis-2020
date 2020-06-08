@@ -4,6 +4,8 @@ import styled from "styled-components";
 import { Tabs } from "antd";
 
 import Ncov from "../ncovis";
+import Hot from "../hotsvis";
+import News from "../newsvis";
 import visImage from "../../assets/images/hots.jpg";
 
 const { TabPane } = Tabs;
@@ -53,12 +55,24 @@ function VisPanel({
 }) {
   // console.log(timeTicks, timeRange, selectedTime, selectedRegion);
 
-//   console.log(selectedRegion, setSelectedRegion);
   const ncovProps = {
     selectedRegion,
     setSelectedRegion,
     selectedTime,
     setSelectedTime,
+  };
+
+  const hotProps = {
+    selectedTime,
+    setSelectedTime,
+    totalTimeRange: timeRange,
+  };
+
+  const newsPros = {
+    selectedTime,
+    setSelectedTime,
+    selectedRegion,
+    setSelectedRegion,
   };
 
   useEffect(() => {
@@ -89,12 +103,13 @@ function VisPanel({
         </Intro>
         <VisImage src={visImage} />
       </Row>
-      <Tabs defaultActiveKey="1">
+      <Tabs defaultActiveKey="2">
         <TabPane tab="疫情数据" key="1">
           <Ncov {...ncovProps} />
         </TabPane>
         <TabPane tab="舆论新闻" key="2">
-          {/* <TalkPanel /> */}
+          <Hot {...hotProps} />
+          <News {...newsPros} />
         </TabPane>
       </Tabs>
     </Container>

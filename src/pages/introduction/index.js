@@ -110,6 +110,7 @@ function IntroductionPanel() {
             <b>InfoVis2019</b> 发表的论文所提到的技术
             <a
               target="_blank"
+              rel="noopener noreferrer"
               href="https://vislab.wang/post/shapewordle:-tailoring-wordles-using-shape-aware-archimedean-spirals"
             >
               {" "}

@@ -3,7 +3,7 @@ import * as d3 from "d3";
 
 import Svg from "../../../components/Svg";
 import mouse from "../../../utils/mouse";
-import Tooltip from "../../../components/Tooltip";
+import Tooltip from "./Tooltip";
 
 export default function ({
   loading,
