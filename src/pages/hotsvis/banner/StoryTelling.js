@@ -96,7 +96,6 @@ export default function ({
   }
 
   function drawText(context) {
-    console.log(words);
     context.save();
     context.translate(width / 2, height / 2);
     context.textAlign = "center";

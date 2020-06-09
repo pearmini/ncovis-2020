@@ -1,15 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from "dva";
 import styled from "styled-components";
 import { Tabs } from "antd";
 import moment from "moment";
 import { DatePicker } from "antd";
+import * as d3 from "d3";
 
 import formatDate from "../../utils/formatDate";
 import Ncov from "../ncovis";
 import Hot from "../hotsvis";
 import News from "../newsvis";
 import visImage from "../../assets/images/hots.jpg";
+import useAnimation from "../../hook/useAnimation";
 
 const { TabPane } = Tabs;
 const Container = styled.div`
@@ -61,8 +63,24 @@ function VisPanel({
   setSelectedRegion,
   setSelectedTime,
 }) {
+  const [running, setRunning] = useState(false); // 用户是否点击播放
+
+  const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
   const selectedDate = formatDate(new Date(selectedTime));
   const setSelectedDate = (date) => setSelectedTime(new Date(date).getTime());
+  const hour = 12,
+    ticks = d3.timeHour
+      .every(hour) // 每隔 12 小时获取一下数据
+      .range(timeRange[0], timeRange[1])
+      .map((d) => d.getTime()),
+    totalDuration = ticks.length * 5000,
+    interpolateInterval = hour * 60 * 60 * 50; // 1小时 0.75秒
+
+  const timeScale = d3
+      .scaleLinear()
+      .domain([0, totalDuration])
+      .range(timeRange || [0, 0]),
+    duration = timeScale.invert(selectedTime);
 
   const ncovProps = {
     selectedRegion,
@@ -74,7 +92,16 @@ function VisPanel({
   const hotProps = {
     selectedTime,
     setSelectedTime,
+    running,
+    totalDuration,
     totalTimeRange: timeRange,
+    timeScale,
+    duration,
+    interpolateInterval,
+    setRunning,
+    requestAnimation,
+    setFrame,
+    stopAnimation,
   };
 
   const newsPros = {
@@ -83,10 +110,27 @@ function VisPanel({
     selectedDate,
   };
 
+  function step(duration) {
+    // 不能超过最大的时间
+    const t = Math.min(timeScale(duration), timeRange[1]);
+    setSelectedTime(t);
+    if (duration > totalDuration) {
+      setRunning(false);
+      return false;
+    }
+  }
+
   function disabledDate(current) {
     if (timeRange.length === 0) return true;
     const [start, end] = timeRange;
     return current < moment(start) || current > moment(end);
+  }
+
+  function stopAnimation() {
+    if (!running) return;
+    setRunning(false);
+    setSelectedTime(selectedTime + 1); // 防止出现过渡效果
+    pauseAnimation();
   }
 
   useEffect(() => {
@@ -117,8 +161,11 @@ function VisPanel({
         </Intro>
         <VisImage src={visImage} />
       </Row>
-      <Tabs defaultActiveKey="2">
-        <TabPane tab="舆论新闻" key="2">
+      <Tabs
+        defaultActiveKey="1"
+        onTabClick={(key) => +key === 2 && stopAnimation()}
+      >
+        <TabPane tab="舆论新闻" key="1">
           <Control>
             <div>
               <span>
@@ -138,7 +185,7 @@ function VisPanel({
           <Hot {...hotProps} />
           <News {...newsPros} />
         </TabPane>
-        <TabPane tab="疫情数据" key="1">
+        <TabPane tab="疫情数据" key="2">
           <Ncov {...ncovProps} />
         </TabPane>
       </Tabs>

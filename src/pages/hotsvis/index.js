@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { connect } from "dva";
 import { Row, Col, message } from "antd";
 
-import useAnimation from "../../hook/useAnimation";
 import Timeline from "./banner/Timeline";
 import BarRace from "./banner/BarRace";
 import StoryTelling from "./banner/StoryTelling";
@@ -35,13 +34,19 @@ function Hot({
   setSelectedWords,
   wordsByTime,
   totalTimeRange,
-  computingLayout
+  computingLayout,
+  running,
+  setRunning,
+  requestAnimation,
+  setFrame,
+  timeScale,
+  duration,
+  interpolateInterval,
+  totalDuration,
+  stopAnimation,
 }) {
-  const [running, setRunning] = useState(false); // 用户是否点击播放
-  const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
-  const { requestAnimation, pauseAnimation, setFrame } = useAnimation(step);
   const [selectedTopic, setSelectedTopic] = useState(null);
-
+  const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
   const barColor = useRef(
     mc([...d3.schemeTableau10, "#634294", "#d54087"], 10)
   );
@@ -52,19 +57,6 @@ function Hot({
   const { listKeyframes, cloudsKeyframes } = namevalues || {};
 
   const hotTimeRange = timeByName.get(selectedName);
-  const hour = 12,
-    ticks = d3.timeHour
-      .every(hour) // 每隔 12 小时获取一下数据
-      .range(totalTimeRange[0], totalTimeRange[1])
-      .map((d) => d.getTime()),
-    totalDuration = ticks.length * 5000,
-    interpolateInterval = hour * 60 * 60 * 50; // 1小时 0.75秒
-
-  const timeScale = d3
-      .scaleLinear()
-      .domain([0, totalDuration])
-      .range(totalTimeRange || [0, 0]),
-    duration = timeScale.invert(selectedTime);
 
   const barsProps = {
     width: 600,
@@ -116,16 +108,6 @@ function Hot({
     setPause(false);
   }
 
-  function step(duration) {
-    // 不能超过最大的时间
-    const t = Math.min(timeScale(duration), totalTimeRange[1]);
-    setSelectedTime(t);
-    if (duration > totalDuration) {
-      setRunning(false);
-      return false;
-    }
-  }
-
   function startAnimation() {
     if (running) return;
     if (selectedTopic !== null) setSelectedTopic(null);
@@ -137,13 +119,6 @@ function Hot({
     } else {
       requestAnimation(duration);
     }
-  }
-
-  function stopAnimation() {
-    if (!running) return;
-    setRunning(false);
-    setSelectedTime(selectedTime + 1); // 防止出现过渡效果
-    pauseAnimation();
   }
 
   function toggleAnimation() {
