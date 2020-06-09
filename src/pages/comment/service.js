@@ -2,6 +2,8 @@ import p1 from "../../assets/images/article/1.png";
 import p2 from "../../assets/images/article/2.png";
 import p3 from "../../assets/images/article/3.png";
 import p4 from "../../assets/images/article/4.png";
+import p5 from "../../assets/images/article/5.png";
+import p6 from "../../assets/images/article/6.png";
 
 export const get = () => [
   {
@@ -44,5 +46,23 @@ export const get = () => [
     createTime: new Date("2020-04-12"),
     author: "yjq",
     imageUrl: p4,
+  },
+  {
+    id: 5,
+    title: "疫情新闻舆论数据可视化工具的使用",
+    url: "https://blog.csdn.net/weixin_43913977/article/details/105428347",
+    des: "这里分析了从疫情爆发到现在新闻热搜变化的趋势和其中的原因。",
+    createTime: new Date("2020-04-12"),
+    author: "一只南极的熊",
+    imageUrl: p5,
+  },
+  {
+    id: 6,
+    title: "英国抗疫",
+    url: "https://www.lofter.com/lpost/1f439172_1c999146b",
+    des: "英国停止对轻症患者进行检测，公共卫生官员未能制定大规模检测计划。",
+    createTime: new Date("2020-04-12"),
+    author: "Higgins011",
+    imageUrl: p6,
   },
 ];

@@ -93,6 +93,7 @@ const Avatar = styled.div`
 `;
 
 const Image = styled.img`
+  margin-left: 50px;
   height: 100%;
   border-radius: 8px;
 
@@ -139,7 +140,11 @@ const Right = styled.div`
   width: 60%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+`;
+
+const List = styled.div`
+  margin-top: 50px;
 `;
 
 function Card({
@@ -235,11 +240,13 @@ function CommentPanel({ list, isOpen, setOpen }) {
         </Intro>
         <VisImage src={newsImage} />
       </Row>
-      {list
-        .sort((a, b) => b.createTime - a.createTime)
-        .map((d) => (
-          <Card {...d} key={d.id} />
-        ))}
+      <List>
+        {list
+          .sort((a, b) => b.createTime - a.createTime)
+          .map((d) => (
+            <Card {...d} key={d.id} />
+          ))}
+      </List>
       <Drawer
         title="投稿"
         width={360}
