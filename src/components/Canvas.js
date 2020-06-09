@@ -8,7 +8,7 @@ const Canvas = styled.canvas`
   height: 100%;
 `;
 
-export default function({
+export default function ({
   loading,
   nodata,
   style,
@@ -21,12 +21,13 @@ export default function({
   filename = "words",
   introduction,
   title,
+  hasZoom = true,
   ...rest
 }) {
   const ratio = 4;
   function onDownload() {
     const canvas = ref.current;
-    canvas.toBlob(blob => {
+    canvas.toBlob((blob) => {
       download(blob, filename);
     });
   }
@@ -41,14 +42,15 @@ export default function({
     loading,
     nodata,
     introduction,
-    title
+    title,
   };
 
   const canvasProps = {
     ref,
     width: width * ratio,
     height: height * ratio,
-    ...rest
+    hasZoom,
+    ...rest,
   };
 
   useEffect(() => {

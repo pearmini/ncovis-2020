@@ -149,6 +149,7 @@ function Card({
   introduction,
   slot,
   show = true,
+  hasZoom = true,
   ...rest
 }) {
   const ref = useRef(null);
@@ -199,10 +200,12 @@ function Card({
           </Left>
           <Right>
             <Slot>{slot}</Slot>
-            <ZoomIcon
-              type={zoom ? "fullscreen-exit" : "fullscreen"}
-              onClick={() => onClickItem(() => setZoom(!zoom))}
-            />
+            {hasZoom && (
+              <ZoomIcon
+                type={zoom ? "fullscreen-exit" : "fullscreen"}
+                onClick={() => onClickItem(() => setZoom(!zoom))}
+              />
+            )}
             <Popover
               placement="bottomRight"
               content={content}

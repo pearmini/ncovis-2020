@@ -2,9 +2,9 @@ import React from "react";
 import Svg from "../../../components/Svg";
 import * as d3 from "d3";
 export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
-  const width = 600,
-    height = 400,
-    margin = { top: 50, right: 35, bottom: 40, left: 40 },
+  const width = 300,
+    height = 620,
+    margin = { top: 50, right: 40, bottom: 40, left: 20 },
     legendHeight = 25,
     outerRadius =
       Math.min(
@@ -62,6 +62,7 @@ export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
       nodata={data.length === 0}
       introduction={introduction}
       title="饼状图"
+      hasZoom={false}
     >
       {data.length && (
         <g
@@ -80,7 +81,7 @@ export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
         </g>
       )}
       <g transform={`translate(${margin.left}, ${margin.top})`}>
-        {names.map((d, index) => (
+        {names.slice(0, 5).map((d, index) => (
           <g key={d} transform={`translate(${0}, ${legendHeight * index})`}>
             <circle fill={color(d)} r={5}></circle>
             <text fill="currentColor" dx={10} dy="0.31em">
@@ -89,7 +90,7 @@ export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
           </g>
         ))}
       </g>
-      <g transform={`translate(${width / 2 + 30}, ${height / 2})`}>
+      <g transform={`translate(${width / 2}, ${height / 2})`}>
         {arcs.map((a) => (
           <path key={a.data.name} d={arc(a)} fill={color(a.data.name)} />
         ))}
@@ -102,6 +103,7 @@ export default function ({ loading, selectedRegion, selectedDate, data = [] }) {
             <text
               fill="currentColor"
               fontSize={11}
+              fontWeight="bold"
               transform={`rotate(${-angle(a)})`}
             >
               {text(a)}

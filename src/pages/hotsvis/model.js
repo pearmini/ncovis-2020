@@ -17,9 +17,12 @@ export default {
     timeByName: d3.map(),
     wordsByTime: d3.map(),
     selectedWords: [],
-    loading: false,
+    computingLayout: false,
   },
   reducers: {
+    setComputingLayout(state, action) {
+      return { ...state, computingLayout: action.payload };
+    },
     setSelectedCountries(state, action) {
       const keys = action.payload;
       return { ...state, selectedCountries: keys };
@@ -80,7 +83,7 @@ export default {
         });
       }
 
-      return { ...state, dataByName };
+      return { ...state, dataByName, computingLayout: false };
     },
   },
   effects: {
@@ -115,6 +118,7 @@ export default {
     *getData(action, { call, put }) {
       const { name, interval, tick, limit, start } = action.payload;
       try {
+        yield put({ type: "setComputingLayout", payload: true });
         const result = yield call(hotApi.getHots, {
           name,
           from: ((tick.time / 1000) | 0) - 1, // 这里的 from 是大于当前时刻，所以需要减少 1
@@ -131,7 +135,6 @@ export default {
           wordsKeyframes
         );
 
-        // 加入关键帧
         yield put({
           type: "addFrames",
           payload: { name, listKeyframes, cloudsKeyframes },

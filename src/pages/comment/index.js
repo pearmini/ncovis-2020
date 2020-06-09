@@ -3,8 +3,9 @@ import styled from "styled-components";
 import { Drawer, Button } from "antd";
 import { connect } from "dva";
 import { schemeTableau10 } from "d3";
-import str2num from "../../utils/str2num";
 
+import formatDate from "../../utils/formatDate";
+import str2num from "../../utils/str2num";
 import newsImage from "../../assets/images/news.jpg";
 
 const Container = styled.div`
@@ -64,7 +65,9 @@ const CardContainer = styled.div`
   }
 `;
 
-const VoteButton = styled(Button)``;
+const VoteButton = styled(Button)`
+  margin-bottom: 2em;
+`;
 
 const ContentWrapper = styled.div`
   width: 100%;
@@ -93,13 +96,9 @@ const Avatar = styled.div`
 `;
 
 const Image = styled.img`
-  margin-left: 50px;
+  margin-left: 100px;
   height: 100%;
   border-radius: 8px;
-
-  @media (max-width: 700px) {
-    display: none;
-  }
 `;
 
 const Main = styled.div`
@@ -141,6 +140,9 @@ const Right = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  @media (max-width: 700px) {
+    display: none;
+  }
 `;
 
 const List = styled.div`
@@ -154,7 +156,6 @@ function Card({
   createTime,
   author,
   isTop,
-  reading,
   imageUrl,
 }) {
   const avatarColor = () =>
@@ -174,8 +175,7 @@ function Card({
               <Sub>
                 {isTop === 1 && <span className="top">置顶</span>}
                 <span>作者：{author}</span>
-                <span>阅读：{reading}</span>
-                <span>日期：{createTime.toLocaleString()}</span>
+                <span>日期：{formatDate(createTime)}</span>
               </Sub>
               <p>{des}</p>
             </Main>

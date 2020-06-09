@@ -126,10 +126,19 @@ function NcovPanel({
   }
 
   function handleCountryDataChange(keys) {
+    // 验证一下
+    const countriesSet = new Set(countries);
+    let isValid = true;
+    keys.forEach((k) => !countriesSet.has(k) && (isValid = false));
+    if (!isValid) {
+      alert("输入无效");
+      return;
+    }
     if (keys.length >= 30) {
       alert("不能超过 30 个国家");
       return;
     }
+
     const newKeys = [];
     for (let k of keys) {
       if (widthData.has(k)) newKeys.push(k);

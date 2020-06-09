@@ -47,7 +47,6 @@ export default function ({
       ></Svg>
     );
 
-
   const [drag, setDrag] = useState({
     start: null,
     move: 0,
@@ -287,7 +286,7 @@ export default function ({
     const maxMove = matrixWidth * (1 - matrixWidth / (days.length * cellWidth));
     const move = Math.max(
       0,
-      Math.min(maxMove, mouseX - drag.start + drag.move)
+      Math.min(maxMove, drag.move + (mouseX - drag.start))
     );
     setDrag({ ...drag, move });
   }
@@ -747,17 +746,17 @@ export default function ({
       <g transform={`translate(${width - margin.right - matrixWidth}, ${0})`}>
         <g clipPath="url(#maxtrix-ly)">
           <g
-            transform={`translate(${-drag.move}, ${
-              margin.top - cellHeight / 2
-            })`}
+            transform={`translate(${
+              -drag.move * ((days.length * cellWidth) / matrixWidth)
+            }, ${margin.top - cellHeight / 2})`}
           >
             {data.map((d) => (
               <rect
                 className={`grid-${d.region} grid`}
                 key={d.region + d.date.toString()}
-                x={x(d.date) - 1}
-                y={y(d.region) - 1}
-                width={x.bandwidth() - 2}
+                x={x(d.date) + 1}
+                y={y(d.region) + 1}
+                width={cellWidth - 2}
                 height={h(d.region) - 2}
                 fill={color(d)}
                 fillOpacity={0}
@@ -768,7 +767,7 @@ export default function ({
                   e.stopPropagation();
                 }}
                 stroke={isSelect(d) ? highlightRectColor : "none"}
-                strokeWidth={isSelect(d) ? 3 : 0}
+                strokeWidth={isSelect(d) ? 2 : 0}
               >
                 <title>{`${d.region}:${d.value}(${formatDate(
                   new Date(d.date)
@@ -778,13 +777,15 @@ export default function ({
           </g>
           <g
             className="tree-xAxis"
-            transform={`translate(${-drag.move}, ${height - margin.bottom})`}
+            transform={`translate(${
+              -drag.move * ((days.length * cellWidth) / matrixWidth)
+            }, ${height - margin.bottom})`}
           ></g>
         </g>
         <defs>
           <clipPath id="maxtrix-ly">
             <rect
-              x="0"
+              x={-2}
               y="0"
               width={matrixWidth}
               height={height - margin.bottom + 30}

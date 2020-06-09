@@ -1,21 +1,14 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import Canvas from "../../../components/Canvas";
-import fontURL from "../../../assets/fonts/思源柔黑.ttf";
 
 function Shape({ data, loading, selectedDate, selectedRegion }) {
   const width = 900,
     height = 600,
-    marginRight = 50,
-    marginBottom = 60,
+    marginRight = 40,
+    marginBottom = 40,
     { keywords, fillingWords } = data || {};
 
   // 在 edge 没有 FontFace 对象
-  const font =
-    typeof FontFace === "undefined"
-      ? null
-      : new FontFace("siyuan", `url(${fontURL})`);
-  const fontRef = useRef(font);
-  const [loadFont, setLoadingFont] = useState(font === null ? false : true);
 
   function drawText(context, words, { fillStyle, textAlign, textBaseline }) {
     context.textAlign = textAlign;
@@ -39,11 +32,11 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     context.fillStyle = "#777";
     context.textAlign = "end";
     context.textBaseline = "bottom";
-    context.font = `bold 50px siyuan`;
+    context.font = `bold 35px siyuan`;
     context.fillText(selectedRegion, 0, 0);
 
-    context.font = "normal 25px siyuan";
-    context.fillText(selectedDate, 0, 35);
+    context.font = "normal 15px siyuan";
+    context.fillText(selectedDate, 0, 25);
     // date
     context.restore();
   }
@@ -51,13 +44,6 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
   async function draw(context) {
     try {
       if (!keywords || !fillingWords) return;
-
-      // 加载字体
-      // if (fontRef.current !== null && fontRef.current.status === "unloaded") {
-      //   await fontRef.current.load();
-      //   document.fonts.add(fontRef.current);
-      //   setLoadingFont(false);
-      // }
 
       // 绘制背景
       context.fillStyle = "white";
@@ -80,7 +66,6 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
       });
     } catch (e) {
       console.error(e);
-      setLoadingFont(false);
     }
   }
 
@@ -99,7 +84,7 @@ function Shape({ data, loading, selectedDate, selectedRegion }) {
     <Canvas
       width={width}
       height={height}
-      loading={false}
+      loading={loading}
       nodata={data === undefined}
       dependcies={[data]}
       introduction={introduction}

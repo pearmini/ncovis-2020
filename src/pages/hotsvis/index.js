@@ -35,6 +35,7 @@ function Hot({
   setSelectedWords,
   wordsByTime,
   totalTimeRange,
+  computingLayout
 }) {
   const [running, setRunning] = useState(false); // 用户是否点击播放
   const [pause, setPause] = useState(false); // 是否应为 loading data 而暂停
@@ -72,7 +73,7 @@ function Hot({
     selectedTime,
     color: barColor.current,
     running,
-    loading: loadingHots || loadingCommon,
+    loading: loadingHots || loadingCommon || computingLayout,
     selectedName: "知乎",
     showWordsOfTopic,
     hideWordsOfTopic: () => setSelectedTopic(null),
@@ -89,7 +90,7 @@ function Hot({
     selectedTime,
     color: barColor.current(selectedTopic),
     colorScale: wordColor.current,
-    loading: loadingHots || loadingCommon,
+    loading: loadingHots || loadingCommon || computingLayout,
     running: running || pause,
     selectedName: "知乎",
   };

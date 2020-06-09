@@ -26,6 +26,7 @@ const Row = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  margin-bottom: 2em;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -116,10 +117,7 @@ function VisPanel({
         </Intro>
         <VisImage src={visImage} />
       </Row>
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="疫情数据" key="1">
-          <Ncov {...ncovProps} />
-        </TabPane>
+      <Tabs defaultActiveKey="2">
         <TabPane tab="舆论新闻" key="2">
           <Control>
             <div>
@@ -139,6 +137,9 @@ function VisPanel({
           </Control>
           <Hot {...hotProps} />
           <News {...newsPros} />
+        </TabPane>
+        <TabPane tab="疫情数据" key="1">
+          <Ncov {...ncovProps} />
         </TabPane>
       </Tabs>
     </Container>

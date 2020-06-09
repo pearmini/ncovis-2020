@@ -5,7 +5,7 @@ export const getHots = ({ name, from, limit = 10 }) => {
     query: gql`
       {
         ${name}(
-          numWords:4
+          numWords:3
           limit:${limit}, 
           ${from ? `from:${from}` : ""}
         ){

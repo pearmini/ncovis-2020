@@ -21,6 +21,7 @@ export default function ({
   introduction,
   title,
   slot,
+  hasZoom = true,
   ...rest
 }) {
   const ref = useRef(null);
@@ -45,6 +46,7 @@ export default function ({
     introduction,
     title,
     slot,
+    hasZoom,
   };
 
   return (

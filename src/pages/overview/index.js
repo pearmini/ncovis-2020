@@ -107,12 +107,23 @@ const Change = styled.div`
     margin-left: 2px;
     color: ${(props) => props.color};
   }
+  @media (max-width: 600px) {
+    font-size: 10px;
+  }
 `;
 
 const Value = styled.div`
   font-size: 19px;
   color: ${(props) => props.color};
   font-weight: bold;
+
+  @media (max-width: 700px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 600px) {
+    font-size: 12px;
+  }
 `;
 
 const Name = styled.div`
