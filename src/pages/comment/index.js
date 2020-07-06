@@ -146,18 +146,10 @@ const Right = styled.div`
 `;
 
 const List = styled.div`
-  margin-top: 50px;
+  margin-top: 1em;
 `;
 
-function Card({
-  title,
-  des,
-  url,
-  createTime,
-  author,
-  isTop,
-  imageUrl,
-}) {
+function Card({ title, des, url, createTime, author, isTop, imageUrl }) {
   const avatarColor = () =>
     schemeTableau10[str2num(author) % schemeTableau10.length];
   return (
@@ -221,11 +213,13 @@ function CommentPanel({ list, isOpen, setOpen }) {
               </ul>
             </li>
             <li>
-              人们对疫情变化的认识的变化情况：蝙蝠 -> 双⻩连 -> 中药 ->
+              人们对疫情变化的认识的变化情况：蝙蝠 -{">"} 双⻩连 -{">"} 中药 -
+              {">"}
               推测来自于美国
             </li>
             <li>
-              中国疫情发展的重要阶段和关键时间点：天津大学宣布研制出口服疫苗 ->
+              中国疫情发展的重要阶段和关键时间点：天津大学宣布研制出口服疫苗 -
+              {">"}
               新冠对中国发展对意义
             </li>
             <li>其他国家的疫情发展情况和关键时间点、关键事件。</li>
