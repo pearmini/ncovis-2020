@@ -1,4 +1,5 @@
 // https://observablehq.com/@mbostock/saving-svg
+
 export function serialize(svg) {
   const xmlns = "http://www.w3.org/2000/xmlns/";
   const xlinkns = "http://www.w3.org/1999/xlink";
@@ -27,6 +28,7 @@ export function serialize(svg) {
 
 export function rasterize(svg) {
   let resolve, reject;
+  // eslint-disable-next-line
   const promise = new Promise((y, n) => ((resolve = y), (reject = n)));
   const image = new Image();
   image.onerror = reject;

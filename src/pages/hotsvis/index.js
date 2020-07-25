@@ -190,7 +190,9 @@ function Hot({
       tick = hotTimeRange[index];
     if (tick.request) return;
     requestData(index);
-  }, [getData, getTime, selectedName, hotTimeRange, selectedTime]);
+
+    // eslint-disable-next-line
+  }, [getTime, selectedName, hotTimeRange, selectedTime]);
 
   return (
     <Container>

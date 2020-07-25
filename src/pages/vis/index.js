@@ -11,7 +11,7 @@ import Ncov from "../ncovis";
 import Hot from "../hotsvis";
 import News from "../newsvis";
 import visImage from "../../assets/images/hots.jpg";
-import useAnimation from "../../hook/useAnimation";
+import useAnimation from "../../hooks/useAnimation";
 
 const { TabPane } = Tabs;
 const Container = styled.div`

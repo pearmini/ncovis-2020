@@ -59,6 +59,7 @@ export default function ({
                 return !countriesSet.has(region) && !secondLevelSet.has(region);
               }
             })
+            // eslint-disable-next-line
             .reduce((obj, { region, data }) => ((obj[region] = data), obj), {}),
         })),
       [

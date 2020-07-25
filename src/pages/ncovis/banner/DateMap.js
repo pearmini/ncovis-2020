@@ -5,7 +5,6 @@ import "array-flat-polyfill";
 import TreeMatrix from "./TreeMatrix";
 import HeatMap from "./HeatMap";
 
-
 export default function ({
   dataByRegion,
   selectedRegion,
@@ -50,12 +49,14 @@ export default function ({
                 region,
                 date: b.date,
                 ...Object.keys(b.data).reduce(
+                  // eslint-disable-next-line
                   (obj, key) => ((obj[key] = b.data[key] - a.data[key]), obj),
                   {}
                 ),
               }))
           )
         : [],
+    // eslint-disable-next-line
     [dataByRegion, selectedCountries.length]
   );
 

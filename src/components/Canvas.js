@@ -60,7 +60,8 @@ export default function ({
     context.save();
     context.scale(ratio, ratio);
     children && children(context);
-  }, dependcies);
+  // eslint-disable-next-line
+  }, [...dependcies, children]);
 
   return (
     <Card {...cardProps}>
