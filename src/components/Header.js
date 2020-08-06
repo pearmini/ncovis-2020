@@ -192,6 +192,15 @@ function Header({ setOpen }) {
                   <span onClick={(e) => e.preventDefault()}>联系我们</span>
                 </Dropdown>
               </li>
+              <li>
+                <a
+                  href="https://github.com/pearmini/ncovis-2020"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  github
+                </a>
+              </li>
             </ul>
           </Nav>
           <ToggleButton

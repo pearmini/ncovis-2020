@@ -4,6 +4,40 @@
   "homepage": ".",
   "private": true,
   "dependencies": {
+    "antd": "^3.26.9",
+    "apollo-cache-persist": "^0.1.1",
+    "d3": "^5.15.0",
+    "d3-array": "^2.4.0",
+    "d3-cloud": "^1.2.5",
+    "dva": "^2.4.1",
+    "dva-loading": "^3.0.20",
+    "moment": "^2.24.0",
+    "react-use": "^13.26.0",
+    "resize-observer-polyfill": "^1.5.1",
+    "styled-components": "^5.0.1"
+  },
+  "scripts": {
+    "start": "node scripts/start.js",
+    "build": "node scripts/build.js",
+    "test": "node scripts/test.js",
+    "pro": "npm run build && cp -r ./build/*  ./gitee"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
     "@babel/core": "7.8.4",
     "@svgr/webpack": "4.3.3",
     "@testing-library/jest-dom": "^4.2.4",
@@ -61,44 +95,8 @@
     "webpack": "4.41.5",
     "webpack-dev-server": "3.10.2",
     "webpack-manifest-plugin": "2.2.0",
-    "workbox-webpack-plugin": "4.3.1"
-  },
-  "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js",
-    "pro": "npm run build && cp -r ./build/*  ./gitee"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "antd": "^3.26.9",
-    "apollo-cache-persist": "^0.1.1",
-    "axios": "^0.19.2",
-    "babel-plugin-import": "^1.13.0",
-    "d3": "^5.15.0",
-    "d3-array": "^2.4.0",
-    "d3-cloud": "^1.2.5",
-    "dva": "^2.4.1",
-    "dva-loading": "^3.0.20",
-    "fingerprintjs2": "^2.1.0",
-    "moment": "^2.24.0",
-    "react-use": "^13.26.0",
-    "resize-observer-polyfill": "^1.5.1",
-    "styled-components": "^5.0.1"
+    "workbox-webpack-plugin": "4.3.1",
+    "babel-plugin-import": "^1.13.0"
   },
   "jest": {
     "roots": [
